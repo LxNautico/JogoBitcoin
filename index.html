@@ -1,0 +1,560 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JogoBitcoin - Desafio de Criptografia</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        /* Estilos gerais */
+        .score {
+            font-size: 2em;
+            font-weight: bold;
+        }
+        
+        /* Estilos para exibição de hashes */
+        #hash-display .hash-box {
+            border: 1px solid #ccc;
+            padding: 10px;
+            margin: 5px 0;
+            background-color: #f9f9f9;
+            border-radius: 5px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+        }
+        
+        #score-display {
+            display: flex;
+            justify-content: left;
+            align-items: left;
+        }
+        
+        /* Seleção de dificuldade */
+        #difficulty-selection {
+            position: fixed;
+            top: 2px;
+            width: 100%;
+            text-align: center;
+            background-color: transparent;
+            z-index: 1000;
+            padding: 10px;
+        }
+
+        #difficulty-selection h2 {
+            margin: 0;
+            padding: 10px;
+            color: #f7931a;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+        }
+
+        #difficulty-selection button {
+            margin: 5px;
+            padding: 10px 20px;
+            font-size: 1.1em;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: bold;
+        }
+        
+        #difficulty-selection button:hover {
+            transform: scale(1.05);
+        }
+        
+        #difficulty-selection button:nth-child(2) {
+            background-color: #4CAF50;
+            color: white;
+        }
+        
+        #difficulty-selection button:nth-child(3) {
+            background-color: #FF9800;
+            color: white;
+        }
+        
+        #difficulty-selection button:nth-child(4) {
+            background-color: #f44336;
+            color: white;
+        }
+
+        /* Container de informações */
+        #info-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+        
+        #info-box {
+            padding: 20px;
+            margin: 20px auto;
+            text-align: left;
+            background-color: rgba(255, 255, 255, 0.9);
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+            max-width: 800px;
+        }
+        
+        #info-box h2 {
+            text-align: center;
+            color: #f7931a;
+        }
+        
+        #info-box ul {
+            list-style-type: none;
+            padding: 0;
+        }
+        
+        #info-box li {
+            margin-bottom: 10px;
+            padding-left: 20px;
+            position: relative;
+        }
+        
+        #info-box li:before {
+            content: "•";
+            color: #f7931a;
+            font-weight: bold;
+            position: absolute;
+            left: 0;
+        }
+        
+        /* Histórico */
+        #history-container {
+            margin-top: 20px;
+            display: none;
+            background-color: rgba(255, 255, 255, 0.9);
+            padding: 15px;
+            border-radius: 10px;
+            max-width: 90%;
+        }
+        
+        /* Bitcoin info */
+        #bitcoin-info {
+            position: fixed;
+            top: 10px;
+            right: 130px;
+            background-color: #fff;
+            padding: 10px 15px;
+            border: 2px solid #f7931a;
+            border-radius: 5px;
+            font-size: 1.2em;
+            z-index: 60;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+        
+        .score-container {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin: 10px 0;
+        }
+        
+        .score-label {
+            font-weight: bold;
+            color: #333;
+        }
+        
+        .score {
+            font-size: 2em;
+            font-weight: bold;
+            color: #f7931a;
+        }
+        
+        .vidas-container {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            margin: 10px 0;
+        }
+        
+        .vidas-label {
+            font-weight: bold;
+            color: #333;
+        }
+        
+        .vida {
+            width: 30px;
+            height: 30px;
+            margin-right: 5px;
+        }
+        
+        /* Layout de 3 colunas */
+        body {
+            margin: 0;
+            display: flex;
+            height: 100vh;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            font-family: Arial, sans-serif;
+        }
+        
+        .container {
+            flex: 1;
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 10px;
+            box-sizing: border-box;
+            background-color: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+        }
+        
+        .left {
+            background-color: transparent;
+        }
+        
+        .center {
+            background-color: transparent;
+        }
+        
+        .right {
+            background-color: transparent;
+        }
+        
+        /* Estilos para o texto cifrado */
+        .texto-cifrado {
+            background: #1a1a1a;
+            color: #f7931a;
+            padding: 15px;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 1.2em;
+            letter-spacing: 1px;
+            margin: 15px 0;
+            border: 2px solid #333;
+            word-break: break-all;
+            text-align: center;
+        }
+        
+        /* Botões do jogo */
+        #problem-container button {
+            padding: 10px 20px;
+            background-color: #f7931a;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1em;
+            font-weight: bold;
+            transition: background-color 0.3s;
+        }
+        
+        #problem-container button:hover {
+            background-color: #e68200;
+        }
+        
+        #answer {
+            padding: 10px;
+            font-size: 1.1em;
+            border: 2px solid #f7931a;
+            border-radius: 5px;
+            width: 80%;
+            margin: 10px 0;
+        }
+        
+        /* Mensagens */
+        #result {
+            font-weight: bold;
+            font-size: 1.1em;
+            min-height: 24px;
+        }
+        
+        #timer {
+            font-weight: bold;
+            color: #333;
+            font-size: 1.2em;
+        }
+        
+        /* Tipo de criptografia */
+        #tipo-indicador {
+            font-weight: bold;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 0.9em;
+        }
+        
+        .tipo-facil {
+            background: #4CAF50 !important;
+            color: white !important;
+        }
+        
+        .tipo-medio {
+            background: #FF9800 !important;
+            color: white !important;
+        }
+        
+        .tipo-dificil {
+            background: #f44336 !important;
+            color: white !important;
+        }
+        
+        /* Botão de ajuda */
+        .help-button {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 8px 16px;
+            background: #2196f3;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            z-index: 10000;
+        }
+        
+        /* Mensagem final */
+        #mensagem-final {
+            background-color: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+            text-align: center;
+            max-width: 500px;
+            margin: 20px auto;
+        }
+        
+        #restart-button {
+            padding: 10px 30px;
+            background-color: #f7931a;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1.1em;
+            font-weight: bold;
+            margin-top: 20px;
+        }
+        
+        /* Imagens */
+        .logo-esquerda, .logo-direita {
+            max-width: 150px;
+            margin: 10px;
+            display: none;
+        }
+        
+        /* Responsividade */
+        @media (max-width: 768px) {
+            body {
+                flex-direction: column;
+                height: auto;
+            }
+            
+            .container {
+                width: 100%;
+                min-height: auto;
+            }
+            
+            #difficulty-selection {
+                position: relative;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Botão de ajuda fixo -->
+    <button onclick="showHelp()" class="help-button">❓ Ajuda</button>
+
+    <!-- Coluna esquerda: Game container e blocos -->
+    <div class="container left">
+        <div id="game-container" style="display: none; flex-direction: column; align-items: center; height: 100vh; justify-content: flex-start;">
+            <div class="score-container" style="margin-top: 20px;">
+                <h3 class="score-label">Score:</h3>
+                <div id="score-display">0000</div>
+            </div>
+            
+            <div class="vidas-container" id="vidas-container" style="margin-top: 20px;">
+                <h3 class="vidas-label">Vidas:</h3>
+                <!-- Vidas serão geradas dinamicamente -->
+            </div>
+            <div id="blocks-container" style="width: 100%; display: flex; flex-direction: column; align-items: center; margin-top: 20px;">
+                <!-- Blocos serão gerados aqui -->
+            </div>
+            
+            
+        </div>
+
+        <img src="img/Bitcoin.jpeg" id="img-Bitcoin.esquerda" class="logo-esquerda" alt="Bitcoin">
+        <img src="img/Bolha.jpeg" id="img-esquerda" class="logo-esquerda" alt="Bolha">
+        <img src="img/logo.jpeg" id="img-logo.esquerda" class="logo-esquerda" alt="Logo">
+        
+        <div id="mensagem-final" style="display: none; text-align: center; margin-top: 20px;">
+            <div id="mensagem-texto">
+                <!-- Mensagem de final de jogo será inserida aqui -->
+            </div>
+            <button id="restart-button" onclick="resetGame()" style="display: none;">Reiniciar Jogo</button>
+        </div>
+    </div>
+
+     <!-- Coluna central: Menu e informações -->
+    
+     <div class="container center" style="display: flex; flex-direction: column; align-items: center; height: auto; min-height: 100vh; justify-content: flex-start; padding: 10px;">
+        <!-- Seleção de dificuldade -->
+        <div id="difficulty-selection" style="margin-bottom: 60px;">
+            <h2>🎮 JOGOBITCOIN 🎮</h2>
+            <h3>Escolha o nível de dificuldade:</h3>   
+            <button onclick="startGame('facil')">Fácil</button>
+            <button onclick="startGame('medio')">Médio</button>
+            <button onclick="startGame('dificil')">Difícil</button>
+        </div>
+        
+        <!-- Informações do jogo -->
+        <div id="info-container">
+            <div id="info-box">
+                
+                <ul style="color: #110303;">
+                <h2 style="margin-top: 1350px;">🚀 Bem-vindo ao JogoBitcoin! 🚀</h2>
+                    <li>Prepare-se para uma aventura de mineração de Bitcoin como nunca antes!</li>
+                    <li>Desafie suas habilidades de criptografia e torne-se um mestre minerador.</li>
+                    <li>Descubra a história do Bitcoin enquanto avança pelos blocos.</li>
+                <p><strong style="padding: 10px;">🎯 Objetivo do Jogo:</strong> O JogoBitcoin é um desafio de criptografia onde você atua como um minerador de blockchain. Seu objetivo é quebrar blocos criptografados resolvendo desafios de descriptografia. Cada bloco possui três estágios de mineração e, ao concluir cada estágio, você avança no jogo e acumula Bitcoin.</p>
+                
+                <p><strong style="padding: 10px;">📚 Sobre a Criptografia:</strong> Você encontrará três tipos de desafios:</p>
+                <ul>
+                    <li><strong>Cifra de César:</strong> Cada letra é deslocada por uma chave fixa</li>
+                    <li><strong>Código ASCII:</strong> Números que representam caracteres</li>
+                    <li><strong>Base64:</strong> Texto codificado em formato web</li>
+                </ul>
+                
+                <p><strong style="padding: 1px;">💰 Sistema de Recompensas:</strong></p>
+                <ul>
+                    <li><strong>Bitcoin ficticio:</strong> Acumule satoshis conforme avança</li>
+                    <li><strong>Pontuação:</strong> Ganhe pontos por velocidade e precisão</li>
+                    <li><strong>História:</strong> Descubra marcos do Bitcoin a cada 5 blocos</li>
+                </ul>
+                
+                <p><strong style="padding: 1px;">🎮 Como Jogar:</strong></p>
+                <ul>
+                    <li>1. Escolha uma dificuldade (Fácil/Médio/Difícil)</li>
+                    <li>2. Descriptografe os textos apresentados</li>
+                    <li>3. Digite a resposta em minúsculas, sem espaços extras</li>
+                    <li>4. Acompanhe seu progresso nos blocos à esquerda</li>
+                    <li>5. Quebre todos os blocos para vencer!</li>
+                </ul>
+                
+                <p style="text-align: center; font-weight: bold; color: #f7931a; margin-top: 20px;">
+                    ⚡ Pronto para começar sua jornada de mineração? ⚡<br>
+                    Escolha sua dificuldade acima!
+                </p>
+                </ul>
+            </div>
+        </div>
+        
+        <!-- Hash log / Blockchain simulator -->
+        <div id="hash-log" style="margin-top: 20px; text-align: center; display: none;">
+            <h3>⛓️ SIMULADOR BLOCKCHAIN ⛓️</h3>
+            <div id="bitcoin-container" style="margin-top: 20px; text-align: center;">
+                <p style="font-weight: bold;">💰 Bitcoin Minerados:</p>
+                <p id="bitcoin-value" style="font-size: 1.5em; color: #f7931a; font-weight: bold;">0.00000000 BTC</p>
+                <div style="background: #f5f5f5; padding: 15px; border-radius: 8px; max-height: 200px; overflow-y: auto;">
+                    <p style="margin-bottom: 10px; font-weight: bold;">📜 Últimos Hashes:</p>
+                    <div id="hash-display">Nenhum bloco quebrado ainda.</div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Mensagens de incentivo -->
+        <div id="mensagem-container" style="display: none; margin-top: 20px; text-align: center; padding: 15px; background-color: #e8f5e9; border-radius: 8px; border: 2px solid #4CAF50;">
+            <!-- Mensagens de incentivo aparecerão aqui -->
+        </div>
+    </div>
+
+
+    
+    <!-- Coluna direita: Problemas e histórico -->
+    <div class="container right" style="display: flex; flex-direction: column; align-items: center; height: 100vh; justify-content: flex-start;">
+        <!-- Container do problema (inicialmente oculto) -->
+        <div id="problem-container" style="margin-top: 20px; text-align: center; max-width: 90%; display:none;">
+            <h2 style="color: #f7931a;">⛏️ MINERAÇÃO DO BLOCO ⛏️</h2>
+            <p id="problem-number" style="font-weight: bold;"></p>
+            <div id="problem-question" style="margin: 20px 0;"></div>
+            
+            <!-- Tipo de criptografia -->
+            <div id="tipo-criptografia" style="margin: 10px 0;">
+                <span id="tipo-indicador" style="display: none;"></span>
+            </div>
+            
+            <input type="text" id="answer" placeholder="Digite a resposta descriptografada..." style="margin: 15px 0; padding: 12px; width: 80%; font-size: 1.1em;">
+            
+            <div style="margin: 15px 0;">
+                <button onclick="submitAnswer()" style="padding: 12px 30px; font-size: 1.1em;">✅ Validar Resposta</button>
+            </div>
+            
+            <p id="result" style="margin-top: 15px; min-height: 40px;"></p>
+            <p id="timer" style="margin-top: 10px; font-size: 1.3em;"></p>
+            
+            <div style="margin-top: 20px;">
+                <button onclick="showHelp()" style="padding: 8px 16px; background: #2196f3; color: white; border: none; border-radius: 5px; cursor: pointer;">
+                    ❓ Dica Rápida
+                </button>
+            </div>
+        </div>
+        
+        <!-- Imagens da coluna direita -->
+        <img src="img/Bitcoin.jpeg" id="img-Bitcoin.direita" class="logo-direita" alt="Bitcoin">
+        <img src="img/Bolha.jpeg" id="img-direita" class="logo-direita" alt="Bolha">
+        <img src="img/logo.jpeg" id="img-logo.direita" class="logo-direita" alt="Logo">
+        
+        <!-- Histórico do Bitcoin -->
+        <div id="history-container">
+            <!-- A história será exibida aqui -->
+        </div>
+    </div>
+
+
+    
+    <!-- Script JavaScript -->
+    <script src="script.js"></script>
+    
+    <script>
+        // Função de ajuda básica
+        function showHelp() {
+            alert(`🎮 AJUDA DO JOGOBITCOIN 🎮
+
+📋 COMO JOGAR:
+1. Escolha uma dificuldade (Fácil/Médio/Difícil)
+2. Descriptografe o texto apresentado
+3. Digite a resposta em MINÚSCULAS
+4. Pressione ENTER ou clique em "Validar Resposta"
+
+🔐 TIPOS DE CRIPTOGRAFIA:
+
+1. CIFRA DE CÉSAR:
+   • Cada letra é deslocada por uma chave
+   • Ex: Chave +3: A → D, B → E, C → F
+   • Dica: Tente todas as letras do alfabeto
+
+2. CÓDIGO ASCII:
+   • Cada grupo de 3 números é um caractere
+   • Ex: 065 = A, 066 = B, 067 = C
+   • Use uma tabela ASCII se necessário
+
+3. BASE64:
+   • Texto codificado em formato web
+   • Ex: "Qml0Y29pbg==" = "Bitcoin"
+   • Pode usar atob() no console para testar
+
+💡 DICAS:
+• Respostas são sempre em minúsculas
+• Sem espaços extras ou pontuação
+• Use o timer como guia
+• A cada 5 blocos, história do Bitcoin!
+
+⏰ TEMPO:
+• Fácil: 60 segundos
+• Médio: 40 segundos  
+• Difícil: 20 segundos
+
+💰 RECOMPENSAS:
+• + Bitcoin por bloco quebrado
+• + Pontos por velocidade
+• História a cada 5 blocos
+
+Boa mineração! ⛏️🚀`);
+        }
+    </script>
+</body>
+</html>
