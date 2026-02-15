@@ -80,7 +80,7 @@ Se quiser rodar localmente:
 
 bash
 # Clone o repositório (caso esteja no GitHub)
-git clone https://github.com/seuusuario/jogobitcoin.git
+git clone https://github.com/LxNautico/jogobitcoin.git
 
 # Entre na pasta
 cd jogobitcoin
