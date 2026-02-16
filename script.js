@@ -1442,19 +1442,33 @@ for (let i = 0; i < 950; i++) {
 }
 
 // ============================================
-// SISTEMA DE CRIPTOGRAFIA
+// SISTEMA DE CRIPTOGRAFIA - VERSÃO CORRIGIDA
 // ============================================
 const Criptografia = {
-    // Cifra de César
+    // Cifra de César CORRIGIDA
     cifraDeCesar: (texto, chave) => {
         return texto.split('').map(char => {
-            if (char.match(/[a-z]/i)) {
+            if (char.match(/[a-zA-Z]/)) {
                 const code = char.charCodeAt(0);
-                const base = code >= 65 && code <= 90 ? 65 : 97;
-                return String.fromCharCode(((code - base + chave + 26) % 26) + base);
+                const isUpperCase = code >= 65 && code <= 90;
+                const base = isUpperCase ? 65 : 97;
+                
+                // Calcular nova posição (garantindo que fique entre 0-25)
+                let novaPosicao = (code - base + chave) % 26;
+                if (novaPosicao < 0) novaPosicao += 26;
+                
+                return String.fromCharCode(base + novaPosicao);
             }
-            return char;
+            return char; // Mantém caracteres não-alfabéticos (espaços, números, etc.)
         }).join('');
+    },
+    
+    // Função de teste para verificar
+    testarCifra: (texto, chave) => {
+        const cifrado = Criptografia.cifraDeCesar(texto, chave);
+        const decifrado = Criptografia.cifraDeCesar(cifrado, -chave);
+        console.log(`Teste: "${texto}" → "${cifrado}" → "${decifrado}"`);
+        return decifrado === texto;
     },
     
     // Tabela ASCII
@@ -1466,7 +1480,12 @@ const Criptografia = {
     
     // Base64
     paraBase64: (texto) => {
-        return btoa(texto);
+        try {
+            return btoa(texto);
+        } catch (e) {
+            console.error('Erro Base64:', e);
+            return texto;
+        }
     },
     
     // Funções de descriptografia
@@ -1475,45 +1494,89 @@ const Criptografia = {
     },
     
     deASCII: (textoCodificado) => {
-        return textoCodificado.split(' ').map(code => 
-            String.fromCharCode(parseInt(code))
-        ).join('');
+        try {
+            return textoCodificado.split(' ').map(code => 
+                String.fromCharCode(parseInt(code))
+            ).join('');
+        } catch (e) {
+            console.error('Erro ASCII:', e);
+            return '';
+        }
     },
     
     deBase64: (textoBase64) => {
-        return atob(textoBase64);
+        try {
+            return atob(textoBase64);
+        } catch (e) {
+            console.error('Erro Base64:', e);
+            return '';
+        }
     }
 };
+// ============================================
+// FUNÇÃO PARA TESTAR A CIFRA DE CÉSAR
+// ============================================
+function testarCifra() {
+    console.log('🔧 TESTANDO CIFRA DE CÉSAR');
+    
+    const palavras = ['Bitcoin', 'Ethereum', 'Crypto', 'Blockchain', 'Miner'];
+    const chaves = [3, -3, 5, -5, 7, -7];
+    
+    palavras.forEach(palavra => {
+        chaves.forEach(chave => {
+            const cifrado = Criptografia.cifraDeCesar(palavra, chave);
+            const decifrado = Criptografia.cifraDeCesar(cifrado, -chave);
+            const funcionou = decifrado === palavra;
+            
+            console.log(`${funcionou ? '✅' : '❌'} "${palavra}" (chave ${chave}) → "${cifrado}" → "${decifrado}"`);
+        });
+    });
+}
 
+// Chamar no console: testarCifra()
 // ============================================
 // SISTEMA DE PROBLEMAS
 // ============================================
+// ============================================
+// SISTEMA DE PROBLEMAS - VERSÃO CORRIGIDA
+// ============================================
 const SistemaProblemas = {
-    // Nível Fácil: Apenas Cifra de César
+    // Nível Fácil: APENAS Cifra de César (CORRIGIDO)
     facil: () => {
         const nomeOriginal = cryptoNomes[Math.floor(Math.random() * cryptoNomes.length)];
+        // Garantir que a chave seja entre 1-5 (positiva ou negativa)
         const chave = Math.random() > 0.5 ? 
-            Math.floor(Math.random() * 3) + 3 :
-            -(Math.floor(Math.random() * 3) + 3);
+            Math.floor(Math.random() * 5) + 1 : // 1-5 positivas
+            -(Math.floor(Math.random() * 5) + 1); // -1 a -5 negativas
         
         const nomeCifrado = Criptografia.cifraDeCesar(nomeOriginal, chave);
         
+        // Debug
+        console.log('🔧 FÁCIL - Gerado:', { 
+            original: nomeOriginal, 
+            cifrado: nomeCifrado, 
+            chave: chave,
+            resposta: nomeOriginal.toLowerCase()
+        });
+        
         return {
-            pergunta: `Descriptografe esta mensagem (Cifra de César, chave: ${Math.abs(chave)}${chave > 0 ? ' à direita' : ' à esquerda'}):`,
+            pergunta: `🔐 Descriptografe esta mensagem (Cifra de César, chave: ${Math.abs(chave)}${chave > 0 ? ' →' : ' ←'}):`,
             textoCifrado: nomeCifrado,
             respostaCorreta: nomeOriginal.toLowerCase(),
             tipo: 'cesar',
             chave: chave,
-            dica: `Dica: Cifra de César com deslocamento de ${Math.abs(chave)} posições`
+            dica: `Dica: Desloque ${Math.abs(chave)} letras ${chave > 0 ? 'para frente' : 'para trás'} no alfabeto`
         };
     },
     
-    // Nível Médio: Cifra de César + ASCII
+    // Nível Médio: APENAS Cifra de César e ASCII (SEM Base64!)
     medio: () => {
         const nomeOriginal = cryptoNomes[Math.floor(Math.random() * cryptoNomes.length)];
+        // 50% Cifra de César, 50% ASCII (NUNCA Base64)
         const tipo = Math.random() > 0.5 ? 'cesar' : 'ascii';
         
         if (tipo === 'cesar') {
+            // Chaves entre 3-7 para médio (sempre mostrar a chave!)
             const chave = Math.random() > 0.5 ? 
                 Math.floor(Math.random() * 5) + 3 : // 3-7
                 -(Math.floor(Math.random() * 5) + 3); // -3 a -7
@@ -1521,27 +1584,27 @@ const SistemaProblemas = {
             const nomeCifrado = Criptografia.cifraDeCesar(nomeOriginal, chave);
             
             return {
-                pergunta: `Descriptografe esta mensagem (Cifra de César, chave: ${Math.abs(chave)}${chave > 0 ? ' à direita' : ' à esquerda'}):`,
+                pergunta: `🔐 Descriptografe (Cifra de César, chave: ${Math.abs(chave)}${chave > 0 ? ' →' : ' ←'}):`,
                 textoCifrado: nomeCifrado,
                 respostaCorreta: nomeOriginal.toLowerCase(),
                 tipo: 'cesar',
                 chave: chave,
-                dica: `Dica: Cifra de César com deslocamento de ${Math.abs(chave)} posições`
+                dica: `Dica: Desloque ${Math.abs(chave)} posições ${chave > 0 ? 'à direita' : 'à esquerda'}`
             };
         } else {
             const nomeASCII = Criptografia.paraASCII(nomeOriginal);
             
             return {
-                pergunta: `Converta este código ASCII para texto:`,
+                pergunta: `🔢 Converta este código ASCII para texto:`,
                 textoCifrado: nomeASCII,
                 respostaCorreta: nomeOriginal.toLowerCase(),
                 tipo: 'ascii',
-                dica: `Dica: Cada grupo de 3 números representa um caractere ASCII`
+                dica: `Dica: Cada grupo de 3 números é um caractere (ex: 065 = A)`
             };
         }
     },
     
-    // Nível Difícil: Todos os tipos
+    // Nível Difícil: TODOS os tipos (César, ASCII e Base64)
     dificil: () => {
         const nomeOriginal = cryptoNomes[Math.floor(Math.random() * cryptoNomes.length)];
         const tipos = ['cesar', 'ascii', 'base64'];
@@ -1550,40 +1613,40 @@ const SistemaProblemas = {
         switch(tipo) {
             case 'cesar':
                 const chave = Math.random() > 0.5 ? 
-                    Math.floor(Math.random() * 8) + 3 :
-                    -(Math.floor(Math.random() * 8) + 3);
+                    Math.floor(Math.random() * 8) + 3 : // 3-10
+                    -(Math.floor(Math.random() * 8) + 3); // -3 a -10
                 
                 const nomeCifrado = Criptografia.cifraDeCesar(nomeOriginal, chave);
                 
                 return {
-                    pergunta: `Descriptografe esta mensagem cifrada:`,
+                    pergunta: `🔐 Descriptografe (Cifra de César, chave: ${Math.abs(chave)}${chave > 0 ? ' →' : ' ←'}):`,
                     textoCifrado: nomeCifrado,
                     respostaCorreta: nomeOriginal.toLowerCase(),
                     tipo: 'cesar',
                     chave: chave,
-                    dica: `Dica: Pode ser Cifra de César, ASCII ou Base64`
+                    dica: `Dica: Cifra de César com deslocamento ${chave > 0 ? '+' : ''}${chave}`
                 };
                 
             case 'ascii':
                 const nomeASCII = Criptografia.paraASCII(nomeOriginal);
                 
                 return {
-                    pergunta: `Decodifique esta sequência numérica:`,
+                    pergunta: `🔢 Decodifique ASCII:`,
                     textoCifrado: nomeASCII,
                     respostaCorreta: nomeOriginal.toLowerCase(),
                     tipo: 'ascii',
-                    dica: `Dica: Pode ser Cifra de César, ASCII ou Base64`
+                    dica: `Dica: Use tabela ASCII (065=A, 066=B...)`
                 };
                 
             case 'base64':
                 const nomeBase64 = Criptografia.paraBase64(nomeOriginal);
                 
                 return {
-                    pergunta: `Decodifique este texto Base64:`,
+                    pergunta: `🔄 Decodifique Base64:`,
                     textoCifrado: nomeBase64,
                     respostaCorreta: nomeOriginal.toLowerCase(),
                     tipo: 'base64',
-                    dica: `Dica: Pode ser Cifra de César, ASCII ou Base64`
+                    dica: `Dica: Base64 termina com = ou ==`
                 };
         }
     }
@@ -1791,16 +1854,16 @@ function generateCryptoProblem() {
     // Usar dificuldade atual do jogo
     let dificuldadeParaUsar = dificuldadeAtual;
     
-    // Progressão automática baseada em blocos quebrados (opcional)
-    if (brokenBlocks >= 15) {
-        dificuldadeParaUsar = 'dificil';
-    } else if (brokenBlocks >= 8) {
-        dificuldadeParaUsar = 'medio';
-    }
-    
+      
     // Gerar problema
-    problemaAtual = SistemaProblemas[dificuldadeParaUsar]();
-    console.log('Problema gerado:', problemaAtual);
+        try {
+        problemaAtual = SistemaProblemas[dificuldadeParaUsar]();
+        console.log('✅ Problema gerado:', problemaAtual);
+    } catch (error) {
+        console.error('❌ Erro ao gerar problema:', error);
+        // Fallback para nível fácil em caso de erro
+        problemaAtual = SistemaProblemas['facil']();
+    }
     
     // Resetar erros consecutivos
     errosConsecutivos = 0;
@@ -2710,6 +2773,10 @@ function criarMenu() {
                         <div>
                             <div style="color: white; font-weight: bold;">Criador</div>
                             <div style="color: #aaa; font-size: 0.9em;">Alex A.G. Ramos</div>
+                            <br>
+                            <div style="color: white; font-weight: bold;">Colaborador</div>
+                            <div style="color: #aaa; font-size: 0.9em;">Junior</div>
+
                         </div>
                     </div>
                     
@@ -2968,6 +3035,11 @@ function mostrarCriador() {
                 <p style="margin: 10px 0;"><strong style="color: #9c27b0;">Email:</strong> guedes_ramos@hotmail.com</p>
                 <p style="margin: 10px 0;"><strong style="color: #9c27b0;">Jogo:</strong> JogoBitcoin v1.0</p>
                 <p style="margin: 10px 0;"><strong style="color: #9c27b0;">Ano:</strong> ${new Date().getFullYear()}</p>
+            </div>
+            <br>
+            <h3 style="color: #9c27b0; margin-bottom: 15px;">Colaborador do Jogo</h3>
+            <div style="background: rgba(255,255,255,0.05); padding: 20px; border-radius: 10px; margin-bottom: 20px;">
+                <p style="margin: 10px 0;"><strong style="color: #9c27b0;">Nome:</strong> Junior</p>
             </div>
             <p style="color: #aaa; font-style: italic; margin-bottom: 20px;">
                 "Desenvolvido com paixão por criptografia e educação"
