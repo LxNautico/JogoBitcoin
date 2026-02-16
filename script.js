@@ -2914,6 +2914,7 @@ function atualizarContadorVisitas() {
 // CONTATO - VERSÃO CORRIGIDA
 // ============================================
 
+// ATUALIZAR: abrirContato()
 function abrirContato() {
     fecharMenu();
     fecharTodosModais();
@@ -2938,7 +2939,7 @@ function abrirContato() {
     `;
     
     modal.innerHTML = `
-        <div style="background: linear-gradient(135deg, #1a1a2e, #16213e); padding: 30px; border-radius: 20px; border: 3px solid #2196f3; max-width: 500px; width: 90%; text-align: center; color: white;">
+        <div style="background: linear-gradient(135deg, #1a1a2e, #16213e); padding: 30px; border-radius: 20px; border: 3px solid #2196f3; max-width: 500px; width: 90%; text-align: center; color: white; box-shadow: 0 20px 60px rgba(0,0,0,0.8);">
             <h3 style="color: #2196f3; margin-bottom: 20px; font-size: 1.5em;">📧 Contato</h3>
             <p style="margin-bottom: 20px; color: #ddd;">Envie sua mensagem diretamente:</p>
             
@@ -2950,13 +2951,15 @@ function abrirContato() {
                 <div style="display: flex; gap: 10px;">
                     <a href="mailto:${email}?subject=${encodeURIComponent(assunto)}&body=${encodeURIComponent(corpo)}" 
                        target="_blank" 
-                       style="flex: 1; background: #2196f3; color: white; padding: 12px; border-radius: 8px; text-decoration: none; font-weight: bold; transition: all 0.3s ease;"
+                       style="flex: 1; background: #2196f3; color: white; padding: 12px; border-radius: 8px; text-decoration: none; font-weight: bold; transition: all 0.3s ease; cursor: pointer;"
                        onmouseover="this.style.background='#1976d2'"
                        onmouseout="this.style.background='#2196f3'">
                         ✉️ Enviar Email
                     </a>
                     
-                    <button onclick="copiarEmail('${email}')" style="background: #4CAF50; color: white; border: none; padding: 12px 20px; border-radius: 8px; cursor: pointer; font-weight: bold; transition: all 0.3s ease;">
+                    <button onclick="copiarEmail('${email}')" style="background: #4CAF50; color: white; border: none; padding: 12px 20px; border-radius: 8px; cursor: pointer; font-weight: bold; transition: all 0.3s ease;"
+                        onmouseover="this.style.background='#45a049'"
+                        onmouseout="this.style.background='#4CAF50'">
                         📋 Copiar
                     </button>
                 </div>
@@ -2969,14 +2972,16 @@ function abrirContato() {
                 </p>
             </div>
             
-            <button onclick="fecharModal(this)" style="background: rgba(255,255,255,0.1); color: white; border: 1px solid rgba(255,255,255,0.3); padding: 12px 30px; border-radius: 8px; cursor: pointer; font-weight: bold; transition: all 0.3s ease;">
+            <button onclick="fecharModal(this)" style="background: rgba(255,255,255,0.1); color: white; border: 1px solid rgba(255,255,255,0.3); padding: 12px 30px; border-radius: 8px; cursor: pointer; font-weight: bold; transition: all 0.3s ease;"
+                onmouseover="this.style.background='rgba(255,0,0,0.3)'"
+                onmouseout="this.style.background='rgba(255,255,255,0.1)'">
                 Fechar
             </button>
         </div>
     `;
     
     document.body.appendChild(modal);
-    document.body.style.overflow = 'hidden'; // Travar scroll
+    document.body.style.overflow = 'auto';
     
     if (SoundSystem && SoundSystem.click) SoundSystem.click();
 }
@@ -3049,7 +3054,7 @@ function mostrarCriador() {
     `;
     
     document.body.appendChild(modal);
-    document.body.style.overflow = 'hidden';
+    document.body.style.overflow = 'auto';
     if (SoundSystem && SoundSystem.click) SoundSystem.click();
 }
 
@@ -3107,7 +3112,7 @@ function abrirCadastro() {
     `;
     
     document.body.appendChild(modal);
-    document.body.style.overflow = 'hidden';
+    document.body.style.overflow = 'auto';
     if (SoundSystem && SoundSystem.click) SoundSystem.click();
 }
 
@@ -3204,7 +3209,7 @@ function abrirAvaliacao() {
     `;
     
     document.body.appendChild(modal);
-    document.body.style.overflow = 'hidden';
+    document.body.style.overflow = 'auto';
     
     // Resetar nota
     window.notaSelecionada = 0;
@@ -3269,7 +3274,17 @@ function enviarAvaliacao() {
     const mensagens = ['😐', '🙂', '😊', '🤩', '🥳'];
     alert(`${mensagens[window.notaSelecionada-1]} Obrigado pela avaliação!\n\nNota: ${window.notaSelecionada} estrelas\n${comentario ? 'Comentário: "' + comentario + '"' : 'Sem comentário'}`);
     
-    fecharModal(document.querySelector('.modal-avaliacao button'));
+    // Fechar todos os modais
+    const modaisAbertos = document.querySelectorAll('.modal-contato, .modal-cadastro, .modal-avaliacao, .modal-dashboard');
+    modaisAbertos.forEach(modal => {
+        if (modal && modal.parentElement) {
+            modal.parentElement.remove();
+        }
+    });
+    
+    // Restaurar scroll
+    document.body.style.overflow = 'auto';
+    
     if (SoundSystem && SoundSystem.correct) SoundSystem.correct();
 }
 
@@ -3373,7 +3388,7 @@ function abrirDashboard() {
     `;
     
     document.body.appendChild(modal);
-    document.body.style.overflow = 'hidden';
+    document.body.style.overflow = 'auto';
     if (SoundSystem && SoundSystem.click) SoundSystem.click();
 }
 
@@ -3433,39 +3448,85 @@ function abrirSobre() {
     `;
     
     document.body.appendChild(modal);
-    document.body.style.overflow = 'hidden';
+    document.body.style.overflow = 'auto';
     if (SoundSystem && SoundSystem.click) SoundSystem.click();
 }
+
+// ============================================
+// FUNÇÕES AUXILIARES - VERSÃO CORRIGIDA
+// ============================================
 
 function fecharModal(elemento) {
     // Encontrar o modal mais próximo
     let modal = elemento;
-    while (modal && !modal.classList.contains('modal-contato') && 
-           !modal.classList.contains('modal-cadastro') && 
-           !modal.classList.contains('modal-avaliacao') &&
-           !modal.classList.contains('modal-dashboard')) {
-        modal = modal.parentElement;
+    
+    // Se elemento for null ou undefined, tentar encontrar qualquer modal aberto
+    if (!elemento) {
+        modal = document.querySelector('.modal-contato, .modal-cadastro, .modal-avaliacao, .modal-dashboard');
+    } else {
+        while (modal && !modal.classList.contains('modal-contato') && 
+               !modal.classList.contains('modal-cadastro') && 
+               !modal.classList.contains('modal-avaliacao') &&
+               !modal.classList.contains('modal-dashboard')) {
+            modal = modal.parentElement;
+        }
     }
     
+    // Remover o modal
     if (modal && modal.parentElement) {
         modal.parentElement.remove();
-        document.body.style.overflow = 'auto'; // Restaurar scroll
+    }
+    
+    // Verificar se ainda há modais abertos
+    const modaisAbertos = document.querySelectorAll('.modal-contato, .modal-cadastro, .modal-avaliacao, .modal-dashboard');
+    
+    // Se não há mais modais abertos, restaurar scroll
+    if (modaisAbertos.length === 0) {
+        document.body.style.overflow = 'auto';
+        document.body.style.height = 'auto';
     }
     
     if (SoundSystem && SoundSystem.click) SoundSystem.click();
 }
 
-// Fechar com ESC
+// Função auxiliar para abrir modais com melhor controle
+function abrirModalComControle(elemento) {
+    // Desabilitar scroll de forma segura
+    const scrollY = window.scrollY || document.documentElement.scrollTop;
+    document.body.style.position = 'fixed';
+    document.body.style.top = `-${scrollY}px`;
+    document.body.style.width = '100%';
+}
+
+// Função auxiliar para restaurar scroll
+function restaurarScroll() {
+    const scrollY = document.body.style.top;
+    document.body.style.position = '';
+    document.body.style.top = '';
+    document.body.style.width = '';
+    
+    if (scrollY) {
+        window.scrollTo(0, -parseInt(scrollY));
+    }
+}
+
+// Fechar com ESC - VERSÃO CORRIGIDA
 document.addEventListener('keydown', function(e) {
     if (e.key === 'Escape') {
-        // Fechar menu se aberto
-        const menu = document.getElementById('main-menu');
-        if (menu && menu.style.display === 'block') {
-            fecharMenu();
-        }
+        // Contar modais abertos
+        const modaisAbertos = document.querySelectorAll('.modal-contato, .modal-cadastro, .modal-avaliacao, .modal-dashboard');
         
-        // Fechar modais
-        fecharTodosModais();
+        if (modaisAbertos.length > 0) {
+            // Fechar o modal mais recente
+            const ultimoModal = modaisAbertos[modaisAbertos.length - 1];
+            fecharModal(ultimoModal);
+        } else {
+            // Fechar menu se nenhum modal aberto
+            const menu = document.getElementById('main-menu');
+            if (menu && menu.style.display === 'block') {
+                fecharMenu();
+            }
+        }
     }
 });
 
