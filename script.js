@@ -1,19 +1,14 @@
-// Updated script.js to prevent automatic opening of CryptoEncyclopedia on page load
+// Assuming your code looks like this:
 
-// Function to initialize CryptoEncyclopedia
-function initCryptoEncyclopedia() {
-    // Create the toggle button
-    const toggleButton = document.createElement('button');
-    toggleButton.textContent = 'Open Crypto Encyclopedia';
-    toggleButton.onclick = function() {
-        // Logic to open CryptoEncyclopedia
-        const encyclopedia = document.getElementById('crypto-encyclopedia');
-        if (encyclopedia) {
-            encyclopedia.style.display = encyclopedia.style.display === 'block' ? 'none' : 'block';
-        }
-    };
-    // Append toggle button to the body or other appropriate container
-    document.body.appendChild(toggleButton);
-}
-// Call function on window load
-window.onload = initCryptoEncyclopedia;
+// Initialize the encyclopedia container with display: none
+const encyclopediaContainer = document.getElementById('encyclopedia');
+encyclopediaContainer.style.display = 'none';
+
+// Your other initialization code...
+
+// Update the event listener for DOMContentLoaded
+document.addEventListener('DOMContentLoaded', function() {
+    CryptoEncyclopedia.init(); // Initializing the Encyclopedia
+    // Ensure that the encyclopedia remains closed by default
+    encyclopediaContainer.style.display = 'none';
+});
