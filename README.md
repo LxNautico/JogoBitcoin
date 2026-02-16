@@ -68,18 +68,24 @@ CSS3
 
 JavaScript
 
-Hospedagem via Netlify
+## 🌐 Hospedagem
 
-🚀 Acesse o Jogo
-Jogue agora mesmo:
+O jogo está disponível online:
 
-🔗 https://jogobitcoin.netlify.app (jogobitcoin.netlify.app in Bing)
+🔗 **https://jogobitcoin.netlify.app**
 
-📦 Instalação (opcional)
-Se quiser rodar localmente:
+Versão alternativa via GitHub Pages:
 
-bash
-# Clone o repositório (caso esteja no GitHub)
+🔗 **https://lxnautico.github.io/JogoBitcoin/**
+
+---
+
+## 📦 Instalação (opcional)
+
+Se quiser rodar o jogo localmente:
+
+```bash
+# Clone o repositório
 git clone https://github.com/LxNautico/jogobitcoin.git
 
 # Entre na pasta
@@ -113,3 +119,4 @@ Acesse aqui:
 📬 Contato
 Criado por Alex Contribuição: Junior 
 Sugestões, dúvidas ou melhorias são sempre bem-vindas.
+
