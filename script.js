@@ -1547,6 +1547,130 @@ function testarCifra() {
         });
     });
 }
+// ============================================
+// SISTEMA DE BÔNUS POR BLOCOS
+// ============================================
+function verificarBonusDeBlocos() {
+    // Bônus a cada 20 blocos
+    if (brokenBlocks > 0 && brokenBlocks % 20 === 0) {
+        console.log(`🎁 BÔNUS! ${brokenBlocks} blocos quebrados!`);
+        
+        // Calcular bônus baseado no nível de dificuldade
+        let bonusPontos = 1000;
+        let bonusBitcoin = 0.00000100;
+        let bonusVidas = 0;
+        
+        switch(dificuldadeAtual) {
+            case 'facil':
+                bonusPontos = 1000;
+                bonusBitcoin = 0.00000100;
+                break;
+            case 'medio':
+                bonusPontos = 2000;
+                bonusBitcoin = 0.00000200;
+                break;
+            case 'dificil':
+                bonusPontos = 3000;
+                bonusBitcoin = 0.00000500;
+                bonusVidas = 1; // No difícil, ganha uma vida extra!
+                break;
+        }
+        
+        // Aplicar bônus
+        score += bonusPontos;
+        bitcoinQuantity += bonusBitcoin;
+        
+        // Bônus de vida (apenas no difícil)
+        if (bonusVidas > 0 && vidas < 3) {
+            vidas = Math.min(3, vidas + bonusVidas);
+            updateVidasDisplay();
+        }
+        if (brokenBlocks === 100) {
+            mostrarBonusFinal();
+        }
+
+        function mostrarBonusFinal() {
+            alert('🏆 PARABÉNS! VOCÊ É UM LENDÁRIO MINERADOR! 🏆\n\n100 BLOCOS QUEBRADOS!');
+            // Bônus extra
+            score += 5000;
+            bitcoinQuantity += 0.00001000;
+            updateScoreDisplay(score);
+            updateBitcoinValue();
+        }
+        
+
+        // Atualizar displays
+        updateScoreDisplay(score);
+        updateBitcoinValue();
+        
+        // Mostrar mensagem de bônus ESPETACULAR
+        mostrarBonusMessage(bonusPontos, bonusBitcoin, bonusVidas);
+        
+        // Som especial de bônus
+        if (SoundSystem && SoundSystem.win) SoundSystem.win();
+    }
+}
+
+// ============================================
+// MENSAGEM DE BÔNUS
+// ============================================
+function mostrarBonusMessage(pontos, bitcoin, vidas) {
+    const mensagemContainer = document.getElementById('mensagem-container');
+    if (!mensagemContainer) return;
+    
+    const mensagem = document.createElement('div');
+    mensagem.style.cssText = `
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        background: linear-gradient(135deg, #FFD700, #FFA500);
+        color: #000;
+        padding: 30px;
+        border-radius: 20px;
+        border: 5px solid gold;
+        box-shadow: 0 0 50px rgba(255, 215, 0, 0.7);
+        text-align: center;
+        z-index: 10000;
+        animation: bonusPop 0.5s ease;
+        max-width: 400px;
+        width: 90%;
+    `;
+    
+    mensagem.innerHTML = `
+        <div style="font-size: 4em; margin-bottom: 15px;">🏆</div>
+        <h2 style="color: #000; margin-bottom: 15px; font-size: 2em;">BÔNUS ESPECIAL!</h2>
+        <p style="font-size: 1.3em; margin-bottom: 10px;">${brokenBlocks} BLOCOS QUEBRADOS!</p>
+        <div style="background: rgba(0,0,0,0.1); padding: 15px; border-radius: 10px; margin: 15px 0;">
+            <p style="margin: 5px 0;">💰 <strong>+${pontos} pontos</strong></p>
+            <p style="margin: 5px 0;">₿ <strong>+${bitcoin.toFixed(8)} BTC</strong></p>
+            ${vidas > 0 ? '<p style="margin: 5px 0;">❤️ <strong>+1 vida extra!</strong></p>' : ''}
+        </div>
+        <button onclick="this.parentElement.remove()" style="
+            background: #000;
+            color: gold;
+            border: none;
+            padding: 10px 30px;
+            border-radius: 25px;
+            font-weight: bold;
+            cursor: pointer;
+            font-size: 1.1em;
+            margin-top: 10px;
+        ">INCRÍVEL! 🎉</button>
+    `;
+    
+    // Remover mensagens anteriores
+    const mensagensAntigas = document.querySelectorAll('div[style*="position: fixed"][style*="transform: translate"]');
+    mensagensAntigas.forEach(msg => msg.remove());
+    
+    document.body.appendChild(mensagem);
+    
+    // Auto-remover após 5 segundos
+    setTimeout(() => {
+        if (mensagem.parentElement) mensagem.remove();
+    }, 5000);
+}
+
 
 // Chamar no console: testarCifra()
 // ============================================
@@ -2073,6 +2197,10 @@ function updateBlocks() {
                     updateBlockProgress(blockIndex, 100);
                     updateScore(300);
                     brokenBlocks++;
+
+                    // ⭐ BÔNUS - COLOCAR LOGO APÓS INCREMENTAR
+                    verificarBonusDeBlocos();
+
                     updateHashLog(currentProblem);
                     
                     // Mostrar mensagem de incentivo a cada 5 blocos
