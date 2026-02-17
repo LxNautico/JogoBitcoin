@@ -2844,6 +2844,7 @@ function criarMenu() {
     
     // Evento para fechar ao clicar no overlay
     document.getElementById('menu-overlay').onclick = fecharMenu;
+    
 }
 
 // ============================================
@@ -2886,6 +2887,21 @@ function fecharMenu() {
     if (SoundSystem && SoundSystem.click) SoundSystem.click();
 }
 
+// ============================================
+// FUNÇÃO PARA FECHAR TODOS OS MODAIS
+// ============================================
+function fecharTodosModais() {
+    // Fechar todos os modais
+    const modais = document.querySelectorAll('.modal-contato, .modal-cadastro, .modal-avaliacao, .modal-dashboard');
+    modais.forEach(modal => {
+        if (modal && modal.parentElement) {
+            modal.parentElement.remove();
+        }
+    });
+    
+    // Restaurar scroll da página
+    document.body.style.overflow = 'none';
+}
 
 // ============================================
 // CONTADOR DE VISITAS
@@ -3253,39 +3269,112 @@ function atualizarTextoAvaliacao(nota) {
 }
 
 function enviarAvaliacao() {
-    if (window.notaSelecionada === 0) {
-        alert('❌ Por favor, selecione uma avaliação com as estrelas!');
-        return;
-    }
-    
-    const comentario = document.getElementById('comentario-avaliacao')?.value || '';
-    
-    // Salvar avaliação
-    const avaliacoes = JSON.parse(localStorage.getItem('jogobitcoin_avaliacoes') || '[]');
-    avaliacoes.push({
-        nota: window.notaSelecionada,
-        comentario: comentario,
-        data: new Date().toLocaleString('pt-BR'),
-        timestamp: Date.now()
-    });
-    localStorage.setItem('jogobitcoin_avaliacoes', JSON.stringify(avaliacoes));
-    
-    // Mensagem de agradecimento
-    const mensagens = ['😐', '🙂', '😊', '🤩', '🥳'];
-    alert(`${mensagens[window.notaSelecionada-1]} Obrigado pela avaliação!\n\nNota: ${window.notaSelecionada} estrelas\n${comentario ? 'Comentário: "' + comentario + '"' : 'Sem comentário'}`);
-    
-    // Fechar todos os modais
-    const modaisAbertos = document.querySelectorAll('.modal-contato, .modal-cadastro, .modal-avaliacao, .modal-dashboard');
-    modaisAbertos.forEach(modal => {
-        if (modal && modal.parentElement) {
-            modal.parentElement.remove();
+    try {
+        if (window.notaSelecionada === 0) {
+            alert('❌ Por favor, selecione uma avaliação com as estrelas!');
+            return;
         }
-    });
-    
-    // Restaurar scroll
-    document.body.style.overflow = 'auto';
-    
-    if (SoundSystem && SoundSystem.correct) SoundSystem.correct();
+        
+        const comentario = document.getElementById('comentario-avaliacao')?.value || '';
+        
+        // Salvar avaliação
+        const avaliacoes = JSON.parse(localStorage.getItem('jogobitcoin_avaliacoes') || '[]');
+        avaliacoes.push({
+            nota: window.notaSelecionada,
+            comentario: comentario,
+            data: new Date().toLocaleString('pt-BR'),
+            timestamp: Date.now()
+        });
+        localStorage.setItem('jogobitcoin_avaliacoes', JSON.stringify(avaliacoes));
+        
+        // Mensagem de agradecimento
+        const mensagens = ['😐', '🙂', '😊', '🤩', '🥳'];
+        alert(`${mensagens[window.notaSelecionada-1]} Obrigado pela avaliação!\n\nNota: ${window.notaSelecionada} estrelas\n${comentario ? 'Comentário: "' + comentario + '"' : 'Sem comentário'}`);
+        
+        // Fechar todos os modais
+        const modaisAbertos = document.querySelectorAll('.modal-contato, .modal-cadastro, .modal-avaliacao, .modal-dashboard, .modal-dashboard-publico, .modal-admin');
+        modaisAbertos.forEach(modal => {
+            try {
+                if (modal && modal.parentElement) {
+                    modal.parentElement.remove();
+                }
+            } catch (e) {
+                console.warn('Erro ao remover modal:', e);
+            }
+        });
+        
+        // 🔴 RESTAURAR SCROLL - VERSÃO ULTRA SEGURA
+        try {
+            if (document && document.body) {
+                document.body.style.overflow = 'auto';
+                document.body.style.height = 'auto';
+                console.log('✅ Scroll restaurado');
+            }
+        } catch (e) {
+            console.warn('Não foi possível restaurar scroll:', e);
+            // Se falhar, tentar novamente após 100ms
+            setTimeout(() => {
+                if (document && document.body) {
+                    document.body.style.overflow = 'auto';
+                }
+            }, 100);
+        }
+        
+        // Restaurar visibilidade da tela principal (COM VERIFICAÇÕES)
+        const restaurarElementos = () => {
+            try {
+                if (jogoConcluido) {
+                    setStyle('mensagem-final', 'display', 'block');
+                    setStyle('restart-button', 'display', 'inline-block');
+                } 
+                else if (currentProblem > 1 && vidas > 0) {
+                    setStyle('difficulty-selection', 'display', 'none');
+                    setStyle('info-container', 'display', 'none');
+                    setStyle('problem-container', 'display', 'flex');
+                    setStyle('game-container', 'display', 'flex');
+                    setStyle('hash-log', 'display', 'flex');
+                } 
+                else {
+                    setStyle('difficulty-selection', 'display', 'block');
+                    setStyle('info-container', 'display', 'flex');
+                    setStyle('problem-container', 'display', 'none');
+                    setStyle('game-container', 'display', 'none');
+                    setStyle('hash-log', 'display', 'none');
+                }
+            } catch (e) {
+                console.warn('Erro ao restaurar elementos:', e);
+            }
+        };
+        
+        restaurarElementos();
+        
+        if (SoundSystem && SoundSystem.correct) SoundSystem.correct();
+        
+    } catch (erro) {
+        console.error('❌ Erro geral em enviarAvaliacao:', erro);
+        // Em caso de erro grave, recarregar a página
+        setTimeout(() => window.location.reload(), 500);
+    }
+}
+
+// Função auxiliar para setar estilo com segurança
+function setStyle(id, prop, value) {
+    try {
+        const el = document.getElementById(id);
+        if (el) {
+            el.style[prop] = value;
+        }
+    } catch (e) {
+        console.warn(`Erro ao setar ${prop} em ${id}:`, e);
+    }
+}
+
+// 🔴 CORREÇÃO 4: Função calcularMediaAvaliacoes corrigida
+function calcularMediaAvaliacoes() {
+    const avaliacoes = JSON.parse(localStorage.getItem('jogobitcoin_avaliacoes') || '[]');
+    if (avaliacoes.length === 0) return '0.0';
+    const soma = avaliacoes.reduce((sum, a) => sum + a.nota, 0);
+    return (soma / avaliacoes.length).toFixed(1);
 }
 
 function calcularMediaAvaliacoes() {
@@ -3392,11 +3481,22 @@ function abrirDashboard() {
     if (SoundSystem && SoundSystem.click) SoundSystem.click();
 }
 
+// ============================================
+// FUNÇÃO MOSTRAR ABA CORRIGIDA (COM VERIFICAÇÕES)
+// ============================================
 function mostrarAba(aba) {
+    console.log('📊 Mostrando aba:', aba);
+    
     const cadastros = document.getElementById('lista-cadastros');
     const avaliacoes = document.getElementById('lista-avaliacoes');
     const btnCadastros = document.getElementById('aba-cadastros-btn');
     const btnAvaliacoes = document.getElementById('aba-avaliacoes-btn');
+    
+    // VERIFICAR SE OS ELEMENTOS EXISTEM ANTES DE USAR
+    if (!cadastros || !avaliacoes || !btnCadastros || !btnAvaliacoes) {
+        console.log('⚠️ Elementos do dashboard não encontrados - ignorando chamada');
+        return; // Sai da função sem fazer nada
+    }
     
     if (aba === 'cadastros') {
         cadastros.style.display = 'block';
@@ -3456,50 +3556,103 @@ function abrirSobre() {
 // FUNÇÕES AUXILIARES - VERSÃO CORRIGIDA
 // ============================================
 
-// ADICIONE ESTA FUNÇÃO NO SEU script.js (após fecharModal):
-
+// ============================================
+// FUNÇÃO FECHAR MODAL - VERSÃO SEGURA (SEM IDs FIXOS)
+// ============================================
 function fecharModal(elemento) {
-    // Encontrar o modal mais próximo
+    console.log('🔽 Fechando modal...');
+    
+    // Encontrar o modal mais próximo e remover
     let modal = elemento;
-    while (modal && 
-           !modal.classList.contains('modal-contato') && 
-           !modal.classList.contains('modal-cadastro') && 
-           !modal.classList.contains('modal-avaliacao') &&
-           !modal.classList.contains('modal-dashboard')) {
+    let encontrou = false;
+    
+    while (modal && modal.parentElement) {
+        // Verificar se é um modal (qualquer div com classe que contenha 'modal')
+        if (modal.classList && modal.classList.length > 0) {
+            for (let i = 0; i < modal.classList.length; i++) {
+                if (modal.classList[i].includes('modal')) {
+                    modal.parentElement.remove();
+                    encontrou = true;
+                    break;
+                }
+            }
+        }
+        if (encontrou) break;
         modal = modal.parentElement;
     }
     
-    if (modal && modal.parentElement) {
-        modal.parentElement.remove();
-        
-        // ✅ FIX: Verificar se ainda há modais abertos
-        const modalEmAberto = document.querySelector(
-            '.modal-contato, .modal-cadastro, .modal-avaliacao, .modal-dashboard'
-        );
-        
-        // Apenas restaurar scroll se não houver mais modais
-        if (!modalEmAberto) {
-            document.body.style.overflow = 'auto';
-        }
+    // Se não encontrou nenhum modal, tentar remover o elemento diretamente
+    if (!encontrou && elemento && elemento.parentElement) {
+        elemento.parentElement.remove();
     }
+    
+    // RESTAURAR A TELA PRINCIPAL
+    restaurarTelaPrincipal();
     
     if (SoundSystem && SoundSystem.click) SoundSystem.click();
 }
 
-// SUBSTITUA a função fecharTodosModais por:
-
-function fecharTodosModais() {
-    // Fechar todos os modais
-    const modais = document.querySelectorAll(
-        '.modal-contato, .modal-cadastro, .modal-avaliacao, .modal-dashboard'
-    );
-    modais.forEach(modal => {
-        if (modal && modal.parentElement) {
-            modal.parentElement.remove();
-        }
-    });
+// ============================================
+// FUNÇÃO PARA RESTAURAR A TELA PRINCIPAL
+// ============================================
+function restaurarTelaPrincipal() {
+    console.log('🔄 Restaurando tela principal...');
     
-    // ✅ FIX: Restaurar scroll depois de remover todos os modais
+    // Verificar cada elemento antes de acessar
+    const elements = {
+        'difficulty-selection': document.getElementById('difficulty-selection'),
+        'info-container': document.getElementById('info-container'),
+        'problem-container': document.getElementById('problem-container'),
+        'game-container': document.getElementById('game-container'),
+        'hash-log': document.getElementById('hash-log'),
+        'mensagem-final': document.getElementById('mensagem-final'),
+        'restart-button': document.getElementById('restart-button')
+    };
+    
+    // Verificar se os elementos principais existem
+    if (!elements['difficulty-selection']) {
+        console.error('❌ Elemento difficulty-selection não encontrado!');
+        // Se não existir, recriar a página
+        window.location.reload();
+        return;
+    }
+    
+    // Restaurar baseado no estado do jogo
+    if (jogoConcluido) {
+        // Jogo terminado
+        if (elements['mensagem-final']) elements['mensagem-final'].style.display = 'block';
+        if (elements['restart-button']) elements['restart-button'].style.display = 'inline-block';
+        if (elements['difficulty-selection']) elements['difficulty-selection'].style.display = 'none';
+        if (elements['info-container']) elements['info-container'].style.display = 'none';
+        if (elements['problem-container']) elements['problem-container'].style.display = 'none';
+        if (elements['game-container']) elements['game-container'].style.display = 'none';
+        if (elements['hash-log']) elements['hash-log'].style.display = 'none';
+    } 
+    else if (currentProblem > 1 && vidas > 0 && !jogoConcluido) {
+        // Jogo em andamento
+        if (elements['difficulty-selection']) elements['difficulty-selection'].style.display = 'none';
+        if (elements['info-container']) elements['info-container'].style.display = 'none';
+        if (elements['problem-container']) elements['problem-container'].style.display = 'flex';
+        if (elements['game-container']) elements['game-container'].style.display = 'flex';
+        if (elements['hash-log']) elements['hash-log'].style.display = 'flex';
+        if (elements['mensagem-final']) elements['mensagem-final'].style.display = 'none';
+        
+        // Restaurar timer se necessário
+        if (remainingTime > 0 && !timerInterval && !jogoConcluido) {
+            startTimer();
+        }
+    } 
+    else {
+        // Tela inicial
+        if (elements['difficulty-selection']) elements['difficulty-selection'].style.display = 'block';
+        if (elements['info-container']) elements['info-container'].style.display = 'flex';
+        if (elements['problem-container']) elements['problem-container'].style.display = 'none';
+        if (elements['game-container']) elements['game-container'].style.display = 'none';
+        if (elements['hash-log']) elements['hash-log'].style.display = 'none';
+        if (elements['mensagem-final']) elements['mensagem-final'].style.display = 'none';
+    }
+    
+    // Restaurar scroll
     document.body.style.overflow = 'auto';
 }
 
@@ -3525,9 +3678,9 @@ function restaurarScroll() {
 }
 
 // Fechar com ESC - VERSÃO CORRIGIDA
-document.addEventListener('keydown', function(e) {
+/*document.addEventListener('keydown', function(e) {
     if (e.key === 'Escape') {
-        // Contar modais abertos
+         Contar modais abertos
         const modaisAbertos = document.querySelectorAll('.modal-contato, .modal-cadastro, .modal-avaliacao, .modal-dashboard');
         
         if (modaisAbertos.length > 0) {
@@ -3542,7 +3695,6 @@ document.addEventListener('keydown', function(e) {
             }
         }
     }
-});
+});*/
 
 console.log('✅ Sistema de Menu, Contato e Avaliação carregado!');
-
