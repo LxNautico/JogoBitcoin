@@ -5,6 +5,10 @@
 Um jogo interativo que ensina conceitos de criptografia, hashes, blockchain, prova de trabalho e transações, tudo de forma prática e gamificada.  
 Ideal para estudantes, curiosos e desenvolvedores que querem aprender brincando.
 
+## 🎥 Demonstração do Jogo
+
+![Demonstração do jogo](animacao.gif)
+
 ---
 
 ## 🖼️ Prévia do Jogo
@@ -40,33 +44,31 @@ Ideal para estudantes, curiosos e desenvolvedores que querem aprender brincando.
 - JavaScript (Vanilla)  
 - GitHub Pages / Netlify  
 
----
-
 ## 📦 Como Instalar Localmente
-
-```bash
+```
 git clone https://github.com/LxNautico/JogoBitcoin
 cd JogoBitcoin
 # Abra o index.html no navegador
+```
 
-🗺️ Roadmap
-[x] Sistema de criptografia
+## 🗺️ Roadmap
+- [x] Sistema de criptografia
 
-[x] Progresso por blocos
+- [x] Progresso por blocos
 
-[x] Hospedagem online
+- [x] Hospedagem online
 
-[x] Correção do bug da tela branca (99% resolvido)
+- [x] Correção do bug da tela branca (99% resolvido)
 
-[ ] Corrigir o bug restante após o alerta de avaliação
+- [ ] Corrigir o bug restante após o alerta de avaliação
 
-[ ] Melhorar UX dos modais
+- [ ] Melhorar UX dos modais
 
-[ ] Criar ranking de jogadores
+- [ ] Criar ranking de jogadores
 
-[ ] Adicionar novos desafios
+- [ ] Adicionar novos desafios
 
-[ ] Criar modo multiplayer
+- [ ] Criar modo multiplayer
 
 💡 Por que este projeto é interessante?
 Ensina conceitos reais de blockchain de forma prática
@@ -98,3 +100,4 @@ Colaborador: Junior
 
 📄 Licença
 Este projeto está sob a licença MIT.
+
