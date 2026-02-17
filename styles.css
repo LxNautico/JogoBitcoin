@@ -991,3 +991,28 @@ body {
     background: linear-gradient(to bottom, #FFD700, #A0522D);
 }
 
+/* ============================================
+   ANIMAÇÃO DO BÔNUS
+   ============================================ */
+@keyframes bonusPop {
+    0% {
+        transform: translate(-50%, -50%) scale(0.3);
+        opacity: 0;
+    }
+    50% {
+        transform: translate(-50%, -50%) scale(1.1);
+    }
+    100% {
+        transform: translate(-50%, -50%) scale(1);
+        opacity: 1;
+    }
+}
+
+@keyframes bonusGlow {
+    0%, 100% {
+        box-shadow: 0 0 50px rgba(255, 215, 0, 0.7);
+    }
+    50% {
+        box-shadow: 0 0 80px rgba(255, 215, 0, 0.9);
+    }
+}
