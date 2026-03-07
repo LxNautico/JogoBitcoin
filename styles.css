@@ -1,6 +1,8 @@
-/* ==============================
-   ESTILOS GERAIS
-   ============================== */
+/* ============================================
+   JOGOBITCOIN - ESTILOS PRINCIPAIS
+   ============================================ */
+
+/* ========== 1. RESET E CONFIGURAÇÕES GERAIS ========== */
 * {
     margin: 0;
     padding: 0;
@@ -15,9 +17,7 @@ body {
     overflow-x: hidden;
 }
 
-/* ==============================
-   LAYOUT DE 3 COLUNAS
-   ============================== */
+/* ========== 2. LAYOUT DE 3 COLUNAS ========== */
 .container {
     display: flex;
     flex-direction: column;
@@ -31,22 +31,14 @@ body {
     overflow-y: auto;
 }
 
-.container.left {
-    border-right: none;
-}
-
-.container.center {
+.container.left { border-right: none; }
+.container.center { 
     border-left: 1px solid rgba(247, 147, 26, 0.2);
     border-right: 1px solid rgba(247, 147, 26, 0.2);
 }
+.container.right { border-left: none; }
 
-.container.right {
-    border-left: none;
-}
-
-/* ==============================
-   SELEÇÃO DE DIFICULDADE
-   ============================== */
+/* ========== 3. SELEÇÃO DE DIFICULDADE ========== */
 #difficulty-selection {
     text-align: center;
     padding: 30px 0;
@@ -109,9 +101,12 @@ body {
     color: white;
 }
 
-/* ==============================
-   CONTAINER DE INFORMAÇÕES
-   ============================== */
+.difficulty-btn:hover {
+    transform: translateY(-5px) !important;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.4) !important;
+}
+
+/* ========== 4. CONTAINER DE INFORMAÇÕES ========== */
 #info-container {
     display: flex;
     justify-content: center;
@@ -142,9 +137,7 @@ body {
     font-size: 1.1em;
 }
 
-#info-box strong {
-    color: #f7931a;
-}
+#info-box strong { color: #f7931a; }
 
 #info-box ul {
     list-style-type: none;
@@ -166,9 +159,7 @@ body {
     font-size: 1.2em;
 }
 
-/* ==============================
-   CONTAINER DO JOGO
-   ============================== */
+/* ========== 5. CONTAINER DO JOGO E BLOCOS ========== */
 #game-container {
     display: none;
     flex-direction: column;
@@ -177,9 +168,6 @@ body {
     padding: 20px;
 }
 
-/* ==============================
-   BLOCOS DO JOGO
-   ============================== */
 #blocks-container {
     display: grid;
     grid-template-columns: repeat(10, 1fr);
@@ -208,21 +196,16 @@ body {
     overflow: hidden;
 }
 
-.block[data-stage="0"] {
-    background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
-}
-
-.block[data-stage="1"] {
+.block[data-stage="0"] { background: linear-gradient(135deg, #3498db 0%, #2980b9 100%); }
+.block[data-stage="1"] { 
     background: linear-gradient(135deg, #f1c40f 0%, #f39c12 100%);
     transform: scale(1.05);
 }
-
-.block[data-stage="2"] {
+.block[data-stage="2"] { 
     background: linear-gradient(135deg, #95a5a6 0%, #7f8c8d 100%);
     transform: scale(1.1);
 }
-
-.block[data-stage="3"] {
+.block[data-stage="3"] { 
     background: linear-gradient(135deg, #2ecc71 0%, #27ae60 100%);
     transform: scale(1.15);
     animation: blockComplete 0.5s ease;
@@ -243,9 +226,7 @@ body {
     text-shadow: 1px 1px 1px rgba(0, 0, 0, 0.5);
 }
 
-/* ==============================
-   SCORE E VIDAS
-   ============================== */
+/* ========== 6. SCORE E VIDAS ========== */
 .score-container {
     display: flex;
     align-items: center;
@@ -283,8 +264,6 @@ body {
     border: 2px solid rgba(247, 147, 26, 0.5);
 }
 
-/* NO styles.css - Estilos para as vidas com imagens */
-
 .vidas-container {
     display: flex;
     align-items: center;
@@ -312,11 +291,10 @@ body {
     cursor: pointer;
 }
 
-.vida:hover {
-    transform: scale(1.1);
-}
+.vida:hover { transform: scale(1.1); }
+.vida.perdida { animation: vidaPerdida 0.5s ease forwards; }
+.vida.recuperada { animation: vidaRecuperada 0.7s ease forwards; }
 
-/* Animações para vidas ativas */
 @keyframes bitcoinPulse {
     0%, 100% { 
         transform: scale(1);
@@ -329,101 +307,25 @@ body {
 }
 
 @keyframes vidaPerdida {
-    0% { 
-        transform: scale(1);
-        opacity: 1;
-    }
-    100% { 
-        transform: scale(0.8);
-        opacity: 0.3;
-    }
+    0% { transform: scale(1); opacity: 1; }
+    100% { transform: scale(0.8); opacity: 0.3; }
 }
 
 @keyframes vidaRecuperada {
-    0% { 
-        transform: scale(0.5);
-        opacity: 0;
-    }
-    70% { 
-        transform: scale(1.2);
-        opacity: 0.8;
-    }
-    100% { 
-        transform: scale(1);
-        opacity: 1;
-    }
+    0% { transform: scale(0.5); opacity: 0; }
+    70% { transform: scale(1.2); opacity: 0.8; }
+    100% { transform: scale(1); opacity: 1; }
 }
 
-/* Efeito quando perde uma vida */
-.vida.perdida {
-    animation: vidaPerdida 0.5s ease forwards;
-}
-
-/* Efeito quando recupera uma vida (power-up) */
-.vida.recuperada {
-    animation: vidaRecuperada 0.7s ease forwards;
-}
-
-/* Efeito de shake quando perde vida */
 @keyframes shakeVida {
     0%, 100% { transform: translateX(0); }
     25% { transform: translateX(-5px); }
     75% { transform: translateX(5px); }
 }
 
-.vidas-container.shake {
-    animation: shakeVida 0.5s ease-in-out;
-}
+.vidas-container.shake { animation: shakeVida 0.5s ease-in-out; }
 
-/* Container responsivo */
-@media (max-width: 768px) {
-    .vidas-container {
-        padding: 10px;
-        margin: 15px 0;
-    }
-    
-    .vida {
-        width: 35px !important;
-        height: 35px !important;
-    }
-    
-    .vidas-label {
-        font-size: 1em;
-        margin-right: 10px;
-    }
-}
-
-@media (max-width: 480px) {
-    .vidas-container {
-        flex-wrap: wrap;
-        justify-content: center;
-    }
-    
-    .vida {
-        width: 30px !important;
-        height: 30px !important;
-        margin: 5px;
-    }
-}
-
-@keyframes bitcoinSpin {
-    0% { transform: rotateY(0deg); }
-    100% { transform: rotateY(360deg); }
-}
-
-@keyframes bitcoinPulse {
-    0%, 100% { transform: scale(1); opacity: 1; }
-    50% { transform: scale(1.2); opacity: 0.8; }
-}
-
-@keyframes heartbeat {
-    0%, 100% { transform: scale(1); }
-    50% { transform: scale(1.1); }
-}
-
-/* ==============================
-   CONTAINER DE PROBLEMAS
-   ============================== */
+/* ========== 7. CONTAINER DE PROBLEMAS ========== */
 #problem-container {
     display: none;
     flex-direction: column;
@@ -450,7 +352,6 @@ body {
     margin-bottom: 20px;
 }
 
-/* TEXTO CIFRADO */
 .texto-cifrado {
     background: rgba(26, 26, 26, 0.9);
     color: #f7931a;
@@ -490,7 +391,6 @@ body {
     background: rgba(255, 255, 255, 0.15);
 }
 
-/* BOTÃO DE VALIDAÇÃO */
 #problem-container button {
     padding: 15px 40px;
     font-size: 1.2em;
@@ -533,9 +433,7 @@ body {
     display: inline-block;
 }
 
-/* ==============================
-   TIPO DE CRIPTOGRAFIA
-   ============================== */
+/* ========== 8. TIPO DE CRIPTOGRAFIA ========== */
 #tipo-criptografia {
     margin: 15px 0;
     display: flex;
@@ -567,13 +465,11 @@ body {
     color: white;
 }
 
-/* ==============================
-   HASH LOG / BLOCKCHAIN
-   ============================== */
+/* ========== 9. HASH LOG / BLOCKCHAIN ========== */
 #hash-log {
     display: none;
-    width: 100%;
-    max-width: 600px;
+    width: 100% !important;
+    max-width: 100% !important;
     margin: 30px auto;
     padding: 20px;
     background: rgba(0, 0, 0, 0.3);
@@ -606,7 +502,24 @@ body {
     transform: translateX(5px);
 }
 
-/* BITCOIN VALUE */
+#hash-log,
+#hash-log > *,
+#hash-log div,
+#hash-log .hash-box {
+    width: 100% !important;
+    max-width: 100% !important;
+}
+#hash-log,
+#bitcoin-container,
+#hash-box-container,
+#hash-display {
+    display: flex;
+    flex-direction: column;
+    align-items: center; /* CENTRALIZA HORIZONTALMENTE */
+    width: 100%;
+}
+
+
 #bitcoin-value {
     font-size: 2em;
     font-weight: bold;
@@ -616,9 +529,7 @@ body {
     font-family: 'Courier New', monospace;
 }
 
-/* ==============================
-   MENSAGENS E HISTÓRICO
-   ============================== */
+/* ========== 10. MENSAGENS E HISTÓRICO ========== */
 #mensagem-container {
     display: none;
     padding: 20px;
@@ -630,19 +541,7 @@ body {
     animation: fadeIn 0.5s ease;
 }
 
-@keyframes fadeIn {
-    from { opacity: 0; transform: translateY(-10px); }
-    to { opacity: 1; transform: translateY(0); }
-}
-
 #history-container {
-   /* display: none;
-    padding: 25px;
-    margin: 20px 0;
-    background: rgba(255, 255, 255, 0.08);
-    border-radius: 15px;
-    border: 1px solid rgba(247, 147, 26, 0.3);
-    max-width: 500px;*/
     background: linear-gradient(135deg, 
         rgba(40, 40, 60, 0.98) 0%, 
         rgba(60, 60, 80, 0.98) 100%) !important;
@@ -654,7 +553,6 @@ body {
     backdrop-filter: blur(20px) !important;
 }
 
-/* Ou se preferir mais claro: */
 #history-container.alternative {
     background: linear-gradient(135deg, rgba(50, 50, 80, 0.95), rgba(70, 70, 100, 0.95)) !important;
     color: #ffffff !important;
@@ -662,28 +560,19 @@ body {
 }
 
 #history-container h3 {
-    /*color: #f7931a;
-    font-size: 1.5em;
-    margin-bottom: 15px;
-    text-align: center;*/
     color: #ffcc00 !important;
     text-shadow: 0 0 15px rgba(255, 204, 0, 0.7) !important;
     font-size: 2em !important;
 }
 
 #history-container p {
-    /*line-height: 1.6;
-    font-size: 1.1em;
-    text-align: justify;*/
     color: #e0e0e0 !important;
     line-height: 1.6 !important;
     font-size: 1.1em !important;
     text-shadow: 0 1px 2px rgba(0,0,0,0.5) !important;
 }
 
-/* ==============================
-   MENSAGEM FINAL
-   ============================== */
+/* ========== 11. MENSAGEM FINAL ========== */
 #mensagem-final {
     display: none;
     position: fixed;
@@ -700,11 +589,6 @@ body {
     width: 90%;
     box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
     animation: popIn 0.5s ease;
-}
-
-@keyframes popIn {
-    0% { transform: translate(-50%, -50%) scale(0.5); opacity: 0; }
-    100% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
 }
 
 #mensagem-texto h2 {
@@ -740,9 +624,7 @@ body {
     box-shadow: 0 8px 25px rgba(247, 147, 26, 0.4);
 }
 
-/* ==============================
-   IMAGENS
-   ============================== */
+/* ========== 12. IMAGENS E BOTÕES FLUTUANTES ========== */
 .logo-esquerda,
 .logo-direita {
     position: absolute;
@@ -768,13 +650,10 @@ body {
     transform: scale(1.05);
 }
 
-/* ==============================
-   BOTÃO DE AJUDA
-   ============================== */
 .help-button {
     position: fixed;
-    top: 20px;
-    right: 20px;
+    top: 0px;
+    right: 0px;
     padding: 12px 24px;
     background: linear-gradient(135deg, #2196f3 0%, #1976d2 100%);
     color: white;
@@ -793,9 +672,130 @@ body {
     box-shadow: 0 8px 25px rgba(33, 150, 243, 0.4);
 }
 
-/* ==============================
-   ANIMAÇÕES
-   ============================== */
+/* ========== 13. CÍRCULO DE CÉSAR ========== */
+.circulo-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin: 20px 0;
+}
+
+.circulo-externo {
+    position: relative;
+    width: 300px;
+    height: 300px;
+    border-radius: 50%;
+    border: 4px solid #f7931a;
+    box-shadow: 0 0 30px rgba(247,147,26,0.5);
+    margin: 20px auto;
+}
+
+.circulo-interno {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    transition: transform 0.3s ease;
+    display: flex;
+    flex-wrap: wrap;
+    transform-origin: center center;
+}
+
+.letra-circulo {
+    position: absolute;
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2em;
+    font-weight: bold;
+    color: white;
+    text-shadow: 0 0 5px rgba(0,0,0,0.5);
+    transform-origin: center center;
+}
+
+.letra-circulo.original { color: #ffaa00; font-weight: bold; }
+.letra-circulo.cifrada { color: #4CAF50; }
+
+.marcador-fixo {
+    position: absolute;
+    top: -10px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 2em;
+    color: gold;
+    z-index: 10;
+}
+
+.resposta-circulo {
+    font-size: 2em;
+    font-weight: bold;
+    color: #4CAF50;
+    margin: 20px 0;
+    padding: 10px 20px;
+    background: rgba(0,0,0,0.3);
+    border-radius: 10px;
+    border: 2px solid gold;
+}
+
+.controles-circulo button {
+    margin: 5px;
+    padding: 10px 20px;
+    background: linear-gradient(135deg, #f7931a, #e68200);
+    color: white;
+    border: none;
+    border-radius: 25px;
+    cursor: pointer;
+    font-weight: bold;
+}
+
+/* ========== 14. SCROLLBAR PERSONALIZADA ========== */
+.info-scroll::-webkit-scrollbar {
+    width: 10px;
+}
+
+.info-scroll::-webkit-scrollbar-track {
+    background: rgba(139, 69, 19, 0.2);
+    border-radius: 5px;
+}
+
+.info-scroll::-webkit-scrollbar-thumb {
+    background: linear-gradient(to bottom, #D4AF37, #8B4513);
+    border-radius: 5px;
+}
+
+.info-scroll::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(to bottom, #FFD700, #A0522D);
+}
+
+/* ========== 15. KEYFRAMES E ANIMAÇÕES ========== */
+@keyframes blockComplete {
+    0% { transform: scale(1.1); }
+    50% { transform: scale(1.2); }
+    100% { transform: scale(1.15); }
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes popIn {
+    0% { transform: translate(-50%, -50%) scale(0.5); opacity: 0; }
+    100% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+}
+
+@keyframes slideIn {
+    0% { transform: translate(-50%, -60%); opacity: 0; }
+    100% { transform: translate(-50%, -50%); opacity: 1; }
+}
+
+@keyframes fadeOut {
+    0% { opacity: 1; }
+    100% { opacity: 0; }
+}
+
 @keyframes pulse {
     0% { opacity: 1; }
     50% { opacity: 0.6; }
@@ -809,27 +809,32 @@ body {
 }
 
 @keyframes mineSuccess {
-    0% { 
-        transform: scale(1); 
-        background: rgba(76, 175, 80, 0); 
-    }
-    50% { 
-        transform: scale(1.05); 
-        background: rgba(76, 175, 80, 0.3); 
-    }
-    100% { 
-        transform: scale(1); 
-        background: rgba(76, 175, 80, 0); 
-    }
+    0% { transform: scale(1); background: rgba(76, 175, 80, 0); }
+    50% { transform: scale(1.05); background: rgba(76, 175, 80, 0.3); }
+    100% { transform: scale(1); background: rgba(76, 175, 80, 0); }
 }
 
-.mining-success {
-    animation: mineSuccess 1s ease;
+@keyframes bonusPop {
+    0% { transform: translate(-50%, -50%) scale(0.3); opacity: 0; }
+    50% { transform: translate(-50%, -50%) scale(1.1); }
+    100% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
 }
 
-/* ==============================
-   RESPONSIVIDADE
-   ============================== */
+@keyframes bonusGlow {
+    0%, 100% { box-shadow: 0 0 50px rgba(255, 215, 0, 0.7); }
+    50% { box-shadow: 0 0 80px rgba(255, 215, 0, 0.9); }
+}
+
+@keyframes conquistaPop {
+    0% { transform: translate(-50%, -50%) scale(0.3) rotate(-10deg); opacity: 0; }
+    30% { transform: translate(-50%, -50%) scale(1.2) rotate(5deg); }
+    60% { transform: translate(-50%, -50%) scale(0.95) rotate(-2deg); }
+    100% { transform: translate(-50%, -50%) scale(1) rotate(0); opacity: 1; }
+}
+
+.mining-success { animation: mineSuccess 1s ease; }
+
+/* ========== 16. RESPONSIVIDADE ========== */
 @media (max-width: 1200px) {
     .container {
         width: 100%;
@@ -855,10 +860,7 @@ body {
 }
 
 @media (max-width: 768px) {
-    #difficulty-selection h2 {
-        font-size: 2em;
-    }
-    
+    #difficulty-selection h2 { font-size: 2em; }
     #difficulty-selection button {
         padding: 12px 30px;
         font-size: 1em;
@@ -886,10 +888,7 @@ body {
         padding: 15px;
     }
     
-    #answer {
-        width: 95%;
-        font-size: 1em;
-    }
+    #answer { width: 95%; font-size: 1em; }
     
     .help-button {
         padding: 10px 20px;
@@ -908,20 +907,28 @@ body {
         right: auto;
         bottom: auto;
     }
+    
+    .vidas-container {
+        padding: 10px;
+        margin: 15px 0;
+    }
+    
+    .vida {
+        width: 35px !important;
+        height: 35px !important;
+    }
+    
+    .vidas-label { font-size: 1em; margin-right: 10px; }
 }
 
 @media (max-width: 480px) {
-    .container {
-        padding: 10px;
-    }
+    .container { padding: 10px; }
     
     #difficulty-selection {
         padding: 20px 10px;
     }
     
-    #difficulty-selection h2 {
-        font-size: 1.8em;
-    }
+    #difficulty-selection h2 { font-size: 1.8em; }
     
     #difficulty-selection button {
         padding: 10px 20px;
@@ -944,75 +951,15 @@ body {
         height: 35px;
         font-size: 1.3em;
     }
-}
-/* Adicione estas animações ao seu CSS */
-@keyframes popIn {
-    0% { transform: translate(-50%, -50%) scale(0.5); opacity: 0; }
-    100% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
-}
-
-@keyframes slideIn {
-    0% { transform: translate(-50%, -60%); opacity: 0; }
-    100% { transform: translate(-50%, -50%); opacity: 1; }
-}
-
-@keyframes fadeOut {
-    0% { opacity: 1; }
-    100% { opacity: 0; }
-}
-/* NO styles.css - Estilos para a nova tela inicial */
-
-/* Efeitos hover nos botões */
-.difficulty-btn:hover {
-    transform: translateY(-5px) !important;
-    box-shadow: 0 10px 25px rgba(0,0,0,0.4) !important;
-}
-
-.difficulty-btn:hover > div {
-    left: 100% !important;
-}
-
-/* Scrollbar personalizada */
-.info-scroll::-webkit-scrollbar {
-    width: 10px;
-}
-
-.info-scroll::-webkit-scrollbar-track {
-    background: rgba(139, 69, 19, 0.2);
-    border-radius: 5px;
-}
-
-.info-scroll::-webkit-scrollbar-thumb {
-    background: linear-gradient(to bottom, #D4AF37, #8B4513);
-    border-radius: 5px;
-}
-
-.info-scroll::-webkit-scrollbar-thumb:hover {
-    background: linear-gradient(to bottom, #FFD700, #A0522D);
-}
-
-/* ============================================
-   ANIMAÇÃO DO BÔNUS
-   ============================================ */
-@keyframes bonusPop {
-    0% {
-        transform: translate(-50%, -50%) scale(0.3);
-        opacity: 0;
+    
+    .vidas-container {
+        flex-wrap: wrap;
+        justify-content: center;
     }
-    50% {
-        transform: translate(-50%, -50%) scale(1.1);
-    }
-    100% {
-        transform: translate(-50%, -50%) scale(1);
-        opacity: 1;
-    }
-}
-
-@keyframes bonusGlow {
-    0%, 100% {
-        box-shadow: 0 0 50px rgba(255, 215, 0, 0.7);
-    }
-    50% {
-        box-shadow: 0 0 80px rgba(255, 215, 0, 0.9);
+    
+    .vida {
+        width: 30px !important;
+        height: 30px !important;
+        margin: 5px;
     }
 }
