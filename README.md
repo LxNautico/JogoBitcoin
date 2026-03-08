@@ -7,8 +7,8 @@ Ideal para estudantes, curiosos e desenvolvedores que querem aprender brincando.
 
 ## 🎥 Demonstração do Jogo
 
-![Demonstração do jogo](animacao.gif)
-
+![Demonstração do jogo](Tela_inicial.gif)
+![Demonstração do jogo](Tela_Jogo.gif)
 ---
 
 ## 🖼️ Prévia do Jogo
@@ -100,4 +100,5 @@ Colaborador: Junior
 
 📄 Licença
 Este projeto está sob a licença MIT.
+
 
