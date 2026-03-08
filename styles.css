@@ -963,3 +963,69 @@ body {
         margin: 5px;
     }
 }
+/* Animações para mensagens laterais */
+@keyframes slideInLeft {
+    from {
+        opacity: 0;
+        transform: translateX(-30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+@keyframes slideOutLeft {
+    from {
+        opacity: 1;
+        transform: translateX(0);
+    }
+    to {
+        opacity: 0;
+        transform: translateX(-30px);
+    }
+}
+
+/* Container de mensagens laterais */
+#mensagens-laterais {
+    max-height: 200px;
+    overflow-y: auto;
+    scrollbar-width: thin;
+    scrollbar-color: #f7931a #1a1a2e;
+    padding-right: 5px;
+}
+
+#mensagens-laterais::-webkit-scrollbar {
+    width: 6px;
+}
+
+#mensagens-laterais::-webkit-scrollbar-track {
+    background: #1a1a2e;
+    border-radius: 3px;
+}
+
+#mensagens-laterais::-webkit-scrollbar-thumb {
+    background: #f7931a;
+    border-radius: 3px;
+}
+/* Animação para novos blocos */
+@keyframes novoBloco {
+    from {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Garantir que a cadeia seja uma coluna normal (não reverse) */
+#blockchain-cadeia {
+    display: flex;
+    flex-direction: column;  /* Não usar column-reverse */
+    gap: 12px;
+    max-height: 500px;
+    overflow-y: auto;
+    padding: 10px;
+}
