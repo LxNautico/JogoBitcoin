@@ -110,8 +110,8 @@ body {
 #info-container {
     display: flex;
     justify-content: center;
-    align-items: center;
     width: 100%;
+    margin-top: 40px; /* adiciona espaço real entre as divs */
 }
 
 #info-box {
@@ -1028,4 +1028,8 @@ body {
     max-height: 500px;
     overflow-y: auto;
     padding: 10px;
+}
+#info-container {
+    align-items: flex-start !important;
+    margin-top: 80px !important;
 }
