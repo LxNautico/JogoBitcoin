@@ -35,42 +35,44 @@ let selosConquistados = [];
 // 2. CONFIGURAÇÕES E CONSTANTES
 // ============================================
 
-// Metas de desempenho
+// ============================================
+// METAS DE DESEMPENHO - VERSÃO REALISTA
+// ============================================
 const metasDisponiveis = [
     {
         id: 'velocidade_5',
         nome: '⚡ Minerador Relâmpago',
-        descricao: 'Quebrar 5 blocos em menos de 60 segundos',
+        descricao: 'Quebrar 5 blocos em menos de 2 minutos',  // Antes: 60s
         icone: '⚡',
         blocos: 5,
-        tempoMax: 60,
+        tempoMax: 120,  // 2 minutos (mais factível)
         recompensa: { pontos: 500, bitcoin: 0.00000200, titulo: 'Minerador Relâmpago' }
     },
     {
         id: 'velocidade_10',
         nome: '🌪️ Cripto Ninja',
-        descricao: 'Quebrar 10 blocos em menos de 120 segundos',
+        descricao: 'Quebrar 10 blocos em menos de 4 minutos',  // Antes: 120s
         icone: '🥷',
         blocos: 10,
-        tempoMax: 120,
+        tempoMax: 240,  // 4 minutos
         recompensa: { pontos: 1000, bitcoin: 0.00000500, titulo: 'Cripto Ninja' }
     },
     {
         id: 'velocidade_20',
         nome: '🔥 Mestre dos Blocos',
-        descricao: 'Quebrar 20 blocos em menos de 240 segundos',
+        descricao: 'Quebrar 20 blocos em menos de 8 minutos',  // Antes: 240s
         icone: '🔥',
         blocos: 20,
-        tempoMax: 240,
+        tempoMax: 480,  // 8 minutos
         recompensa: { pontos: 2500, bitcoin: 0.00001000, titulo: 'Mestre dos Blocos' }
     },
     {
         id: 'velocidade_50',
         nome: '💎 Lenda da Mineração',
-        descricao: 'Quebrar 50 blocos em menos de 600 segundos',
+        descricao: 'Quebrar 50 blocos em menos de 20 minutos',  // Antes: 600s
         icone: '💎',
         blocos: 50,
-        tempoMax: 600,
+        tempoMax: 1200,  // 20 minutos
         recompensa: { pontos: 5000, bitcoin: 0.00002500, titulo: 'Lenda da Mineração' }
     },
     {
@@ -85,28 +87,28 @@ const metasDisponiveis = [
     {
         id: 'speedrun_facil',
         nome: '🏃 Speedrunner Fácil',
-        descricao: 'Completar o jogo no nível fácil em menos de 5 minutos',
+        descricao: 'Completar o nível fácil em menos de 15 minutos',  // Antes: 300s
         icone: '🏃',
         dificuldade: 'facil',
-        tempoMax: 300,
+        tempoMax: 900,  // 15 minutos
         recompensa: { pontos: 3000, bitcoin: 0.00001500, titulo: 'Speedrunner' }
     },
     {
         id: 'speedrun_medio',
         nome: '🏃‍♂️ Speedrunner Médio',
-        descricao: 'Completar o jogo no nível médio em menos de 8 minutos',
+        descricao: 'Completar o nível médio em menos de 20 minutos',  // Antes: 480s
         icone: '🏃‍♂️',
         dificuldade: 'medio',
-        tempoMax: 480,
+        tempoMax: 1200,  // 20 minutos
         recompensa: { pontos: 5000, bitcoin: 0.00002500, titulo: 'Speedrunner Pro' }
     },
     {
         id: 'speedrun_dificil',
         nome: '🏃‍♀️ Speedrunner Difícil',
-        descricao: 'Completar o jogo no nível difícil em menos de 10 minutos',
+        descricao: 'Completar o nível difícil em menos de 25 minutos',  // Antes: 600s
         icone: '🏃‍♀️',
         dificuldade: 'dificil',
-        tempoMax: 600,
+        tempoMax: 1500,  // 25 minutos
         recompensa: { pontos: 10000, bitcoin: 0.00005000, titulo: 'Speedrunner Lendário' }
     }
 ];
@@ -258,56 +260,77 @@ function alcançarMeta(meta) {
     mostrarConquista(meta);
 }
 
+// ============================================
+// MOSTRAR CONQUISTA - VERSÃO COM LATERAL
+// ============================================
 function mostrarConquista(meta) {
-    const conquistaDiv = document.createElement('div');
-    conquistaDiv.style.cssText = `
-        position: fixed;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-        background: linear-gradient(135deg, #FFD700, #FFA500);
-        color: #000;
-        padding: 30px;
-        border-radius: 20px;
-        border: 5px solid gold;
-        box-shadow: 0 0 70px rgba(255, 215, 0, 0.9);
-        text-align: center;
-        z-index: 20000;
-        animation: conquistaPop 0.8s ease;
-        max-width: 400px;
-        width: 90%;
-    `;
+    // 🆕 SEMPRE mostra na lateral (não bloqueia)
+    const nomeConquista = meta.nome;
+    const icone = meta.icone || '🏆';
     
-    conquistaDiv.innerHTML = `
-        <div style="font-size: 5em; margin-bottom: 15px;">${meta.icone}</div>
-        <h2 style="color: #000; margin-bottom: 10px;">🏆 CONQUISTA!</h2>
-        <h3 style="color: #000; margin-bottom: 15px;">${meta.nome}</h3>
-        <p style="margin-bottom: 15px;">${meta.descricao}</p>
-        <div style="background: rgba(0,0,0,0.2); padding: 15px; border-radius: 10px; margin: 15px 0;">
-            <p style="margin: 5px 0;">💰 <strong>+${meta.recompensa.pontos} pontos</strong></p>
-            <p style="margin: 5px 0;">₿ <strong>+${meta.recompensa.bitcoin.toFixed(8)} BTC</strong></p>
-            ${meta.recompensa.titulo ? `<p style="margin: 5px 0;">🏅 Título: <strong>${meta.recompensa.titulo}</strong></p>` : ''}
-        </div>
-        <button onclick="this.parentElement.remove()" style="
-            background: #000;
-            color: gold;
-            border: none;
-            padding: 12px 35px;
-            border-radius: 25px;
-            font-weight: bold;
-            cursor: pointer;
-            font-size: 1.1em;
-            margin-top: 10px;
-        ">INCRÍVEL! 🎉</button>
-    `;
+    mostrarMensagemLateral(`${icone} CONQUISTA: ${nomeConquista}`, 'conquista', 5000);
     
-    document.body.appendChild(conquistaDiv);
+    // 🔴 OPÇÃO 1: Manter o modal apenas para conquistas raras (ex: 100 blocos)
+    // Descomente se quiser manter o modal apenas para conquistas especiais
+    /*
+    if (meta.id === 'velocidade_50' || meta.id === 'precisao_total') {
+        // Mostrar modal apenas para conquistas lendárias
+        const conquistaDiv = document.createElement('div');
+        conquistaDiv.style.cssText = `
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: linear-gradient(135deg, #FFD700, #FFA500);
+            color: #000;
+            padding: 30px;
+            border-radius: 20px;
+            border: 5px solid gold;
+            box-shadow: 0 0 70px rgba(255, 215, 0, 0.9);
+            text-align: center;
+            z-index: 20000;
+            animation: conquistaPop 0.8s ease;
+            max-width: 400px;
+            width: 90%;
+        `;
+        
+        conquistaDiv.innerHTML = `
+            <div style="font-size: 5em; margin-bottom: 15px;">${meta.icone}</div>
+            <h2 style="color: #000; margin-bottom: 10px;">🏆 CONQUISTA LENDÁRIA!</h2>
+            <h3 style="color: #000; margin-bottom: 15px;">${meta.nome}</h3>
+            <p style="margin-bottom: 15px;">${meta.descricao}</p>
+            <div style="background: rgba(0,0,0,0.2); padding: 15px; border-radius: 10px; margin: 15px 0;">
+                <p style="margin: 5px 0;">💰 <strong>+${meta.recompensa.pontos} pontos</strong></p>
+                <p style="margin: 5px 0;">₿ <strong>+${meta.recompensa.bitcoin.toFixed(8)} BTC</strong></p>
+            </div>
+            <button onclick="this.parentElement.remove()" style="
+                background: #000;
+                color: gold;
+                border: none;
+                padding: 12px 35px;
+                border-radius: 25px;
+                font-weight: bold;
+                cursor: pointer;
+                font-size: 1.1em;
+                margin-top: 10px;
+            ">INCRÍVEL! 🎉</button>
+        `;
+        
+        document.body.appendChild(conquistaDiv);
+        
+        if (SoundSystem && SoundSystem.win) SoundSystem.win();
+        
+        setTimeout(() => {
+            if (conquistaDiv.parentElement) conquistaDiv.remove();
+        }, 8000);
+    }
+    */
     
+    // 🔴 OPÇÃO 2: Remover completamente o modal (só lateral)
+    // Basta não fazer nada além da mensagem lateral
+    
+    // Manter o som de conquista
     if (SoundSystem && SoundSystem.win) SoundSystem.win();
-    
-    setTimeout(() => {
-        if (conquistaDiv.parentElement) conquistaDiv.remove();
-    }, 8000);
 }
 
 // ============================================
@@ -1241,30 +1264,45 @@ function displayNextProblem() {
     document.getElementById('problem-number').textContent = `Bloco Nº: ${currentProblem}`;
     document.getElementById('problem-question').innerHTML = p.texto;
     
+    // Fechar círculo se estiver aberto
     fecharCirculo();
     
-    const btnAntigo = document.getElementById('btn-circulo-cesar');
-    if (btnAntigo) btnAntigo.remove();
+    // 🔴 REMOVER BOTÕES ANTIGOS
+    const botoesDivAntigo = document.getElementById('botoes-ajuda-container');
+    if (botoesDivAntigo) botoesDivAntigo.remove();
     
+    // 🔴 SE FOR CIFRA DE CÉSAR, MOSTRAR OS DOIS BOTÕES
     if (problemaAtual && problemaAtual.tipo === 'cesar') {
         const container = document.getElementById('problem-container');
+        
+        // Container para os botões
+        const botoesDiv = document.createElement('div');
+        botoesDiv.id = 'botoes-ajuda-container';
+        botoesDiv.style.cssText = `
+            display: flex;
+            gap: 15px;
+            margin: 20px auto;
+            justify-content: center;
+            flex-wrap: wrap;
+        `;
+        
+        // 🔴 BOTÃO 1: CÍRCULO DE CÉSAR (já existente)
         const btnCirculo = document.createElement('button');
         btnCirculo.id = 'btn-circulo-cesar';
-        btnCirculo.innerHTML = '🔄 Abrir Círculo de César';
+        btnCirculo.innerHTML = '🔄 Círculo de César';
         btnCirculo.style.cssText = `
-            margin: 15px auto;
             padding: 12px 25px;
             background: linear-gradient(135deg, #9c27b0, #673ab7);
             color: white;
             border: none;
             border-radius: 30px;
             font-weight: bold;
-            font-size: 1.1em;
+            font-size: 1em;
             cursor: pointer;
             box-shadow: 0 4px 15px rgba(156, 39, 176, 0.4);
             transition: all 0.3s ease;
-            display: block;
-            width: fit-content;
+            flex: 1;
+            min-width: 180px;
         `;
         btnCirculo.onmouseover = () => {
             btnCirculo.style.transform = 'scale(1.05)';
@@ -1275,15 +1313,48 @@ function displayNextProblem() {
             btnCirculo.style.boxShadow = '0 4px 15px rgba(156, 39, 176, 0.4)';
         };
         btnCirculo.onclick = ativarCirculoCesar;
-        container.appendChild(btnCirculo);
+        
+        // 🔴 BOTÃO 2: DECODIFICADOR (novo)
+        const btnDecode = document.createElement('button');
+        btnDecode.id = 'btn-decode-rapido';
+        btnDecode.innerHTML = '🔧 Decodificador';
+        btnDecode.style.cssText = `
+            padding: 12px 25px;
+            background: linear-gradient(135deg, #2196f3, #1976d2);
+            color: white;
+            border: none;
+            border-radius: 30px;
+            font-weight: bold;
+            font-size: 1em;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(33, 150, 243, 0.4);
+            transition: all 0.3s ease;
+            flex: 1;
+            min-width: 180px;
+        `;
+        btnDecode.onmouseover = () => {
+            btnDecode.style.transform = 'scale(1.05)';
+            btnDecode.style.boxShadow = '0 8px 25px rgba(33, 150, 243, 0.6)';
+        };
+        btnDecode.onmouseout = () => {
+            btnDecode.style.transform = 'scale(1)';
+            btnDecode.style.boxShadow = '0 4px 15px rgba(33, 150, 243, 0.4)';
+        };
+        btnDecode.onclick = abrirDecodificador;
+        
+        botoesDiv.appendChild(btnCirculo);
+        botoesDiv.appendChild(btnDecode);
+        container.appendChild(botoesDiv);
     }
     
+    // Atualizar indicador de dificuldade
     const tipo = document.getElementById('tipo-indicador');
     if (tipo) {
         tipo.textContent = `Dificuldade: ${dificuldadeAtual.toUpperCase()}`;
         tipo.className = `tipo-${dificuldadeAtual}`;
     }
     
+    // Preparar campo de resposta
     const input = document.getElementById('answer');
     input.value = ''; 
     input.disabled = false; 
@@ -1292,9 +1363,11 @@ function displayNextProblem() {
     document.getElementById('result').textContent = '';
     startTimer();
 
-    // 🆕 ATUALIZAR DECODIFICADOR SE ESTIVER ABERTO
+    // Atualizar decodificador se estiver aberto
     setTimeout(() => {
-        atualizarDecodificadorComProblema();
+        if (typeof atualizarDecodificadorComProblema === 'function') {
+            atualizarDecodificadorComProblema();
+        }
     }, 500);
 }
 
@@ -1635,12 +1708,74 @@ function formatarTempo(segundos) {
 }
 
 function mostrarMensagemIncentivo(idx) {
-    const c = document.getElementById('mensagem-container');
-    if (!c) return;
     if (idx >= 0 && idx < mensagensDeIncentivo.length) {
-        c.innerHTML = `<div style="background:linear-gradient(135deg,#f7931a,#ffb347); color:white; padding:20px; border-radius:15px; border:3px solid gold; text-align:center; position:fixed; top:50%; left:50%; transform:translate(-50%,-50%); z-index:10000; max-width:400px;">${mensagensDeIncentivo[idx]}<br><small>Bloco ${brokenBlocks}</small></div>`;
-        c.style.display = 'block';
-        setTimeout(() => { c.style.display = 'none'; }, 3000);
+        // Mostra na lateral (não bloqueia)
+        mostrarMensagemLateral(mensagensDeIncentivo[idx], 'incentivo', 3000);
+        
+        // Opcional: manter também no console para debug
+        console.log(`💬 Mensagem: ${mensagensDeIncentivo[idx]}`);
+    }
+}
+
+// ============================================
+// MENSAGENS LATERAIS (NÃO BLOQUEIAM)
+// ============================================
+function mostrarMensagemLateral(texto, tipo = 'incentivo', duracao = 3000) {
+    const container = document.getElementById('mensagens-laterais');
+    if (!container) return;
+    
+    // Cores diferentes por tipo
+    const cores = {
+        incentivo: 'linear-gradient(135deg, #f7931a, #ffaa33)',
+        conquista: 'linear-gradient(135deg, gold, #ffcc00)',
+        bonus: 'linear-gradient(135deg, #4CAF50, #2E7D32)',
+        info: 'linear-gradient(135deg, #2196f3, #1976d2)'
+    };
+    
+    // Ícones por tipo
+    const icones = {
+        incentivo: '💪',
+        conquista: '🏆',
+        bonus: '🎁',
+        info: 'ℹ️'
+    };
+    
+    const mensagem = document.createElement('div');
+    mensagem.style.cssText = `
+        background: ${cores[tipo] || cores.incentivo};
+        color: black;
+        padding: 12px 18px;
+        border-radius: 10px;
+        margin-bottom: 10px;
+        border-left: 5px solid gold;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+        animation: slideInLeft 0.3s ease;
+        font-weight: bold;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        width: 100%;
+        font-size: 1em;
+    `;
+    
+    mensagem.innerHTML = `
+        <span style="font-size: 1.5em;">${icones[tipo]}</span>
+        <span style="flex: 1;">${texto}</span>
+        <span style="font-size: 0.8em; opacity: 0.7;">agora</span>
+    `;
+    
+    // Adicionar no TOPO (para mensagens recentes aparecerem primeiro)
+    container.prepend(mensagem);
+    
+    // Remover após duração
+    setTimeout(() => {
+        mensagem.style.animation = 'slideOutLeft 0.3s ease';
+        setTimeout(() => mensagem.remove(), 300);
+    }, duracao);
+    
+    // Manter apenas últimas 5 mensagens
+    while (container.children.length > 5) {
+        container.removeChild(container.lastChild);
     }
 }
 
@@ -1790,15 +1925,47 @@ function generateHash(n) {
     return `Bloco #${n} | Hash: 000000${Math.random().toString(36).substring(2,15)}${n} | ${d.toLocaleString('pt-BR')}`;
 }
 
-function updateHashLog(n) {
-    const h = document.getElementById('hash-display');
-    if (!h) return;
-    if (h.textContent.trim() === "Nenhum bloco quebrado ainda.") h.innerHTML = '';
-    const el = document.createElement('div');
-    el.className = 'hash-box';
-    el.textContent = generateHash(n);
-    h.prepend(el);
-    while (h.children.length > 5) h.children[h.children.length-1].remove();
+// ============================================
+// UPDATE HASH LOG - VERIFICAR SE USA A FUNÇÃO CORRETA
+// ============================================
+function updateHashLog(blockNumber) {
+    // Gerar bloco realista
+    const bloco = gerarBlocoRealista(blockNumber, problemaAtual?.textoCifrado || '');
+    
+    // 🔴 CHAMAR A FUNÇÃO CORRETA
+    adicionarBlocoRealista(bloco);
+    
+    // Se ainda tiver a parte do hash-display, mantenha
+    const hashDisplay = document.getElementById('hash-display');
+    if (hashDisplay) {
+        if (hashDisplay.textContent.trim() === "Nenhum bloco quebrado ainda.") {
+            hashDisplay.innerHTML = '';
+        }
+        const el = document.createElement('div');
+        el.className = 'hash-box';
+        el.style.cssText = `
+            background: rgba(0,0,0,0.5);
+            border-left: 4px solid #f7931a;
+            padding: 10px 15px;
+            margin: 8px 0;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+            color: #00ff00;
+        `;
+        el.textContent = `Bloco #${blockNumber} | ${bloco.timestamp} | Hash: ${bloco.hash}`;
+        
+        // 🔴 TAMBÉM INSERIR NO TOPO
+        if (hashDisplay.firstChild) {
+            hashDisplay.insertBefore(el, hashDisplay.firstChild);
+        } else {
+            hashDisplay.appendChild(el);
+        }
+        
+        while (hashDisplay.children.length > 5) {
+            hashDisplay.removeChild(hashDisplay.lastChild);
+        }
+    }
 }
 
 function showHelp() {
@@ -2118,6 +2285,7 @@ function selecionarLetra(index) {
     if (SoundSystem) SoundSystem.click();
 }
 
+// --- CONTROLA O GIRO DA LETRA ATUAL ---
 function girarLetraAtual(direcao) {
     rotacoesPorLetra[letraSelecionada] += direcao;
     atualizarLetraSelecionada();
@@ -2133,6 +2301,16 @@ function girarLetraAtual(direcao) {
     
     if (SoundSystem) SoundSystem.click();
 }
+
+// --- SUPORTE AO TECLADO (SETAS ESQUERDA/DIREITA) ---
+document.addEventListener('keydown', (event) => {
+    if (event.key === 'ArrowLeft') {
+        girarLetraAtual(-1); // gira para a esquerda
+    }
+    if (event.key === 'ArrowRight') {
+        girarLetraAtual(1); // gira para a direita
+    }
+});
 
 function atualizarLetraSelecionada() {
     const letraAtual = document.getElementById('letra-atual');
@@ -2792,12 +2970,16 @@ function gerarBlocoRealista(numeroBloco, texto = '') {
     return bloco;
 }
 
+// ============================================
+// ADICIONAR BLOCO REALISTA - VERSÃO CORRIGIDA
+// ============================================
 function adicionarBlocoRealista(bloco) {
     const cadeia = document.getElementById('blockchain-cadeia');
     if (!cadeia) return;
     
     const blocoDiv = document.createElement('div');
     blocoDiv.className = 'bloco-blockchain';
+    blocoDiv.setAttribute('data-numero', bloco.numero); // Para referência futura
     blocoDiv.style.cssText = `
         background: linear-gradient(135deg, #1a1a2e, #16213e);
         border: 2px solid #f7931a;
@@ -2810,6 +2992,7 @@ function adicionarBlocoRealista(bloco) {
         box-shadow: 0 6px 20px rgba(247, 147, 26, 0.3);
         transition: all 0.3s ease;
         width: 100%;
+        animation: novoBloco 0.5s ease-out;
     `;
     
     blocoDiv.innerHTML = `
@@ -2830,12 +3013,22 @@ function adicionarBlocoRealista(bloco) {
         </div>
     `;
     
-    cadeia.prepend(blocoDiv);
+    // 🔴 FORÇAR INSERÇÃO NO INÍCIO (TOPO)
+    if (cadeia.firstChild) {
+        cadeia.insertBefore(blocoDiv, cadeia.firstChild);
+    } else {
+        cadeia.appendChild(blocoDiv);
+    }
     
-    // Manter apenas últimos 8 blocos na visualização
-    while (cadeia.children.length > 8) {
+    // 🔴 REMOVER BLOCOS EXTRAS (manter só os 10 mais recentes)
+    while (cadeia.children.length > 10) {
         cadeia.removeChild(cadeia.lastChild);
     }
+    
+    // 🔴 DEBUG: Mostrar ordem no console
+    console.log('Ordem dos blocos na cadeia:');
+    const blocos = Array.from(cadeia.children).map(div => div.getAttribute('data-numero'));
+    console.log(blocos.join(' → '));
 }
 
 // Modificar updateHashLog para usar o novo sistema
