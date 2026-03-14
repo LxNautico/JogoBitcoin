@@ -106,7 +106,7 @@ Você assume o papel de um minerador e precisa quebrar blocos criptografados par
 | | | |
 |:---:|:---:|:---:|
 | **Nível Fácil** | **Nível Médio** | **Nível Difícil** |
-| ![Ferramentas Facil](assets/Ferramentas_Decodificacao_Facil.png) | ![Ferramentas Medio](assets/Ferramentas_Decodificacao_Medio.png) | ![Ferramentas Dificil](assets/Ferramentas_Decodificacao_Difficult.png) |
+| ![Ferramentas Facil](assets/Ferramentas_Decodificacao_Facil.png) | ![Ferramentas Medio](assets/Ferramentas_Decodificacao_Medio.png) | ![Ferramentas_Dificil](assets/Ferramentas_Decodificacao_Dificil.png) |
 
 ---
 
