@@ -128,29 +128,43 @@ const mensagensDeIncentivo = [
 // ============================================
 
 function iniciarTimerGlobal() {
+    // Parar timer existente
     if (timerGlobalInterval) {
         clearInterval(timerGlobalInterval);
         timerGlobalInterval = null;
     }
     
+    // Registrar início
     tempoInicioPartida = Date.now();
+    tempoTotalPartida = 0;
     
+    // Iniciar timer
     timerGlobalInterval = setInterval(() => {
         if (!jogoConcluido) {
             tempoTotalPartida = Math.floor((Date.now() - tempoInicioPartida) / 1000);
             atualizarDisplayTempo();
             
-            if (vidas > 0) {
-                verificarMetasTempo();
+            // 🔴 GARANTIR QUE ESTA LINHA EXISTE!
+            verificarMetasTempo();
+
+            // Atualizar também no card esquerdo (se existir)
+            const tempoModern = document.getElementById('tempo-modern');
+            if (tempoModern) {
+                const mins = Math.floor(tempoTotalPartida / 60);
+                const secs = tempoTotalPartida % 60;
+                tempoModern.textContent = `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
             }
         }
     }, 1000);
+    
+    console.log('⏱️ Timer global iniciado em', new Date().toLocaleTimeString());
 }
 
 function pararTimerGlobal() {
     if (timerGlobalInterval) {
         clearInterval(timerGlobalInterval);
         timerGlobalInterval = null;
+        console.log('⏱️ Timer global parado em', tempoTotalPartida, 'segundos');
     }
 }
 
@@ -162,37 +176,12 @@ function resetTimerGlobal() {
 }
 
 function atualizarDisplayTempo() {
-    let tempoDisplay = document.getElementById('tempo-global');
-    if (!tempoDisplay) {
-        tempoDisplay = document.createElement('div');
-        tempoDisplay.id = 'tempo-global';
-        tempoDisplay.style.cssText = `
-            position: fixed;
-            top: 0px;
-            left: 260px;
-            background: rgba(0,0,0,0.7);
-            color: #4CAF50;
-            padding: 8px 15px;
-            border-radius: 20px;
-            font-family: 'Courier New', monospace;
-            font-size: 1.1em;
-            border: 1px solid #4CAF50;
-            z-index: 9999;
-            backdrop-filter: blur(5px);
-            display: flex;
-            align-items: center;
-            gap: 5px;
-        `;
-        tempoDisplay.innerHTML = '⏱️ <span id="tempo-valor">00:00</span>';
-        document.body.appendChild(tempoDisplay);
-    }
+    const tempoDisplay = document.getElementById('tempo-global');
+    if (!tempoDisplay) return;
     
     const minutos = Math.floor(tempoTotalPartida / 60);
     const segundos = tempoTotalPartida % 60;
-    const tempoFormatado = `${minutos.toString().padStart(2, '0')}:${segundos.toString().padStart(2, '0')}`;
-    
-    const tempoValor = document.getElementById('tempo-valor');
-    if (tempoValor) tempoValor.textContent = tempoFormatado;
+    tempoDisplay.innerHTML = `⏱️ ${minutos.toString().padStart(2, '0')}:${segundos.toString().padStart(2, '0')}`;
 }
 
 // ============================================
@@ -200,22 +189,30 @@ function atualizarDisplayTempo() {
 // ============================================
 
 function verificarMetasTempo() {
+    console.log('⏱️ Verificando metas...', {brokenBlocks, tempoTotalPartida});
+    
     metasDisponiveis.forEach(meta => {
         if (metasAlcancadas.includes(meta.id)) return;
         
+        // Meta de velocidade por blocos
         if (meta.blocos && !isNaN(meta.blocos)) {
             if (brokenBlocks >= meta.blocos && tempoTotalPartida <= meta.tempoMax) {
+                console.log('🏆 Meta atingida:', meta.nome);
                 alcançarMeta(meta);
             }
         }
         
+        // Meta de speedrun por dificuldade
         if (meta.dificuldade && meta.dificuldade === dificuldadeAtual) {
             if (brokenBlocks >= TamMax && tempoTotalPartida <= meta.tempoMax) {
+                console.log('🏆 Meta speedrun atingida:', meta.nome);
                 alcançarMeta(meta);
             }
         }
         
+        // Meta de perfeição
         if (meta.id === 'precisao_total' && brokenBlocks >= TamMax && vidas === 3) {
+            console.log('🏆 Meta perfeição atingida:', meta.nome);
             alcançarMeta(meta);
         }
     });
@@ -257,80 +254,26 @@ function alcançarMeta(meta) {
         RankingSystem.adicionarConquista(ultimoJogador, conquista);
     }
     
+    // ✅ CHAMAR A FUNÇÃO QUE MOSTRA A CONQUISTA
     mostrarConquista(meta);
 }
 
 // ============================================
-// MOSTRAR CONQUISTA - VERSÃO COM LATERAL
+// MOSTRAR CONQUISTA - VERSÃO COM LATERAL (CORRIGIDA)
 // ============================================
 function mostrarConquista(meta) {
-    // 🆕 SEMPRE mostra na lateral (não bloqueia)
+    // ✅ SEMPRE mostra na lateral (não bloqueia)
     const nomeConquista = meta.nome;
     const icone = meta.icone || '🏆';
     
+    // Chamar a função de mensagem lateral
     mostrarMensagemLateral(`${icone} CONQUISTA: ${nomeConquista}`, 'conquista', 5000);
-    
-    // 🔴 OPÇÃO 1: Manter o modal apenas para conquistas raras (ex: 100 blocos)
-    // Descomente se quiser manter o modal apenas para conquistas especiais
-    /*
-    if (meta.id === 'velocidade_50' || meta.id === 'precisao_total') {
-        // Mostrar modal apenas para conquistas lendárias
-        const conquistaDiv = document.createElement('div');
-        conquistaDiv.style.cssText = `
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background: linear-gradient(135deg, #FFD700, #FFA500);
-            color: #000;
-            padding: 30px;
-            border-radius: 20px;
-            border: 5px solid gold;
-            box-shadow: 0 0 70px rgba(255, 215, 0, 0.9);
-            text-align: center;
-            z-index: 20000;
-            animation: conquistaPop 0.8s ease;
-            max-width: 400px;
-            width: 90%;
-        `;
-        
-        conquistaDiv.innerHTML = `
-            <div style="font-size: 5em; margin-bottom: 15px;">${meta.icone}</div>
-            <h2 style="color: #000; margin-bottom: 10px;">🏆 CONQUISTA LENDÁRIA!</h2>
-            <h3 style="color: #000; margin-bottom: 15px;">${meta.nome}</h3>
-            <p style="margin-bottom: 15px;">${meta.descricao}</p>
-            <div style="background: rgba(0,0,0,0.2); padding: 15px; border-radius: 10px; margin: 15px 0;">
-                <p style="margin: 5px 0;">💰 <strong>+${meta.recompensa.pontos} pontos</strong></p>
-                <p style="margin: 5px 0;">₿ <strong>+${meta.recompensa.bitcoin.toFixed(8)} BTC</strong></p>
-            </div>
-            <button onclick="this.parentElement.remove()" style="
-                background: #000;
-                color: gold;
-                border: none;
-                padding: 12px 35px;
-                border-radius: 25px;
-                font-weight: bold;
-                cursor: pointer;
-                font-size: 1.1em;
-                margin-top: 10px;
-            ">INCRÍVEL! 🎉</button>
-        `;
-        
-        document.body.appendChild(conquistaDiv);
-        
-        if (SoundSystem && SoundSystem.win) SoundSystem.win();
-        
-        setTimeout(() => {
-            if (conquistaDiv.parentElement) conquistaDiv.remove();
-        }, 8000);
-    }
-    */
-    
-    // 🔴 OPÇÃO 2: Remover completamente o modal (só lateral)
-    // Basta não fazer nada além da mensagem lateral
     
     // Manter o som de conquista
     if (SoundSystem && SoundSystem.win) SoundSystem.win();
+    
+    // Log para debug
+    console.log(`🏆 Conquista: ${nomeConquista}`);
 }
 
 // ============================================
@@ -1094,30 +1037,45 @@ const SistemaProblemas = {
             };
         }
     },
+    // ============================================
+    // SISTEMA DE PROBLEMAS - NÍVEL DIFÍCIL CORRIGIDO
+    // ============================================
     dificil: () => {
         const nome = cryptoNomes[Math.floor(Math.random() * cryptoNomes.length)];
         const tipo = ['cesar', 'ascii', 'base64'][Math.floor(Math.random() * 3)];
+        
         if (tipo === 'cesar') {
-            const chave = Math.random() > 0.5 ? Math.floor(Math.random() * 8) + 3 : -(Math.floor(Math.random() * 8) + 3);
+            const chave = Math.random() > 0.5 ? 
+                Math.floor(Math.random() * 8) + 3 : // 3-10 positivas
+                -(Math.floor(Math.random() * 8) + 3); // -3 a -10 negativas
+            
+            const nomeCifrado = Criptografia.cifraDeCesar(nome, chave);
+            
             return {
-                pergunta: `🔐 Descriptografe (Cifra de César):`,
-                textoCifrado: Criptografia.cifraDeCesar(nome, chave),
+                pergunta: `🔐 Descriptografe (Cifra de César, chave: ${Math.abs(chave)}${chave > 0 ? ' →' : ' ←'}):`,
+                textoCifrado: nomeCifrado,
                 respostaCorreta: nome.toLowerCase(),
-                tipo: 'cesar', chave, dica: `Chave: ${chave > 0 ? '+' : ''}${chave}`
+                tipo: 'cesar',
+                chave: chave,
+                dica: `Chave: ${chave > 0 ? '+' : ''}${chave} (desloque ${Math.abs(chave)} posições ${chave > 0 ? 'para frente' : 'para trás'})`
             };
-        } else if (tipo === 'ascii') {
+        } 
+        else if (tipo === 'ascii') {
             return {
                 pergunta: `🔢 Decodifique ASCII:`,
                 textoCifrado: Criptografia.paraASCII(nome),
                 respostaCorreta: nome.toLowerCase(),
-                tipo: 'ascii', dica: `Use tabela ASCII`
+                tipo: 'ascii',
+                dica: `Use tabela ASCII (cada 3 números = 1 caractere)`
             };
-        } else {
+        } 
+        else { // base64
             return {
                 pergunta: `🔄 Decodifique Base64:`,
                 textoCifrado: Criptografia.paraBase64(nome),
                 respostaCorreta: nome.toLowerCase(),
-                tipo: 'base64', dica: `Termina com = ou ==`
+                tipo: 'base64',
+                dica: `Base64 termina com = ou ==`
             };
         }
     }
@@ -1254,6 +1212,9 @@ function generateCryptoProblem() {
     };
 }
 
+// ============================================
+// DISPLAY NEXT PROBLEM - COM BOTÕES CORRETOS
+// ============================================
 function displayNextProblem() {
     if (jogoConcluido || vidas <= 0) {
         if (vidas <= 0) gameOver();
@@ -1271,22 +1232,52 @@ function displayNextProblem() {
     const botoesDivAntigo = document.getElementById('botoes-ajuda-container');
     if (botoesDivAntigo) botoesDivAntigo.remove();
     
-    // 🔴 SE FOR CIFRA DE CÉSAR, MOSTRAR OS DOIS BOTÕES
+    // 🔴 SEMPRE mostrar o botão do decodificador (para qualquer tipo de problema)
+    const container = document.getElementById('problem-container');
+    
+    // Container para os botões
+    const botoesDiv = document.createElement('div');
+    botoesDiv.id = 'botoes-ajuda-container';
+    botoesDiv.style.cssText = `
+        display: flex;
+        gap: 15px;
+        margin: 20px auto;
+        justify-content: center;
+        flex-wrap: wrap;
+    `;
+    
+    // 🔴 BOTÃO DO DECODIFICADOR (sempre presente)
+    const btnDecode = document.createElement('button');
+    btnDecode.id = 'btn-decode-rapido';
+    btnDecode.innerHTML = '🔧 Decodificador';
+    btnDecode.style.cssText = `
+        padding: 12px 25px;
+        background: linear-gradient(135deg, #2196f3, #1976d2);
+        color: white;
+        border: none;
+        border-radius: 30px;
+        font-weight: bold;
+        font-size: 1em;
+        cursor: pointer;
+        box-shadow: 0 4px 15px rgba(33, 150, 243, 0.4);
+        transition: all 0.3s ease;
+        flex: 1;
+        min-width: 180px;
+    `;
+    btnDecode.onmouseover = () => {
+        btnDecode.style.transform = 'scale(1.05)';
+        btnDecode.style.boxShadow = '0 8px 25px rgba(33, 150, 243, 0.6)';
+    };
+    btnDecode.onmouseout = () => {
+        btnDecode.style.transform = 'scale(1)';
+        btnDecode.style.boxShadow = '0 4px 15px rgba(33, 150, 243, 0.4)';
+    };
+    btnDecode.onclick = abrirDecodificador;
+    
+    botoesDiv.appendChild(btnDecode);
+    
+    // 🔴 BOTÃO DO CÍRCULO DE CÉSAR (APENAS para cifra de César)
     if (problemaAtual && problemaAtual.tipo === 'cesar') {
-        const container = document.getElementById('problem-container');
-        
-        // Container para os botões
-        const botoesDiv = document.createElement('div');
-        botoesDiv.id = 'botoes-ajuda-container';
-        botoesDiv.style.cssText = `
-            display: flex;
-            gap: 15px;
-            margin: 20px auto;
-            justify-content: center;
-            flex-wrap: wrap;
-        `;
-        
-        // 🔴 BOTÃO 1: CÍRCULO DE CÉSAR (já existente)
         const btnCirculo = document.createElement('button');
         btnCirculo.id = 'btn-circulo-cesar';
         btnCirculo.innerHTML = '🔄 Círculo de César';
@@ -1314,38 +1305,10 @@ function displayNextProblem() {
         };
         btnCirculo.onclick = ativarCirculoCesar;
         
-        // 🔴 BOTÃO 2: DECODIFICADOR (novo)
-        const btnDecode = document.createElement('button');
-        btnDecode.id = 'btn-decode-rapido';
-        btnDecode.innerHTML = '🔧 Decodificador';
-        btnDecode.style.cssText = `
-            padding: 12px 25px;
-            background: linear-gradient(135deg, #2196f3, #1976d2);
-            color: white;
-            border: none;
-            border-radius: 30px;
-            font-weight: bold;
-            font-size: 1em;
-            cursor: pointer;
-            box-shadow: 0 4px 15px rgba(33, 150, 243, 0.4);
-            transition: all 0.3s ease;
-            flex: 1;
-            min-width: 180px;
-        `;
-        btnDecode.onmouseover = () => {
-            btnDecode.style.transform = 'scale(1.05)';
-            btnDecode.style.boxShadow = '0 8px 25px rgba(33, 150, 243, 0.6)';
-        };
-        btnDecode.onmouseout = () => {
-            btnDecode.style.transform = 'scale(1)';
-            btnDecode.style.boxShadow = '0 4px 15px rgba(33, 150, 243, 0.4)';
-        };
-        btnDecode.onclick = abrirDecodificador;
-        
         botoesDiv.appendChild(btnCirculo);
-        botoesDiv.appendChild(btnDecode);
-        container.appendChild(botoesDiv);
     }
+    
+    container.appendChild(botoesDiv);
     
     // Atualizar indicador de dificuldade
     const tipo = document.getElementById('tipo-indicador');
@@ -1716,6 +1679,9 @@ function mostrarMensagemIncentivo(idx) {
         console.log(`💬 Mensagem: ${mensagensDeIncentivo[idx]}`);
     }
 }
+// ============================================
+// MENSAGENS LATERAIS (NÃO BLOQUEIAM)
+// ============================================
 
 // ============================================
 // MENSAGENS LATERAIS (NÃO BLOQUEIAM)
@@ -2462,32 +2428,50 @@ function fecharDecodificador() {
 }
 
 // Abrir nível no decodificador
+// ============================================
+// FUNÇÃO PARA ABRIR NÍVEL NO DECODIFICADOR
+// ============================================
 function abrirDecodNivel(nivel) {
+    console.log('📂 Abrindo nível:', nivel);
+    
     // Esconder todos os conteúdos
-    document.querySelectorAll('.decod-conteudo').forEach(el => el.style.display = 'none');
-    
-    // Mostrar o nível selecionado
-    document.getElementById(`decod-${nivel}`).style.display = 'block';
-    
-    // Atualizar botões
-    document.querySelectorAll('.decod-nivel').forEach(btn => {
-        btn.style.background = 'rgba(255,255,255,0.1)';
+    document.querySelectorAll('.decod-conteudo').forEach(el => {
+        el.style.display = 'none';
     });
     
+    // Mostrar o nível selecionado
+    const nivelDiv = document.getElementById(`decod-${nivel}`);
+    if (nivelDiv) {
+        nivelDiv.style.display = 'block';
+    } else {
+        console.error(`❌ Nível ${nivel} não encontrado`);
+        return;
+    }
+    
+    // Atualizar aparência dos botões
+    document.querySelectorAll('.decod-nivel').forEach(btn => {
+        btn.style.background = 'rgba(255,255,255,0.1)';
+        btn.style.color = 'white';
+    });
+    
+    // Destacar botão ativo
     const btnAtivo = document.querySelector(`.decod-nivel[data-nivel="${nivel}"]`);
     if (btnAtivo) {
-        if (nivel === 'facil') btnAtivo.style.background = 'linear-gradient(135deg, #4CAF50, #2E7D32)';
-        if (nivel === 'medio') btnAtivo.style.background = 'linear-gradient(135deg, #FF9800, #F57C00)';
-        if (nivel === 'dificil') btnAtivo.style.background = 'linear-gradient(135deg, #f44336, #c62828)';
+        if (nivel === 'facil') btnAtivo.style.background = 'linear-gradient(135deg,#00aa00,#006600)';
+        if (nivel === 'medio') btnAtivo.style.background = 'linear-gradient(135deg,#ffaa00,#cc8800)';
+        if (nivel === 'dificil') btnAtivo.style.background = 'linear-gradient(135deg,#ff4400,#aa2200)';
+        btnAtivo.style.color = 'white';
     }
     
     // Resetar resultado
-    document.getElementById('decod-resultado').innerHTML = 'Aguardando decodificação...';
+    const resultado = document.getElementById('decod-resultado');
+    if (resultado) resultado.innerHTML = 'Aguardando decodificação...';
 }
 
 // Selecionar método (para médio e difícil)
 function selecionarDecodMetodo(nivel, metodo) {
     // Esconder todos os métodos deste nível
+    console.log(`📂 Selecionando método ${metodo} no nível ${nivel}`);
     document.querySelectorAll(`#decod-${nivel} .decod-metodo`).forEach(el => el.style.display = 'none');
     
     // Mostrar método selecionado
@@ -2497,7 +2481,7 @@ function selecionarDecodMetodo(nivel, metodo) {
     const botoes = document.querySelectorAll(`#decod-${nivel} .btn-metodo`);
     botoes.forEach(btn => btn.style.background = 'rgba(255,255,255,0.1)');
     
-    const btnAtivo = event.target;
+    const btnAtivo = document.getElementById(`decod-${nivel}-${metodo}-btn`);
     if (btnAtivo) {
         if (nivel === 'medio') btnAtivo.style.background = 'linear-gradient(135deg, #FF9800, #F57C00)';
         if (nivel === 'dificil') btnAtivo.style.background = 'linear-gradient(135deg, #f44336, #c62828)';
@@ -2506,7 +2490,173 @@ function selecionarDecodMetodo(nivel, metodo) {
     // 🆕 ATUALIZAR COM PROBLEMA ATUAL
     atualizarDecodificadorComProblema();
 }
+// ============================================
+// FUNÇÕES DE DECODIFICAÇÃO POR NÍVEL
+// ============================================
 
+// Decodificar nível fácil (Cifra de César)
+function decodificarFacil() {
+    const input = document.getElementById('decod-facil-input')?.value;
+    const shift = parseInt(document.getElementById('decod-facil-shift')?.value || 0);
+    const resultado = document.getElementById('decod-resultado');
+    
+    if (!input) {
+        resultado.innerHTML = '⚠️ Digite uma mensagem para decodificar!';
+        return;
+    }
+    
+    resultado.innerHTML = decodificarCesar(input, shift);
+    if (SoundSystem) SoundSystem.click();
+}
+
+// Decodificar nível médio (Cifra de César + ASCII)
+function decodificarMedio() {
+    // Verificar qual método está ativo no médio
+    const metodoCesar = document.getElementById('decod-medio-cesar')?.style.display !== 'none';
+    const metodoAscii = document.getElementById('decod-medio-ascii')?.style.display !== 'none';
+    const resultado = document.getElementById('decod-resultado');
+    
+    if (metodoCesar) {
+        const input = document.getElementById('decod-medio-cesar-input')?.value;
+        const shift = parseInt(document.getElementById('decod-medio-shift')?.value || 0);
+        
+        if (!input) {
+            resultado.innerHTML = '⚠️ Digite uma mensagem!';
+            return;
+        }
+        resultado.innerHTML = decodificarCesar(input, shift);
+    } 
+    else if (metodoAscii) {
+        const input = document.getElementById('decod-medio-ascii-input')?.value;
+        if (!input) {
+            resultado.innerHTML = '⚠️ Digite códigos ASCII!';
+            return;
+        }
+        resultado.innerHTML = decodificarASCII(input);
+    }
+    else {
+        resultado.innerHTML = '❌ Selecione um método primeiro!';
+    }
+    
+    if (SoundSystem) SoundSystem.click();
+}
+
+// Decodificar nível difícil (Cifra de César + ASCII + Base64)
+function decodificarDificil() {
+    const metodoCesar = document.getElementById('decod-dificil-cesar')?.style.display !== 'none';
+    const metodoAscii = document.getElementById('decod-dificil-ascii')?.style.display !== 'none';
+    const metodoBase64 = document.getElementById('decod-dificil-base64')?.style.display !== 'none';
+    const resultado = document.getElementById('decod-resultado');
+    
+    if (metodoCesar) {
+        const input = document.getElementById('decod-dificil-cesar-input')?.value;
+        const shift = parseInt(document.getElementById('decod-dificil-shift')?.value || 0);
+        if (!input) {
+            resultado.innerHTML = '⚠️ Digite uma mensagem!';
+            return;
+        }
+        resultado.innerHTML = decodificarCesar(input, shift);
+    } 
+    else if (metodoAscii) {
+        const input = document.getElementById('decod-dificil-ascii-input')?.value;
+        if (!input) {
+            resultado.innerHTML = '⚠️ Digite códigos ASCII!';
+            return;
+        }
+        resultado.innerHTML = decodificarASCII(input);
+    } 
+    else if (metodoBase64) {
+        const input = document.getElementById('decod-dificil-base64-input')?.value;
+        if (!input) {
+            resultado.innerHTML = '⚠️ Digite um texto Base64!';
+            return;
+        }
+        resultado.innerHTML = decodificarBase64(input);
+    }
+    else {
+        resultado.innerHTML = '❌ Selecione um método primeiro!';
+    }
+    
+    if (SoundSystem) SoundSystem.click();
+}
+
+// Funções auxiliares de decodificação
+function decodificarCesar(texto, shift) {
+    try {
+        let resultado = '';
+        for (let i = 0; i < texto.length; i++) {
+            let char = texto[i];
+            if (char.match(/[a-z]/i)) {
+                let code = texto.charCodeAt(i);
+                if (code >= 65 && code <= 90) {
+                    char = String.fromCharCode(((code - 65 - shift + 26) % 26) + 65);
+                } else if (code >= 97 && code <= 122) {
+                    char = String.fromCharCode(((code - 97 - shift + 26) % 26) + 97);
+                }
+            }
+            resultado += char;
+        }
+        return resultado;
+    } catch (e) {
+        return '❌ Erro na decodificação';
+    }
+}
+
+function decodificarASCII(texto) {
+    try {
+        const codes = texto.split(/[,\s]+/);
+        let resultado = '';
+        for (let code of codes) {
+            if (code === '') continue;
+            const num = parseInt(code);
+            if (isNaN(num) || num < 0 || num > 255) {
+                return `❌ Código inválido: ${code}`;
+            }
+            resultado += String.fromCharCode(num);
+        }
+        return resultado;
+    } catch (e) {
+        return '❌ Erro ao decodificar ASCII';
+    }
+}
+
+function decodificarBase64(texto) {
+    try {
+        return atob(texto.replace(/\s/g, ''));
+    } catch (e) {
+        return '❌ Erro: Texto Base64 inválido!';
+    }
+}
+
+// ============================================
+// SELECIONAR MÉTODO (César, ASCII, Base64)
+// ============================================
+function selecionarDecodMetodo(nivel, metodo) {
+    console.log(`📂 Selecionando método ${metodo} no nível ${nivel}`);
+    
+    // Esconder todos os métodos deste nível
+    document.querySelectorAll(`#decod-${nivel} .decod-metodo`).forEach(el => {
+        el.style.display = 'none';
+    });
+    
+    // Mostrar método selecionado
+    const metodoDiv = document.getElementById(`decod-${nivel}-${metodo}`);
+    if (metodoDiv) {
+        metodoDiv.style.display = 'block';
+    }
+    
+    // Atualizar botões de método
+    document.querySelectorAll(`#decod-${nivel} .btn-metodo`).forEach(btn => {
+        btn.style.background = 'rgba(255,255,255,0.1)';
+    });
+    
+    // Destacar botão ativo
+    const btnAtivo = document.getElementById(`decod-${nivel}-${metodo}-btn`);
+    if (btnAtivo) {
+        if (nivel === 'medio') btnAtivo.style.background = 'linear-gradient(135deg, #ffaa00, #cc8800)';
+        if (nivel === 'dificil') btnAtivo.style.background = 'linear-gradient(135deg, #ff4400, #aa2200)';
+    }
+}
 // Função para o nível fácil
 function selecionarDecodFacil(tipo) {
     const btnSimples = document.getElementById('decod-facil-simples-btn');
@@ -3065,7 +3215,313 @@ function updateHashLog(blockNumber) {
 }
 
 // ============================================
+// CORREÇÃO DO TIMER GLOBAL - ADICIONE NO FINAL
+// ============================================
+
+// Sobrescrever a função startGame para garantir o timer
+const startGameOriginal = startGame;
+startGame = function(difficulty) {
+    // Chamar a função original
+    startGameOriginal(difficulty);
+    
+    // Garantir que o timer seja iniciado
+    setTimeout(() => {
+        if (typeof iniciarTimerGlobal === 'function') {
+            iniciarTimerGlobal();
+            console.log('⏱️ Timer reiniciado após startGame');
+        }
+        
+        // Mostrar o display
+        const tempoDisplay = document.getElementById('tempo-global');
+        if (tempoDisplay) {
+            tempoDisplay.style.display = 'flex';
+        }
+    }, 500);
+};
+
+// Garantir que a função iniciarTimerGlobal existe e funciona
+if (typeof iniciarTimerGlobal !== 'function') {
+    iniciarTimerGlobal = function() {
+        if (timerGlobalInterval) clearInterval(timerGlobalInterval);
+        
+        tempoInicioPartida = Date.now();
+        
+        timerGlobalInterval = setInterval(() => {
+            if (!jogoConcluido) {
+                tempoTotalPartida = Math.floor((Date.now() - tempoInicioPartida) / 1000);
+                
+                const tempoDisplay = document.getElementById('tempo-global');
+                if (tempoDisplay) {
+                    const mins = Math.floor(tempoTotalPartida / 60);
+                    const secs = tempoTotalPartida % 60;
+                    tempoDisplay.innerHTML = `⏱️ ${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+                }
+            }
+        }, 1000);
+    };
+}
+
+// Forçar atualização do display a cada segundo (fallback)
+setInterval(() => {
+    const tempoDisplay = document.getElementById('tempo-global');
+    if (tempoDisplay && tempoDisplay.style.display !== 'none' && tempoTotalPartida > 0) {
+        const mins = Math.floor(tempoTotalPartida / 60);
+        const secs = tempoTotalPartida % 60;
+        tempoDisplay.innerHTML = `⏱️ ${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+    }
+}, 1000);
+// ============================================
+// DEBUG DO TIMER
+// ============================================
+setInterval(() => {
+    if (jogoConcluido) return;
+    console.log('⏱️ Status:', {
+        tempo: tempoTotalPartida,
+        ativo: !!timerGlobalInterval,
+        inicio: tempoInicioPartida ? new Date(tempoInicioPartida).toLocaleTimeString() : 'null',
+        jogo: jogoConcluido ? 'concluído' : 'ativo'
+    });
+}, 2000);
+
+// ============================================
+// CORREÇÃO DO AUTO-PREENCHIMENTO DO DECODIFICADOR
+// ============================================
+
+// Garantir que o preenchimento automático funcione para todos os níveis
+function forcarPreenchimentoDecodificador() {
+    if (!problemaAtual) return;
+    
+    const textoCifrado = problemaAtual.textoCifrado;
+    if (!textoCifrado) return;
+    
+    console.log('🔄 Forçando preenchimento do decodificador com:', textoCifrado);
+    
+    // Preencher nível fácil
+    const facilInput = document.getElementById('decod-facil-input');
+    if (facilInput) facilInput.value = textoCifrado;
+    
+    // Preencher nível médio (ambos os métodos)
+    const medioCesarInput = document.getElementById('decod-medio-cesar-input');
+    if (medioCesarInput) medioCesarInput.value = textoCifrado;
+    
+    const medioAsciiInput = document.getElementById('decod-medio-ascii-input');
+    if (medioAsciiInput && problemaAtual.tipo === 'ascii') {
+        medioAsciiInput.value = textoCifrado;
+    }
+    
+    // Preencher nível difícil (todos os métodos)
+    const dificilCesarInput = document.getElementById('decod-dificil-cesar-input');
+    if (dificilCesarInput) dificilCesarInput.value = textoCifrado;
+    
+    const dificilAsciiInput = document.getElementById('decod-dificil-ascii-input');
+    if (dificilAsciiInput && problemaAtual.tipo === 'ascii') {
+        dificilAsciiInput.value = textoCifrado;
+    }
+    
+    const dificilBase64Input = document.getElementById('decod-dificil-base64-input');
+    if (dificilBase64Input && problemaAtual.tipo === 'base64') {
+        dificilBase64Input.value = textoCifrado;
+    }
+}
+
+// Modificar a função abrirDecodificador para garantir o preenchimento
+const abrirDecodificadorOriginal = abrirDecodificador;
+abrirDecodificador = function() {
+    console.log('🔧 Abrindo decodificador');
+    
+    fecharMenu();
+    const modal = document.getElementById('decodificador-modal');
+    if (modal) {
+        modal.style.display = 'flex';
+        
+        // Abrir nível fácil por padrão
+        abrirDecodNivel('facil');
+        
+        // Forçar preenchimento após abrir
+        setTimeout(() => {
+            forcarPreenchimentoDecodificador();
+            
+            // Se não houver problema, mostrar mensagem
+            if (!problemaAtual) {
+                document.getElementById('decod-resultado').innerHTML = '⚠️ Nenhum problema ativo. Inicie uma partida primeiro!';
+            }
+        }, 200);
+        
+        if (SoundSystem) SoundSystem.click();
+    }
+};
+
+// Modificar abrirDecodNivel para atualizar o texto quando mudar de nível
+const abrirDecodNivelOriginal = abrirDecodNivel;
+abrirDecodNivel = function(nivel) {
+    console.log('📂 Abrindo nível:', nivel);
+    
+    // Esconder todos os conteúdos
+    document.querySelectorAll('.decod-conteudo').forEach(el => {
+        el.style.display = 'none';
+    });
+    
+    // Mostrar o nível selecionado
+    const nivelDiv = document.getElementById(`decod-${nivel}`);
+    if (nivelDiv) {
+        nivelDiv.style.display = 'block';
+    } else {
+        console.error(`❌ Nível ${nivel} não encontrado`);
+        return;
+    }
+    
+    // Atualizar aparência dos botões
+    document.querySelectorAll('.decod-nivel').forEach(btn => {
+        btn.style.background = 'rgba(255,255,255,0.1)';
+        btn.style.color = 'white';
+    });
+    
+    // Destacar botão ativo
+    const btnAtivo = document.querySelector(`.decod-nivel[data-nivel="${nivel}"]`);
+    if (btnAtivo) {
+        if (nivel === 'facil') btnAtivo.style.background = 'linear-gradient(135deg,#00aa00,#006600)';
+        if (nivel === 'medio') btnAtivo.style.background = 'linear-gradient(135deg,#ffaa00,#cc8800)';
+        if (nivel === 'dificil') btnAtivo.style.background = 'linear-gradient(135deg,#ff4400,#aa2200)';
+        btnAtivo.style.color = 'white';
+    }
+    
+    // Forçar preenchimento ao mudar de nível
+    setTimeout(() => {
+        forcarPreenchimentoDecodificador();
+    }, 100);
+    
+    // Resetar resultado
+    const resultado = document.getElementById('decod-resultado');
+    if (resultado) resultado.innerHTML = 'Aguardando decodificação...';
+};
+
+// Modificar selecionarDecodMetodo para preencher ao mudar de método
+const selecionarDecodMetodoOriginal = selecionarDecodMetodo;
+selecionarDecodMetodo = function(nivel, metodo) {
+    console.log(`📂 Selecionando método ${metodo} no nível ${nivel}`);
+    
+    // Esconder todos os métodos deste nível
+    document.querySelectorAll(`#decod-${nivel} .decod-metodo`).forEach(el => {
+        el.style.display = 'none';
+    });
+    
+    // Mostrar método selecionado
+    const metodoDiv = document.getElementById(`decod-${nivel}-${metodo}`);
+    if (metodoDiv) {
+        metodoDiv.style.display = 'block';
+    }
+    
+    // Atualizar botões de método
+    document.querySelectorAll(`#decod-${nivel} .btn-metodo`).forEach(btn => {
+        btn.style.background = 'rgba(255,255,255,0.1)';
+    });
+    
+    // Destacar botão ativo
+    const btnAtivo = document.getElementById(`decod-${nivel}-${metodo}-btn`);
+    if (btnAtivo) {
+        if (nivel === 'medio') btnAtivo.style.background = 'linear-gradient(135deg, #ffaa00, #cc8800)';
+        if (nivel === 'dificil') btnAtivo.style.background = 'linear-gradient(135deg, #ff4400, #aa2200)';
+    }
+    
+    // Forçar preenchimento ao mudar de método
+    setTimeout(() => {
+        forcarPreenchimentoDecodificador();
+    }, 100);
+};
+
+// Garantir que o preenchimento também ocorra quando o problema mudar
+const displayNextProblemOriginal = displayNextProblem;
+displayNextProblem = function() {
+    if (displayNextProblemOriginal) displayNextProblemOriginal();
+    
+    // Se o decodificador estiver aberto, atualizar
+    const modal = document.getElementById('decodificador-modal');
+    if (modal && modal.style.display === 'flex') {
+        setTimeout(() => {
+            forcarPreenchimentoDecodificador();
+        }, 300);
+    }
+};
+
+// ============================================
+// USAR RESPOSTA E ENVIAR AUTOMATICAMENTE
+// ============================================
+function usarResultadoEEnviar() {
+    const resultado = document.getElementById('decod-resultado').innerText;
+    
+    // Verificações
+    if (!resultado || resultado.includes('Aguardando') || resultado.includes('⚠️') || resultado.includes('❌')) {
+        alert('❌ Nenhum resultado válido para usar!');
+        return;
+    }
+    
+    // Verificar se o jogo está ativo
+    if (jogoConcluido || vidas <= 0) {
+        alert('❌ O jogo não está ativo no momento!');
+        return;
+    }
+    
+    // Preencher a resposta no campo do jogo
+    const answerInput = document.getElementById('answer');
+    if (answerInput) {
+        answerInput.value = resultado;
+        
+        // Feedback visual
+        answerInput.style.borderColor = '#4CAF50';
+        answerInput.style.boxShadow = '0 0 20px rgba(76,175,80,0.5)';
+        
+        // Efeito de sucesso
+        const msgSucesso = document.createElement('div');
+        msgSucesso.style.cssText = `
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: #4CAF50;
+            color: white;
+            padding: 20px 40px;
+            border-radius: 50px;
+            font-size: 1.5em;
+            font-weight: bold;
+            z-index: 40000;
+            box-shadow: 0 0 50px rgba(76,175,80,0.8);
+            animation: fadeOut 2s forwards;
+        `;
+        msgSucesso.textContent = '✅ RESPOSTA ENVIADA!';
+        document.body.appendChild(msgSucesso);
+        
+        setTimeout(() => msgSucesso.remove(), 1500);
+        
+        // 🔥 ENVIAR A RESPOSTA AUTOMATICAMENTE
+        setTimeout(() => {
+            submitAnswer();
+        }, 300);
+        
+        if (SoundSystem) SoundSystem.correct();
+    }
+}
+
+
+console.log('✅ Correção do decodificador aplicada!');
+
+// ============================================
 // 20. LOG INICIAL
 // ============================================
 console.log('✅ JogoBitcoin carregado com sucesso!');
 console.log(`💰 Bitcoin atual: ${bitcoinQuantity.toFixed(8)} BTC`);
+function testarConquista() {
+    console.log('🧪 Testando conquista...');
+    
+    // Simular quebra de 5 blocos em 1 minuto
+    const metaTeste = {
+        id: 'velocidade_5',
+        nome: '⚡ Minerador Relâmpago (Teste)',
+        icone: '⚡',
+        descricao: 'Teste de conquista',
+        recompensa: { pontos: 500, bitcoin: 0.00000200, titulo: 'Minerador Relâmpago' }
+    };
+    
+    alcançarMeta(metaTeste);
+}
+
+// Chamar no console: testarConquista()
