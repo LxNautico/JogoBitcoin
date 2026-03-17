@@ -652,8 +652,8 @@ body {
 
 .help-button {
     position: fixed;
-    top: 0px;
-    right: 0px;
+    top: 12px;
+    right: 12px;
     padding: 12px 24px;
     background: linear-gradient(135deg, #2196f3 0%, #1976d2 100%);
     color: white;
