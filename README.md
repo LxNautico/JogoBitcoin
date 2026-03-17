@@ -190,7 +190,7 @@ Se quiser rodar localmente:
 
 ```bash
 # Clone o repositório
-git clone https://github.com/LxNautico/JogoBitcoin/
+git clone https://lxnautico.github.io/JogoBitcoin/
 
 # Entre na pasta
 cd jogobitcoin
