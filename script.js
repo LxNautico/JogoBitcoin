@@ -1,7 +1,7 @@
 // ============================================
 // JOGOBITCOIN - SCRIPT PRINCIPAL
 // ============================================
-// Versão organizada e comentada
+// Versão completa com salvamento e botão encerrar
 // ============================================
 
 // ============================================
@@ -15,6 +15,7 @@ let bitcoinQuantity = 0;
 let timeLimit = 60;
 let remainingTime = timeLimit;
 let timerInterval;
+let bubbleInterval = null;
 let TamMax = 100;
 let jogoConcluido = false;
 let brokenBlocks = 0;
@@ -42,37 +43,37 @@ const metasDisponiveis = [
     {
         id: 'velocidade_5',
         nome: '⚡ Minerador Relâmpago',
-        descricao: 'Quebrar 5 blocos em menos de 2 minutos',  // Antes: 60s
+        descricao: 'Quebrar 5 blocos em menos de 2 minutos',
         icone: '⚡',
         blocos: 5,
-        tempoMax: 120,  // 2 minutos (mais factível)
+        tempoMax: 120,
         recompensa: { pontos: 500, bitcoin: 0.00000200, titulo: 'Minerador Relâmpago' }
     },
     {
         id: 'velocidade_10',
         nome: '🌪️ Cripto Ninja',
-        descricao: 'Quebrar 10 blocos em menos de 4 minutos',  // Antes: 120s
+        descricao: 'Quebrar 10 blocos em menos de 4 minutos',
         icone: '🥷',
         blocos: 10,
-        tempoMax: 240,  // 4 minutos
+        tempoMax: 240,
         recompensa: { pontos: 1000, bitcoin: 0.00000500, titulo: 'Cripto Ninja' }
     },
     {
         id: 'velocidade_20',
         nome: '🔥 Mestre dos Blocos',
-        descricao: 'Quebrar 20 blocos em menos de 8 minutos',  // Antes: 240s
+        descricao: 'Quebrar 20 blocos em menos de 8 minutos',
         icone: '🔥',
         blocos: 20,
-        tempoMax: 480,  // 8 minutos
+        tempoMax: 480,
         recompensa: { pontos: 2500, bitcoin: 0.00001000, titulo: 'Mestre dos Blocos' }
     },
     {
         id: 'velocidade_50',
         nome: '💎 Lenda da Mineração',
-        descricao: 'Quebrar 50 blocos em menos de 20 minutos',  // Antes: 600s
+        descricao: 'Quebrar 50 blocos em menos de 20 minutos',
         icone: '💎',
         blocos: 50,
-        tempoMax: 1200,  // 20 minutos
+        tempoMax: 1200,
         recompensa: { pontos: 5000, bitcoin: 0.00002500, titulo: 'Lenda da Mineração' }
     },
     {
@@ -87,28 +88,28 @@ const metasDisponiveis = [
     {
         id: 'speedrun_facil',
         nome: '🏃 Speedrunner Fácil',
-        descricao: 'Completar o nível fácil em menos de 15 minutos',  // Antes: 300s
+        descricao: 'Completar o nível fácil em menos de 15 minutos',
         icone: '🏃',
         dificuldade: 'facil',
-        tempoMax: 900,  // 15 minutos
+        tempoMax: 900,
         recompensa: { pontos: 3000, bitcoin: 0.00001500, titulo: 'Speedrunner' }
     },
     {
         id: 'speedrun_medio',
         nome: '🏃‍♂️ Speedrunner Médio',
-        descricao: 'Completar o nível médio em menos de 20 minutos',  // Antes: 480s
+        descricao: 'Completar o nível médio em menos de 20 minutos',
         icone: '🏃‍♂️',
         dificuldade: 'medio',
-        tempoMax: 1200,  // 20 minutos
+        tempoMax: 1200,
         recompensa: { pontos: 5000, bitcoin: 0.00002500, titulo: 'Speedrunner Pro' }
     },
     {
         id: 'speedrun_dificil',
         nome: '🏃‍♀️ Speedrunner Difícil',
-        descricao: 'Completar o nível difícil em menos de 25 minutos',  // Antes: 600s
+        descricao: 'Completar o nível difícil em menos de 25 minutos',
         icone: '🏃‍♀️',
         dificuldade: 'dificil',
-        tempoMax: 1500,  // 25 minutos
+        tempoMax: 1500,
         recompensa: { pontos: 10000, bitcoin: 0.00005000, titulo: 'Speedrunner Lendário' }
     }
 ];
@@ -128,26 +129,19 @@ const mensagensDeIncentivo = [
 // ============================================
 
 function iniciarTimerGlobal() {
-    // Parar timer existente
     if (timerGlobalInterval) {
         clearInterval(timerGlobalInterval);
         timerGlobalInterval = null;
     }
     
-    // Registrar início
     tempoInicioPartida = Date.now();
     tempoTotalPartida = 0;
     
-    // Iniciar timer
     timerGlobalInterval = setInterval(() => {
         if (!jogoConcluido) {
             tempoTotalPartida = Math.floor((Date.now() - tempoInicioPartida) / 1000);
             atualizarDisplayTempo();
             
-            // 🔴 GARANTIR QUE ESTA LINHA EXISTE!
-            verificarMetasTempo();
-
-            // Atualizar também no card esquerdo (se existir)
             const tempoModern = document.getElementById('tempo-modern');
             if (tempoModern) {
                 const mins = Math.floor(tempoTotalPartida / 60);
@@ -194,7 +188,6 @@ function verificarMetasTempo() {
     metasDisponiveis.forEach(meta => {
         if (metasAlcancadas.includes(meta.id)) return;
         
-        // Meta de velocidade por blocos
         if (meta.blocos && !isNaN(meta.blocos)) {
             if (brokenBlocks >= meta.blocos && tempoTotalPartida <= meta.tempoMax) {
                 console.log('🏆 Meta atingida:', meta.nome);
@@ -202,7 +195,6 @@ function verificarMetasTempo() {
             }
         }
         
-        // Meta de speedrun por dificuldade
         if (meta.dificuldade && meta.dificuldade === dificuldadeAtual) {
             if (brokenBlocks >= TamMax && tempoTotalPartida <= meta.tempoMax) {
                 console.log('🏆 Meta speedrun atingida:', meta.nome);
@@ -210,7 +202,6 @@ function verificarMetasTempo() {
             }
         }
         
-        // Meta de perfeição
         if (meta.id === 'precisao_total' && brokenBlocks >= TamMax && vidas === 3) {
             console.log('🏆 Meta perfeição atingida:', meta.nome);
             alcançarMeta(meta);
@@ -218,21 +209,28 @@ function verificarMetasTempo() {
     });
 }
 
+// ============================================
+// SISTEMA DE CONQUISTAS - VERSÃO CORRIGIDA
+// ============================================
+
 function alcançarMeta(meta) {
     if (metasAlcancadas.includes(meta.id)) return;
     
     metasAlcancadas.push(meta.id);
+    console.log('🏆 META ALCANÇADA:', meta.nome);
     
+    // Aplicar recompensas
     if (meta.recompensa.pontos) {
         score += meta.recompensa.pontos;
         updateScoreDisplay(score);
     }
     
     if (meta.recompensa.bitcoin) {
-        bitcoinQuantity += meta.recompensa.bitcoin;
-        updateBitcoinValue();
+    bitcoinQuantity += meta.recompensa.bitcoin;
+    updateBitcoinValue(false);
     }
     
+    // Registrar conquista
     const conquista = {
         id: meta.id,
         titulo: meta.recompensa.titulo || meta.nome,
@@ -249,32 +247,106 @@ function alcançarMeta(meta) {
         });
     }
     
+    // Salvar no ranking
     const ultimoJogador = localStorage.getItem('jogobitcoin_lastname');
     if (ultimoJogador && ultimoJogador !== 'Anônimo') {
         RankingSystem.adicionarConquista(ultimoJogador, conquista);
     }
     
-    // ✅ CHAMAR A FUNÇÃO QUE MOSTRA A CONQUISTA
-    mostrarConquista(meta);
+    // ✅ MOSTrar CONQUISTA NA LATERAL (como mensagem de 5 segundos)
+    mostrarConquistaNaLateral(meta);
 }
 
 // ============================================
-// MOSTRAR CONQUISTA - VERSÃO COM LATERAL (CORRIGIDA)
+// MOSTRAR CONQUISTA NA LATERAL (NOVA FUNÇÃO)
 // ============================================
-function mostrarConquista(meta) {
-    // ✅ SEMPRE mostra na lateral (não bloqueia)
-    const nomeConquista = meta.nome;
-    const icone = meta.icone || '🏆';
+function mostrarConquistaNaLateral(meta) {
+    // Formatar mensagem baseado no tipo de conquista
+    let mensagem = '';
+    let icone = meta.icone || '🏆';
     
-    // Chamar a função de mensagem lateral
-    mostrarMensagemLateral(`${icone} CONQUISTA: ${nomeConquista}`, 'conquista', 5000);
+    // Personalizar mensagem por tipo de conquista
+    if (meta.id.includes('velocidade')) {
+        const blocos = meta.blocos;
+        const minutos = Math.floor(meta.tempoMax / 60);
+        mensagem = `${icone} CONQUISTA: ${meta.nome} - ${blocos} blocos em menos de ${minutos} minutos! +${meta.recompensa.pontos} pts, +${meta.recompensa.bitcoin.toFixed(8)} BTC`;
+    }
+    else if (meta.id.includes('speedrun')) {
+        const minutos = Math.floor(meta.tempoMax / 60);
+        mensagem = `${icone} CONQUISTA: ${meta.nome} - Completou o nível em menos de ${minutos} minutos! +${meta.recompensa.pontos} pts, +${meta.recompensa.bitcoin.toFixed(8)} BTC`;
+    }
+    else if (meta.id === 'precisao_total') {
+        mensagem = `${icone} CONQUISTA: ${meta.nome} - Completou o jogo sem perder vidas! +${meta.recompensa.pontos} pts, +${meta.recompensa.bitcoin.toFixed(8)} BTC`;
+    }
+    else {
+        mensagem = `${icone} CONQUISTA: ${meta.nome} - ${meta.descricao} +${meta.recompensa.pontos} pts, +${meta.recompensa.bitcoin.toFixed(8)} BTC`;
+    }
     
-    // Manter o som de conquista
+    // Mostrar na lateral (mesmo local das mensagens de incentivo)
+    mostrarMensagemLateral(mensagem, 'conquista', 5000);
+    
+    // Também mostrar um popup temporário no centro (opcional, para dar mais destaque)
+    mostrarPopupConquista(meta);
+    
+    // Tocar som de conquista
     if (SoundSystem && SoundSystem.win) SoundSystem.win();
-    
-    // Log para debug
-    console.log(`🏆 Conquista: ${nomeConquista}`);
 }
+
+// ============================================
+// POPUP DE CONQUISTA (OPCIONAL - PARA DAR DESTAQUE)
+// ============================================
+function mostrarPopupConquista(meta) {
+    // Criar popup temporário
+    const popup = document.createElement('div');
+    popup.style.cssText = `
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        background: linear-gradient(135deg, gold, #ffaa00);
+        color: black;
+        padding: 25px 40px;
+        border-radius: 60px;
+        border: 4px solid white;
+        box-shadow: 0 0 50px rgba(255,215,0,0.8);
+        z-index: 50000;
+        font-family: 'Exo 2', sans-serif;
+        text-align: center;
+        animation: conquistaPop 0.5s ease-out;
+        pointer-events: none;
+    `;
+    
+    popup.innerHTML = `
+        <div style="font-size: 4em; margin-bottom: 10px;">${meta.icone || '🏆'}</div>
+        <div style="font-size: 1.8em; font-weight: bold; margin-bottom: 5px;">CONQUISTA!</div>
+        <div style="font-size: 1.3em; font-weight: bold; background: rgba(0,0,0,0.1); padding: 10px 20px; border-radius: 40px;">${meta.nome}</div>
+        <div style="font-size: 1em; margin-top: 10px; color: #333;">${meta.descricao}</div>
+        <div style="display: flex; gap: 20px; justify-content: center; margin-top: 15px;">
+            <div style="background: rgba(0,0,0,0.2); padding: 5px 15px; border-radius: 20px;">+${meta.recompensa.pontos} pts</div>
+            <div style="background: rgba(0,0,0,0.2); padding: 5px 15px; border-radius: 20px;">+${meta.recompensa.bitcoin.toFixed(8)} BTC</div>
+        </div>
+    `;
+    
+    document.body.appendChild(popup);
+    
+    // Remover após 3 segundos
+    setTimeout(() => {
+        popup.style.animation = 'fadeOut 0.5s ease-out';
+        setTimeout(() => popup.remove(), 500);
+    }, 3000);
+}
+
+// ============================================
+// GARANTIR QUE AS METAS SÃO VERIFICADAS REGULARMENTE
+// ============================================
+
+// Adicionar verificação periódica durante o jogo
+setInterval(() => {
+    // Só verificar se o jogo está ativo
+    if (!jogoConcluido && vidas > 0 && brokenBlocks > 0) {
+        verificarMetasTempo();
+    }
+}, 5000);
 
 // ============================================
 // 5. ENCICLOPÉDIA CRIPTO
@@ -298,7 +370,27 @@ const CryptoEncyclopedia = {
         'DAO': { description: 'Organização autônoma.', link: 'https://pt.wikipedia.org/wiki/Organiza%C3%A7%C3%A3o_aut%C3%B4noma_descentralizada', category: 'Governança' },
         'Coinbase': { description: 'Exchange americana.', link: 'https://pt.wikipedia.org/wiki/Coinbase', category: 'Exchange' },
         'Satoshi Nakamoto': { description: 'Criador do Bitcoin.', link: 'https://pt.wikipedia.org/wiki/Satoshi_Nakamoto', category: 'Pessoa' },
-        'Vitalik Buterin': { description: 'Criador do Ethereum.', link: 'https://pt.wikipedia.org/wiki/Vitalik_Buterin', category: 'Pessoa' }
+        'Vitalik Buterin': { description: 'Criador do Ethereum.', link: 'https://pt.wikipedia.org/wiki/Vitalik_Buterin', category: 'Pessoa' },
+        'Lightning Network': { description: 'Rede de pagamentos de segunda camada para Bitcoin.', link: 'https://pt.wikipedia.org/wiki/Lightning_Network', category: 'Escalabilidade' },
+        'Taproot': { description: 'Atualização do Bitcoin que melhora privacidade e scripts.', link: 'https://en.wikipedia.org/wiki/Taproot', category: 'Protocolo' },
+        'Layer 2': { description: 'Soluções de segunda camada para escalar blockchains.', link: 'https://en.wikipedia.org/wiki/Layer-2_scaling', category: 'Escalabilidade' },
+        'Rollup': { description: 'Agrupa transações off-chain e publica na camada base.', link: 'https://en.wikipedia.org/wiki/Rollup_(blockchain)', category: 'Escalabilidade' },
+        'Zero-Knowledge Proof': { description: 'Prova criptográfica sem revelar o segredo.', link: 'https://pt.wikipedia.org/wiki/Prova_de_conhecimento_zero', category: 'Criptografia' },
+        'Merkle Tree': { description: 'Estrutura de dados para verificar integridade em blocos.', link: 'https://pt.wikipedia.org/wiki/%C3%81rvore_de_Merkle', category: 'Estrutura de Dados' },
+        'Cold Wallet': { description: 'Carteira offline para maior segurança.', link: 'https://pt.wikipedia.org/wiki/Carteira_de_criptomoeda', category: 'Seguranca' },
+        'Hot Wallet': { description: 'Carteira conectada à internet, prática porém mais exposta.', link: 'https://pt.wikipedia.org/wiki/Carteira_de_criptomoeda', category: 'Seguranca' },
+        'Seed Phrase': { description: 'Frase mnemônica usada para recuperar a carteira.', link: 'https://en.wikipedia.org/wiki/Seed_phrase', category: 'Seguranca' },
+        'Rug Pull': { description: 'Golpe onde o criador some com a liquidez do projeto.', link: 'https://en.wikipedia.org/wiki/Rug_pull', category: 'Risco' },
+        'Airdrop': { description: 'Distribuição gratuita de tokens para usuários.', link: 'https://en.wikipedia.org/wiki/Airdrop_(cryptocurrency)', category: 'Marketing' },
+        'Gas Fee': { description: 'Taxa paga para executar transações em rede.', link: 'https://en.wikipedia.org/wiki/Gas_(Ethereum)', category: 'Economia' },
+        'MEV': { description: 'Valor extra capturado por validadores ao ordenar transações.', link: 'https://en.wikipedia.org/wiki/Maximal_extractable_value', category: 'Economia' },
+        'DApp': { description: 'Aplicativo descentralizado executado em blockchain.', link: 'https://en.wikipedia.org/wiki/Decentralized_application', category: 'Aplicacao' },
+        'Metamask': { description: 'Carteira e gateway Web3 popular para Ethereum.', link: 'https://en.wikipedia.org/wiki/MetaMask', category: 'Ferramenta' },
+        'Ledger': { description: 'Carteira hardware para custódia segura.', link: 'https://en.wikipedia.org/wiki/Ledger_(cryptocurrency_hardware_wallet)', category: 'Hardware' },
+        'DePIN': { description: 'Redes físicas descentralizadas que tokenizam infraestrutura.', link: 'https://en.wikipedia.org/wiki/Decentralized_physical_infrastructure_network', category: 'Ecossistema' },
+        'RWA': { description: 'Tokenização de ativos do mundo real.', link: 'https://en.wikipedia.org/wiki/Real-world_asset_tokenization', category: 'Ecossistema' },
+        'Oracle': { description: 'Serviço que leva dados externos para contratos inteligentes.', link: 'https://en.wikipedia.org/wiki/Oracle_(blockchain)', category: 'Infraestrutura' },
+        'Stablecoin Algorítmica': { description: 'Stablecoin que mantém paridade via algoritmos.', link: 'https://en.wikipedia.org/wiki/Algorithmic_stablecoin', category: 'Criptomoeda' }
     },
     
     init: function() {
@@ -804,8 +896,6 @@ const RankingSystem = {
         }, 500);
     },
     
-    
-    
     createRankingButton: function() {
         if (document.getElementById('ranking-button')) return;
         
@@ -814,8 +904,8 @@ const RankingSystem = {
         btn.innerHTML = '🏆 Ranking';
         btn.style.cssText = `
             position: fixed;
-            top: 0px;
-            left: 130px;
+            top: 12px;
+            left: 120px;
             padding: 10px 20px;
             background: rgba(33,150,243,0.9);
             color: white;
@@ -858,7 +948,6 @@ const RankingSystem = {
                 localStorage.setItem('jogobitcoin_lastname', nomeLimpo);
             }
             
-            // Salvar conquistas da sessão atual para este jogador
             if (selosConquistados.length > 0 && nomeLimpo) {
                 console.log(`🏆 Salvando ${selosConquistados.length} conquistas da sessão para ${nomeLimpo}`);
                 selosConquistados.forEach(conquista => {
@@ -882,6 +971,15 @@ const RankingSystem = {
             );
             
             setTimeout(() => this.showRanking(), 1000);
+            
+            // Após registrar nome, solicitar avaliação da partida
+            setTimeout(() => {
+                try {
+                    abrirAvaliacao();
+                } catch (e) {
+                    console.warn('Avaliação automática não pôde ser aberta:', e);
+                }
+            }, 800);
         }
     },
     
@@ -897,6 +995,7 @@ const RankingSystem = {
 const SoundSystem = {
     urls: { correct: 'sounds/correct.mp3', wrong: 'sounds/wrong.mp3', click: 'sounds/click.mp3', block: 'sounds/block.mp3', gameover: 'sounds/gameover.mp3', win: 'sounds/win.mp3' },
     audios: {}, enabled: true,
+    ambientCtx: null, ambientGain: null, ambientInterval: null, ambientEnabled: true,
     
     init: function() {
         for (const [k, u] of Object.entries(this.urls)) {
@@ -909,6 +1008,29 @@ const SoundSystem = {
             }
         }
         this.createSoundToggle();
+        this.setupAmbient();
+    },
+
+    setupAmbient: function() {
+        try {
+            const saved = localStorage.getItem('jogobitcoin_ambient');
+            if (saved !== null) this.ambientEnabled = saved === 'true';
+
+            this.ambientCtx = new (window.AudioContext || window.webkitAudioContext)();
+            this.ambientGain = this.ambientCtx.createGain();
+            this.ambientGain.gain.value = this.ambientEnabled ? 0.18 : 0;
+            this.ambientGain.connect(this.ambientCtx.destination);
+
+            document.addEventListener('click', () => this.unlockAmbient(), { once: true });
+            this.createAmbientToggle();
+            if (this.ambientEnabled) this.startAmbient();
+        } catch {}
+    },
+
+    unlockAmbient: function() {
+        if (this.ambientCtx && this.ambientCtx.state === 'suspended') {
+            this.ambientCtx.resume().catch(() => {});
+        }
     },
     
     createFallbackSound: function(t) {
@@ -937,7 +1059,7 @@ const SoundSystem = {
         if (document.getElementById('sound-toggle')) return;
         const btn = document.createElement('button');
         btn.id = 'sound-toggle'; btn.innerHTML = '🔊';
-        btn.style.cssText = 'position:fixed; top:0px; left:75px; width:40px; height:40px; border-radius:50%; background:#f7931a; color:white; border:none; font-size:1.2em; cursor:pointer; z-index:10000;';
+        btn.style.cssText = 'position:fixed; top:12px; left:16px; width:40px; height:40px; border-radius:50%; background:#f7931a; color:white; border:none; font-size:1.2em; cursor:pointer; z-index:10000;';
         btn.onclick = () => { 
             this.enabled = !this.enabled; 
             btn.innerHTML = this.enabled ? '🔊' : '🔇'; 
@@ -950,7 +1072,100 @@ const SoundSystem = {
         }
         document.body.appendChild(btn);
     },
-    
+
+    createAmbientToggle: function() {
+        if (document.getElementById('ambient-toggle')) return;
+        const btn = document.createElement('button');
+        btn.id = 'ambient-toggle'; btn.innerHTML = '🎵';
+        btn.style.cssText = 'position:fixed; top:12px; left:68px; width:40px; height:40px; border-radius:50%; background:#3b4cca; color:white; border:none; font-size:1.2em; cursor:pointer; z-index:10000;';
+        btn.onclick = () => {
+            this.ambientEnabled = !this.ambientEnabled;
+            btn.innerHTML = this.ambientEnabled ? '🎵' : '🔈';
+            localStorage.setItem('jogobitcoin_ambient', this.ambientEnabled);
+            if (this.ambientEnabled) {
+                this.startAmbient();
+            } else {
+                this.stopAmbient();
+            }
+        };
+        btn.innerHTML = this.ambientEnabled ? '🎵' : '🔈';
+        document.body.appendChild(btn);
+    },
+
+    chipNote: function(freq, start, duration = 0.18, volume = 0.18, type = 'square') {
+        if (!this.ambientCtx || !this.ambientGain) return;
+        const osc = this.ambientCtx.createOscillator();
+        const gain = this.ambientCtx.createGain();
+        osc.type = type;
+        osc.frequency.setValueAtTime(freq, start);
+        gain.gain.setValueAtTime(volume, start);
+        gain.gain.exponentialRampToValueAtTime(0.001, start + duration);
+        osc.connect(gain); gain.connect(this.ambientGain);
+        osc.start(start);
+        osc.stop(start + duration + 0.05);
+    },
+
+    noiseTap: function(start, duration = 0.08, volume = 0.05) {
+        if (!this.ambientCtx || !this.ambientGain) return;
+        const ctx = this.ambientCtx;
+        const buffer = ctx.createBuffer(1, ctx.sampleRate * duration, ctx.sampleRate);
+        const data = buffer.getChannelData(0);
+        for (let i = 0; i < data.length; i++) {
+            const decay = 1 - i / data.length;
+            data[i] = (Math.random() * 2 - 1) * decay * decay;
+        }
+        const noise = ctx.createBufferSource();
+        noise.buffer = buffer;
+        const gain = ctx.createGain();
+        gain.gain.setValueAtTime(volume, start);
+        gain.gain.exponentialRampToValueAtTime(0.001, start + duration);
+        noise.connect(gain); gain.connect(this.ambientGain);
+        noise.start(start);
+        noise.stop(start + duration + 0.05);
+    },
+
+    playAmbientBar: function() {
+        if (!this.ambientCtx || !this.ambientGain || !this.ambientEnabled) return;
+        const ctx = this.ambientCtx;
+        const now = ctx.currentTime + 0.05;
+        const roots = [196, 220, 247]; // G3, A3, B3
+        const root = roots[Math.floor(Math.random() * roots.length)];
+        const pattern = [0, 7, 12, 7, 3, 10, 14, 7];
+
+        pattern.forEach((step, i) => {
+            const start = now + i * 0.32;
+            const freq = root * Math.pow(2, step / 12);
+            this.chipNote(freq, start, 0.18, 0.16 + (i % 4 === 0 ? 0.05 : 0));
+            if (i % 2 === 0) this.noiseTap(start, 0.08, 0.04);
+        });
+
+        const padOsc = ctx.createOscillator();
+        padOsc.type = 'triangle';
+        padOsc.frequency.setValueAtTime(root / 2, now);
+        const padGain = ctx.createGain();
+        padGain.gain.setValueAtTime(0.08, now);
+        padGain.gain.linearRampToValueAtTime(0.02, now + 3);
+        padOsc.connect(padGain); padGain.connect(this.ambientGain);
+        padOsc.start(now);
+        padOsc.stop(now + 3.2);
+    },
+
+    startAmbient: function() {
+        if (!this.ambientCtx || !this.ambientGain) return;
+        this.unlockAmbient();
+        if (this.ambientInterval) clearInterval(this.ambientInterval);
+        this.ambientGain.gain.setTargetAtTime(0.18, this.ambientCtx.currentTime, 0.2);
+        this.playAmbientBar();
+        this.ambientInterval = setInterval(() => this.playAmbientBar(), 3200);
+    },
+
+    stopAmbient: function() {
+        if (!this.ambientCtx || !this.ambientGain) return;
+        if (this.ambientInterval) clearInterval(this.ambientInterval);
+        this.ambientInterval = null;
+        this.ambientGain.gain.setTargetAtTime(0.0001, this.ambientCtx.currentTime, 0.2);
+    },
+
     correct: function() { this.play('correct'); },
     wrong: function() { this.play('wrong'); },
     click: function() { this.play('click'); },
@@ -963,22 +1178,37 @@ const SoundSystem = {
 // 9. LISTA DE CRIPTOATIVOS
 // ============================================
 const cryptoNomes = [
-    "Bitcoin", "Ethereum", "Binance", "Solana", "Cardano", "Ripple", "Polkadot", "Dogecoin", "Shiba", "Avalanche",
-    "Chainlink", "Litecoin", "Polygon", "Uniswap", "Monero", "Blockchain", "Hash", "Miner", "Node", "Wallet",
-    "PrivateKey", "PublicKey", "SeedPhrase", "Nonce", "Merkle", "ProofOfWork", "ProofOfStake", "SmartContract", "GasFee", "Fork",
-    "Halving", "Difficulty", "Timestamp", "Consensus", "Coinbase", "Kraken", "Gemini", "FTX", "CryptoCom", "KuCoin",
+    "Bitcoin", "Ethereum", "Solana", "Cardano", "Binance", "Ripple", "Polkadot", "Avalanche", "Tron", "Algorand",
+    "Tezos", "NEO", "Stellar", "Cosmos", "Fantom", "Harmony", "Kusama", "Aptos", "Sui", "Celestia",
+    "Monad", "Sei", "Linea", "Base", "Scroll", "Blast", "Mantle", "Polygon", "Arbitrum", "Optimism",
+    "zkSync", "Starknet", "Loopring", "ImmutableX", "Boba", "Metis", "Stargate", "LayerZero", "Axelar", "Wormhole",
+    "Monero", "Zcash", "Dash", "Grin", "Beam", "Secret", "Oasis", "Aleo", "Aztec", "Railgun",
+    "ProofOfWork", "ProofOfStake", "ProofOfHistory", "ProofOfSpace", "ProofOfAuthority", "Halving", "Difficulty", "Hashrate", "Blocktime", "Nonce",
+    "Merkle", "Block", "Fork", "Timestamp", "Consensus", "GasFee", "FeeMarket", "MEV", "Slippage", "Liquidity",
+    "ImpermanentLoss", "FrontRun", "Sandwich", "SmartContract", "Multisig", "ColdStorage", "HotWallet", "HardwareWallet", "SeedPhrase", "PrivateKey",
+    "PublicKey", "Wallet", "Node", "Miner", "MiningRig", "ASIC", "GPU", "FPGA", "Bitmain", "Antminer",
+    "Whatsminer", "Hash", "Lightning", "Taproot", "SegWit", "Ordinals", "BRC20", "RGB", "Runes", "StateChannels",
+    "Chainlink", "TheGraph", "Infura", "Alchemy", "QuickNode", "Ankr", "Moralis", "Pinata", "Fleek", "Ceramic",
+    "Livepeer", "IPFS", "Filecoin", "Arweave", "Helium", "Theta", "Render", "Akash", "Storj", "HeliumMobile",
+    "Uniswap", "Sushi", "PancakeSwap", "Curve", "Balancer", "Aave", "Compound", "Maker", "Yearn", "Synthetix",
+    "dYdX", "Lido", "RocketPool", "EigenLayer", "Pendle", "Jito", "Marinade", "Jupiter", "Raydium", "Orca",
+    "OpenSea", "Rarible", "Blur", "MagicEden", "Tensor", "Zora", "BAYC", "CryptoPunks", "Azuki", "DeGods",
+    "Doodles", "CloneX", "Mocaverse", "OrdinalsArt", "BoredApe", "Sandbox", "Decentraland", "Axie", "StepN", "Illuvium",
+    "ENS", "Lens", "Farcaster", "FriendTech", "FrenPet", "DePIN", "RWA", "Stablecoin", "Tether", "USDC",
+    "DAI", "BUSD", "FRAX", "LUSD", "GHO", "PayPalUSD", "Circle", "MakerDAO", "UniswapDAO", "Aragon",
+    "Moloch", "Airdrop", "Retrodrop", "RugPull", "Pump", "Dump", "Whale", "Bull", "Bear", "HODL",
+    "FOMO", "FUD", "ReKT", "WAGMI", "NGMI", "GM", "DYOR", "ATH", "ATL", "ROI",
+    "PEPE", "WIF", "BONK", "FLOKI", "BABYDOGE", "MOG", "TURBO", "MEME", "DOGE", "Shiba",
+    "LUNC", "CELO", "MKR", "CRV", "SNX", "COMP", "YFI", "UNI", "CAKE", "SAND",
+    "MANA", "FLOW", "GALA", "IMX", "PYTH", "APT", "SUI", "TIA", "FIL", "AR",
+    "RUNE", "KAVA", "GMX", "RPL", "LPT", "INJ", "LINK", "MINA", "OP", "ARB",
     "Satoshi", "Nakamoto", "Vitalik", "Buterin", "CZ", "Zhao", "Gavin", "Wood", "Charles", "Hoskinson",
-    "Tron", "Algorand", "Tezos", "EOS", "NEO", "Stellar", "Cosmos", "Fantom", "Harmony", "Kusama",
-    "Filecoin", "Arweave", "Helium", "Theta", "Flow", "Aave", "Compound", "Maker", "Curve", "Sushi",
-    "PancakeSwap", "Yearn", "Synthetix", "Balancer", "Convex", "OpenSea", "BoredApe", "CryptoPunks", "Axie", "Sandbox",
-    "Decentraland", "ENS", "Optimism", "Arbitrum", "zkSync", "Starknet", "Loopring", "ImmutableX", "Boba", "Metis",
-    "Tornado", "Cash", "Zcash", "Dash", "Zooko", "Grin", "Beam", "Secret", "Oasis", "Aleo",
-    "Tether", "USDC", "DAI", "BUSD", "FRAX", "Infura", "Alchemy", "QuickNode", "Moralis", "TheGraph",
-    "IPFS", "Pinata", "Fleek", "Ceramic", "Livepeer", "UniswapDAO", "MakerDAO", "Aragon", "Moloch", "StepN",
-    "SEC", "CFTC", "FATF", "FinCEN", "MiCA", "IRS", "FCA", "ASIC", "Bull", "Bear",
-    "Whale", "HODL", "FOMO", "FUD", "ReKT", "WAGMI", "NGMI", "GM", "Airdrop", "RugPull",
-    "DYOR", "ATH", "ATL", "Bitmain", "Antminer", "Whatsminer", "ASIC", "GPU", "Hashrate", "MiningRig",
-    "CoinDesk", "Cointelegraph", "Messari", "Decrypt", "Bankless", "LexFridman", "Pomp", "BitcoinMagazine", "TheBlock"
+    "Anatoly", "Toly", "DoKwon", "Hayes", "Bankless", "Pomp", "LexFridman", "CoinDesk", "Cointelegraph", "Messari",
+    "Decrypt", "BitcoinMagazine", "TheBlock", "BloombergCrypto", "Coinbase", "BinanceUS", "Kraken", "Gemini", "FTX", "OKX",
+    "Bybit", "Bitfinex", "Bitget", "KuCoin", "CryptoCom", "Ledger", "Trezor", "Metamask", "Phantom", "Keplr",
+    "Sparrow", "Wasabi", "MuSig", "TaprootAssets", "LightningPool", "LNURL", "Liquid", "RGBProtocol", "CoinJoin", "Mixnet",
+    "SEC", "CFTC", "FATF", "FinCEN", "MiCA", "IRS", "FCA", "ANBIMA", "CVM", "BACEN",
+    "ERC20", "ERC721", "ERC1155", "BEP20", "SPL", "CosmWasm", "Move", "Rust", "Solidity", "Vyper"
 ];
 
 // ============================================
@@ -1037,17 +1267,14 @@ const SistemaProblemas = {
             };
         }
     },
-    // ============================================
-    // SISTEMA DE PROBLEMAS - NÍVEL DIFÍCIL CORRIGIDO
-    // ============================================
     dificil: () => {
         const nome = cryptoNomes[Math.floor(Math.random() * cryptoNomes.length)];
         const tipo = ['cesar', 'ascii', 'base64'][Math.floor(Math.random() * 3)];
         
         if (tipo === 'cesar') {
             const chave = Math.random() > 0.5 ? 
-                Math.floor(Math.random() * 8) + 3 : // 3-10 positivas
-                -(Math.floor(Math.random() * 8) + 3); // -3 a -10 negativas
+                Math.floor(Math.random() * 8) + 3 :
+                -(Math.floor(Math.random() * 8) + 3);
             
             const nomeCifrado = Criptografia.cifraDeCesar(nome, chave);
             
@@ -1069,7 +1296,7 @@ const SistemaProblemas = {
                 dica: `Use tabela ASCII (cada 3 números = 1 caractere)`
             };
         } 
-        else { // base64
+        else {
             return {
                 pergunta: `🔄 Decodifique Base64:`,
                 textoCifrado: Criptografia.paraBase64(nome),
@@ -1103,6 +1330,8 @@ function startGame(difficulty) {
     document.getElementById('problem-container').style.display = 'flex';
     document.getElementById('game-container').style.display = 'flex';
     document.getElementById('hash-log').style.display = 'flex';
+    document.body.classList.remove('show-crypto');
+    stopHomeBubbles();
     
     ['img-Bitcoin.esquerda', 'img-esquerda', 'img-logo.esquerda', 'img-Bitcoin.direita', 'img-direita', 'img-logo.direita'].forEach(id => {
         const el = document.getElementById(id);
@@ -1111,7 +1340,7 @@ function startGame(difficulty) {
     
     document.getElementById('answer').disabled = false;
     initializeBlocks();
-    updateBitcoinValue();
+    updateBitcoinValue(false);
     updateScoreDisplay(score);
     updateVidasDisplay();
     gameStartTime = Date.now();
@@ -1123,6 +1352,15 @@ function startGame(difficulty) {
         tipo.className = `tipo-${dificuldadeAtual}`;
         tipo.style.display = 'inline-block';
     }
+    
+    // Mostrar botão de encerrar
+    const btnEncerrar = document.getElementById('btn-encerrar');
+    if (btnEncerrar) {
+        btnEncerrar.style.display = 'block';
+    }
+    
+    // Limpar save anterior ao começar novo jogo
+    localStorage.removeItem(SAVE_KEY);
     
     displayNextProblem();
 }
@@ -1137,14 +1375,20 @@ function resetGame() {
     document.getElementById('hash-log').style.display = 'none';
     document.getElementById('history-container').style.display = 'none';
     document.getElementById('mensagem-container').style.display = 'none';
+    document.body.classList.add('show-crypto');
+    startHomeBubbles();
     
-    // 🆕 OCULTAR O TIMER GLOBAL NA TELA INICIAL
     const tempoDisplay = document.getElementById('tempo-global');
     if (tempoDisplay) {
         tempoDisplay.style.display = 'none';
     }
 
-    // Reiniciar variáveis
+    // Esconder botão de encerrar
+    const btnEncerrar = document.getElementById('btn-encerrar');
+    if (btnEncerrar) {
+        btnEncerrar.style.display = 'none';
+    }
+
     bitcoinQuantity = 0; 
     score = 0; 
     currentProblem = 1; 
@@ -1162,7 +1406,7 @@ function resetGame() {
     selosConquistados = [];
     
     updateScoreDisplay(score);
-    updateBitcoinValue();
+    updateBitcoinValue(false);
     updateVidasDisplay();
     document.getElementById('timer').textContent = '';
     document.getElementById('result').textContent = '';
@@ -1175,6 +1419,9 @@ function resetGame() {
     
     SoundSystem.click();
     initializeBlocks();
+    
+    // Limpar save
+    localStorage.removeItem(SAVE_KEY);
 }
 
 function initializeBlocks() {
@@ -1212,9 +1459,6 @@ function generateCryptoProblem() {
     };
 }
 
-// ============================================
-// DISPLAY NEXT PROBLEM - COM BOTÕES CORRETOS
-// ============================================
 function displayNextProblem() {
     if (jogoConcluido || vidas <= 0) {
         if (vidas <= 0) gameOver();
@@ -1225,17 +1469,13 @@ function displayNextProblem() {
     document.getElementById('problem-number').textContent = `Bloco Nº: ${currentProblem}`;
     document.getElementById('problem-question').innerHTML = p.texto;
     
-    // Fechar círculo se estiver aberto
     fecharCirculo();
     
-    // 🔴 REMOVER BOTÕES ANTIGOS
     const botoesDivAntigo = document.getElementById('botoes-ajuda-container');
     if (botoesDivAntigo) botoesDivAntigo.remove();
     
-    // 🔴 SEMPRE mostrar o botão do decodificador (para qualquer tipo de problema)
     const container = document.getElementById('problem-container');
     
-    // Container para os botões
     const botoesDiv = document.createElement('div');
     botoesDiv.id = 'botoes-ajuda-container';
     botoesDiv.style.cssText = `
@@ -1246,7 +1486,6 @@ function displayNextProblem() {
         flex-wrap: wrap;
     `;
     
-    // 🔴 BOTÃO DO DECODIFICADOR (sempre presente)
     const btnDecode = document.createElement('button');
     btnDecode.id = 'btn-decode-rapido';
     btnDecode.innerHTML = '🔧 Decodificador';
@@ -1276,7 +1515,6 @@ function displayNextProblem() {
     
     botoesDiv.appendChild(btnDecode);
     
-    // 🔴 BOTÃO DO CÍRCULO DE CÉSAR (APENAS para cifra de César)
     if (problemaAtual && problemaAtual.tipo === 'cesar') {
         const btnCirculo = document.createElement('button');
         btnCirculo.id = 'btn-circulo-cesar';
@@ -1310,14 +1548,12 @@ function displayNextProblem() {
     
     container.appendChild(botoesDiv);
     
-    // Atualizar indicador de dificuldade
     const tipo = document.getElementById('tipo-indicador');
     if (tipo) {
         tipo.textContent = `Dificuldade: ${dificuldadeAtual.toUpperCase()}`;
         tipo.className = `tipo-${dificuldadeAtual}`;
     }
     
-    // Preparar campo de resposta
     const input = document.getElementById('answer');
     input.value = ''; 
     input.disabled = false; 
@@ -1326,7 +1562,6 @@ function displayNextProblem() {
     document.getElementById('result').textContent = '';
     startTimer();
 
-    // Atualizar decodificador se estiver aberto
     setTimeout(() => {
         if (typeof atualizarDecodificadorComProblema === 'function') {
             atualizarDecodificadorComProblema();
@@ -1371,21 +1606,16 @@ function updateTimerDisplay() {
     }
 }
 
-// ============================================
-// FUNÇÃO SUBMIT ANSWER - VERIFICAÇÃO ATIVADA
-// ============================================
 function submitAnswer() {
     if (jogoConcluido || vidas <= 0) return;
     
     const answerInput = document.getElementById('answer');
     const answer = answerInput.value.trim().toLowerCase();
     
-    // Verificar se resposta está vazia
     if (!answer) {
         document.getElementById('result').textContent = '❌ Digite uma resposta!';
         document.getElementById('result').style.color = '#ff9800';
         
-        // Feedback visual
         answerInput.style.borderColor = '#ff9800';
         answerInput.style.boxShadow = '0 0 10px rgba(255,152,0,0.5)';
         setTimeout(() => {
@@ -1395,90 +1625,77 @@ function submitAnswer() {
         return;
     }
     
-    // Verificar se há problema atual
     if (!problemaAtual) {
         document.getElementById('result').textContent = '❌ Erro: problema não carregado';
         document.getElementById('result').style.color = '#f44336';
         return;
     }
     
-    // COMPARAÇÃO DA RESPOSTA
     if (answer === problemaAtual.respostaCorreta) {
-        // ✅ RESPOSTA CORRETA
         clearInterval(timerInterval);
         
-        // Feedback visual de acerto
         document.getElementById('result').textContent = '✅ CORRETO! Bloco minerado!';
         document.getElementById('result').style.color = '#4CAF50';
         answerInput.style.borderColor = '#4CAF50';
         answerInput.style.boxShadow = '0 0 15px rgba(76,175,80,0.5)';
         
-        // Efeito visual na pergunta
         const questionElement = document.getElementById('problem-question');
         questionElement.classList.add('mining-success');
         setTimeout(() => {
             questionElement.classList.remove('mining-success');
         }, 1000);
         
-        // Resetar borda após 1 segundo
         setTimeout(() => {
             answerInput.style.borderColor = '';
             answerInput.style.boxShadow = '';
         }, 1000);
         
-        // Atualizar jogo (Bitcoin, blocos, etc)
         updateBitcoinValue();
         updateBlocks();
         
-        // Som de acerto
         if (SoundSystem) SoundSystem.correct();
         
     } else {
-        // ❌ RESPOSTA ERRADA
         errosConsecutivos++;
         
-        // Feedback visual de erro
         document.getElementById('result').textContent = '❌ RESPOSTA ERRADA! Tente novamente.';
         document.getElementById('result').style.color = '#f44336';
         answerInput.style.borderColor = '#f44336';
         answerInput.style.boxShadow = '0 0 15px rgba(244,67,54,0.5)';
         
-        // Resetar borda após 1 segundo
         setTimeout(() => {
             answerInput.style.borderColor = '';
             answerInput.style.boxShadow = '';
         }, 1000);
         
-        // Dar dica após 2 erros consecutivos
         if (errosConsecutivos >= 2 && problemaAtual.dica) {
             const dicaElement = document.createElement('div');
             dicaElement.className = 'dica-box';
             dicaElement.innerHTML = `<small>💡 DICA: ${problemaAtual.dica}</small>`;
             document.getElementById('result').appendChild(dicaElement);
             
-            // Remover dica após 5 segundos
             setTimeout(() => {
                 if (dicaElement.parentElement) dicaElement.remove();
             }, 5000);
         }
         
-        // Perder uma vida
         perderVida();
         
-        // Som de erro
         if (SoundSystem) SoundSystem.wrong();
     }
 }
 
-function updateBitcoinValue() {
+function updateBitcoinValue(shouldAdd = true) {
     if (jogoConcluido) return;
-    let add = 0;
-    switch(dificuldadeAtual) {
-        case 'facil': add = 0.01000000; break;
-        case 'medio': add = 0.01200000; break;
-        case 'dificil': add = 0.01500000; break;
+    if (shouldAdd) {
+        let add = 0;
+        switch(dificuldadeAtual) {
+            case 'facil': add = 0.01000000; break;
+            case 'medio': add = 0.01200000; break;
+            case 'dificil': add = 0.01500000; break;
+        }
+        bitcoinQuantity += add;
     }
-    bitcoinQuantity += add;
     const disp = document.getElementById('bitcoin-value');
     if (disp) disp.textContent = `${bitcoinQuantity.toFixed(8)} BTC`;
 }
@@ -1539,6 +1756,18 @@ function updateBlocks() {
         setTimeout(() => displayNextProblem(), 1500);
         SoundSystem.block();
     }
+    
+    // Salvar após quebrar bloco
+    setTimeout(() => {
+        if (!jogoConcluido && vidas > 0) {
+            salvarJogo();
+        }
+    }, 500);
+    
+    // Verificar metas após quebrar bloco
+    setTimeout(() => {
+        verificarMetasTempo();
+    }, 100);
 }
 
 function updateBlockProgress(idx, pct) {
@@ -1638,6 +1867,13 @@ function gameOver() {
     SoundSystem.gameover();
     setTimeout(() => RankingSystem.saveGameScore(false), 1500);
     if (btn) btn.style.display = 'inline-block';
+    
+    // Esconder botão de encerrar
+    const btnEncerrar = document.getElementById('btn-encerrar');
+    if (btnEncerrar) btnEncerrar.style.display = 'none';
+    
+    // Limpar save
+    localStorage.removeItem(SAVE_KEY);
 }
 
 function endGame(isVictory = true) {
@@ -1661,6 +1897,13 @@ function endGame(isVictory = true) {
     }
     setTimeout(() => RankingSystem.saveGameScore(isVictory), 1500);
     if (btn) btn.style.display = 'inline-block';
+    
+    // Esconder botão de encerrar
+    const btnEncerrar = document.getElementById('btn-encerrar');
+    if (btnEncerrar) btnEncerrar.style.display = 'none';
+    
+    // Limpar save
+    localStorage.removeItem(SAVE_KEY);
 }
 
 function formatarTempo(segundos) {
@@ -1672,25 +1915,15 @@ function formatarTempo(segundos) {
 
 function mostrarMensagemIncentivo(idx) {
     if (idx >= 0 && idx < mensagensDeIncentivo.length) {
-        // Mostra na lateral (não bloqueia)
         mostrarMensagemLateral(mensagensDeIncentivo[idx], 'incentivo', 3000);
-        
-        // Opcional: manter também no console para debug
         console.log(`💬 Mensagem: ${mensagensDeIncentivo[idx]}`);
     }
 }
-// ============================================
-// MENSAGENS LATERAIS (NÃO BLOQUEIAM)
-// ============================================
 
-// ============================================
-// MENSAGENS LATERAIS (NÃO BLOQUEIAM)
-// ============================================
 function mostrarMensagemLateral(texto, tipo = 'incentivo', duracao = 3000) {
     const container = document.getElementById('mensagens-laterais');
     if (!container) return;
     
-    // Cores diferentes por tipo
     const cores = {
         incentivo: 'linear-gradient(135deg, #f7931a, #ffaa33)',
         conquista: 'linear-gradient(135deg, gold, #ffcc00)',
@@ -1698,7 +1931,6 @@ function mostrarMensagemLateral(texto, tipo = 'incentivo', duracao = 3000) {
         info: 'linear-gradient(135deg, #2196f3, #1976d2)'
     };
     
-    // Ícones por tipo
     const icones = {
         incentivo: '💪',
         conquista: '🏆',
@@ -1730,24 +1962,18 @@ function mostrarMensagemLateral(texto, tipo = 'incentivo', duracao = 3000) {
         <span style="font-size: 0.8em; opacity: 0.7;">agora</span>
     `;
     
-    // Adicionar no TOPO (para mensagens recentes aparecerem primeiro)
     container.prepend(mensagem);
     
-    // Remover após duração
     setTimeout(() => {
         mensagem.style.animation = 'slideOutLeft 0.3s ease';
         setTimeout(() => mensagem.remove(), 300);
     }, duracao);
     
-    // Manter apenas últimas 5 mensagens
     while (container.children.length > 5) {
         container.removeChild(container.lastChild);
     }
 }
 
-// ============================================
-// 13. FUNÇÃO SHOWHISTORY
-// ============================================
 function showHistory(chapter) {
     if (timerInterval) {
         clearInterval(timerInterval);
@@ -1842,9 +2068,6 @@ function fecharHistoriaEVoltar() {
     SoundSystem.click();
 }
 
-// ============================================
-// 14. SISTEMA DE BÔNUS
-// ============================================
 function verificarBonusDeBlocos() {
     if (brokenBlocks > 0 && brokenBlocks % 20 === 0) {
         let pts = 1000, btc = 0.00000100, vidasBonus = 0;
@@ -1868,7 +2091,7 @@ function verificarBonusDeBlocos() {
             alert('🏆 100 BLOCOS! BÔNUS EXTRA!');
         }
         updateScoreDisplay(score);
-        updateBitcoinValue();
+        updateBitcoinValue(false);
         SoundSystem.win();
     }
 }
@@ -1883,25 +2106,16 @@ function mostrarBonusMessage(p, b, v) {
     setTimeout(() => div.remove(), 5000);
 }
 
-// ============================================
-// 15. FUNÇÕES AUXILIARES
-// ============================================
 function generateHash(n) {
     const d = new Date();
     return `Bloco #${n} | Hash: 000000${Math.random().toString(36).substring(2,15)}${n} | ${d.toLocaleString('pt-BR')}`;
 }
 
-// ============================================
-// UPDATE HASH LOG - VERIFICAR SE USA A FUNÇÃO CORRETA
-// ============================================
 function updateHashLog(blockNumber) {
-    // Gerar bloco realista
     const bloco = gerarBlocoRealista(blockNumber, problemaAtual?.textoCifrado || '');
     
-    // 🔴 CHAMAR A FUNÇÃO CORRETA
     adicionarBlocoRealista(bloco);
     
-    // Se ainda tiver a parte do hash-display, mantenha
     const hashDisplay = document.getElementById('hash-display');
     if (hashDisplay) {
         if (hashDisplay.textContent.trim() === "Nenhum bloco quebrado ainda.") {
@@ -1921,7 +2135,6 @@ function updateHashLog(blockNumber) {
         `;
         el.textContent = `Bloco #${blockNumber} | ${bloco.timestamp} | Hash: ${bloco.hash}`;
         
-        // 🔴 TAMBÉM INSERIR NO TOPO
         if (hashDisplay.firstChild) {
             hashDisplay.insertBefore(el, hashDisplay.firstChild);
         } else {
@@ -1938,9 +2151,6 @@ function showHelp() {
     alert(`🎮 AJUDA DO JOGOBITCOIN\n\n1. Escolha dificuldade\n2. Descriptografe\n3. Digite resposta\n4. Enter\n\nTipos: Cifra de César, ASCII, Base64`);
 }
 
-// ============================================
-// 16. SISTEMA DE MENU COMPLETO
-// ============================================
 let gameStartTime = Date.now();
 
 function inicializarContadorVisitas() {
@@ -1955,7 +2165,7 @@ function criarMenu() {
     const btn = document.createElement('button');
     btn.id = 'menu-button';
     btn.innerHTML = '☰';
-    btn.style.cssText = 'position:fixed; bottom:600px; right:20px; width:50px; height:50px; border-radius:50%; background:linear-gradient(135deg,#9c27b0,#673ab7); color:white; border:2px solid #ba68c8; font-size:1.5em; cursor:pointer; z-index:10001;';
+    btn.style.cssText = 'position:fixed; top:12px; right:140px; width:50px; height:50px; border-radius:50%; background:linear-gradient(135deg,#9c27b0,#673ab7); color:white; border:2px solid #ba68c8; font-size:1.5em; cursor:pointer; z-index:10001;';
     btn.onclick = toggleMenu;
     document.body.appendChild(btn);
     
@@ -1983,13 +2193,50 @@ function criarMenu() {
                 </div>
                 <div style="padding:20px; border-top:1px solid rgba(255,255,255,0.1); display:flex; justify-content:space-between;">
                     <span>👁️ <span id="visit-count">0</span> visitas</span>
-                    <span style="color:#888;">v1.0</span>
+                    <span style="color:#888;">v2.0</span>
                 </div>
             </div>
         </div>
     `;
     document.body.insertAdjacentHTML('beforeend', html);
     document.getElementById('menu-overlay').onclick = fecharMenu;
+}
+
+// ============================================
+// BOLHAS NA TELA INICIAL
+// ============================================
+function createBubble() {
+    if (!document.body.classList.contains('show-crypto')) return;
+    const b = document.createElement('div');
+    b.className = 'bubble';
+    const size = 40 + Math.random() * 50;
+    b.style.width = `${size}px`;
+    b.style.height = `${size}px`;
+    b.style.left = `${Math.random() * 100}%`;
+    const dur = 12 + Math.random() * 12;
+    b.style.animationDuration = `${dur}s`;
+    b.onclick = () => {
+        b.style.transition = 'transform 0.2s ease, opacity 0.2s ease';
+        b.style.transform = 'scale(0)';
+        b.style.opacity = '0';
+        setTimeout(() => b.remove(), 200);
+    };
+    b.addEventListener('animationend', () => b.remove());
+    document.body.appendChild(b);
+}
+
+function startHomeBubbles() {
+    if (bubbleInterval) return;
+    createBubble();
+    bubbleInterval = setInterval(createBubble, 5000);
+}
+
+function stopHomeBubbles() {
+    if (bubbleInterval) {
+        clearInterval(bubbleInterval);
+        bubbleInterval = null;
+    }
+    document.querySelectorAll('.bubble').forEach(b => b.remove());
 }
 
 function toggleMenu() {
@@ -2055,7 +2302,7 @@ function abrirDashboard() {
 
 function abrirSobre() {
     fecharMenu();
-    alert('🎮 JogoBitcoin v1.0\n\nUm jogo educativo sobre criptografia e Bitcoin.\n\n© 2026 - Todos os direitos reservados');
+    alert('🎮 JogoBitcoin v2.0\n\nUm jogo educativo sobre criptografia e Bitcoin.\n\n© 2026 - Todos os direitos reservados');
 }
 
 function mostrarConquistas() {
@@ -2115,9 +2362,6 @@ function verConquistasDeJogador() {
     }
 }
 
-// ============================================
-// 17. CÍRCULO DE CÉSAR
-// ============================================
 let circuloAtivo = false;
 let letrasCifradas = [];
 let letrasDecifradas = [];
@@ -2251,7 +2495,6 @@ function selecionarLetra(index) {
     if (SoundSystem) SoundSystem.click();
 }
 
-// --- CONTROLA O GIRO DA LETRA ATUAL ---
 function girarLetraAtual(direcao) {
     rotacoesPorLetra[letraSelecionada] += direcao;
     atualizarLetraSelecionada();
@@ -2268,13 +2511,12 @@ function girarLetraAtual(direcao) {
     if (SoundSystem) SoundSystem.click();
 }
 
-// --- SUPORTE AO TECLADO (SETAS ESQUERDA/DIREITA) ---
 document.addEventListener('keydown', (event) => {
     if (event.key === 'ArrowLeft') {
-        girarLetraAtual(-1); // gira para a esquerda
+        girarLetraAtual(-1);
     }
     if (event.key === 'ArrowRight') {
-        girarLetraAtual(1); // gira para a direita
+        girarLetraAtual(1);
     }
 });
 
@@ -2351,9 +2593,6 @@ function fecharCirculo() {
     if (SoundSystem) SoundSystem.click();
 }
 
-// ============================================
-// 18. CSS ADICIONAL (inserido via JS)
-// ============================================
 document.head.insertAdjacentHTML('beforeend', `
 <style>
     .shake { animation: shake 0.5s ease-in-out; }
@@ -2366,59 +2605,369 @@ document.head.insertAdjacentHTML('beforeend', `
 `);
 
 // ============================================
-// 19. INICIALIZAÇÃO DO JOGO
+// NOVO: SISTEMA DE SALVAMENTO DO JOGO
 // ============================================
-document.addEventListener('DOMContentLoaded', () => {
-    document.getElementById('problem-container').style.display = 'none';
-    document.getElementById('hash-log').style.display = 'none';
-    document.getElementById('game-container').style.display = 'none';
-    document.getElementById('tipo-indicador').style.display = 'none';
+
+// Chave para localStorage
+const SAVE_KEY = 'jogobitcoin_save';
+
+// ============================================
+// SALVAR ESTADO DO JOGO
+// ============================================
+function salvarJogo() {
+    // Só salvar se o jogo estiver ativo
+    if (jogoConcluido || vidas <= 0) return;
     
-    const answerInput = document.getElementById('answer');
-    if (answerInput) {
-        answerInput.addEventListener('keydown', function(e) {
-            if (e.key === 'Enter' && typeof submitAnswer === 'function') submitAnswer();
-        });
+    const estado = {
+        // Progresso básico
+        currentProblem: currentProblem,
+        score: score,
+        vidas: vidas,
+        bitcoinQuantity: bitcoinQuantity,
+        brokenBlocks: brokenBlocks,
+        dificuldadeAtual: dificuldadeAtual,
+        timeLimit: timeLimit,
+        remainingTime: remainingTime,
+        
+        // Timestamp para saber quando foi salvo
+        timestamp: Date.now(),
+        
+        // Blocos quebrados (estado dos blocos)
+        blocksStage: blocks.map(block => parseInt(block.getAttribute('data-stage') || '0')),
+        
+        // Problema atual
+        problemaAtual: problemaAtual ? {
+            pergunta: problemaAtual.pergunta,
+            textoCifrado: problemaAtual.textoCifrado,
+            respostaCorreta: problemaAtual.respostaCorreta,
+            tipo: problemaAtual.tipo,
+            chave: problemaAtual.chave,
+            dica: problemaAtual.dica
+        } : null,
+        
+        // Metas e conquistas da sessão atual
+        metasAlcancadas: metasAlcancadas,
+        selosConquistados: selosConquistados,
+        
+        // Tempo
+        tempoTotalPartida: tempoTotalPartida,
+        tempoInicioPartida: tempoInicioPartida
+    };
+    
+    try {
+        localStorage.setItem(SAVE_KEY, JSON.stringify(estado));
+        console.log('💾 Jogo salvo automaticamente:', new Date().toLocaleTimeString());
+        
+        // Mostrar indicador de salvamento
+        mostrarIndicadorSalvamento();
+    } catch (e) {
+        console.error('Erro ao salvar jogo:', e);
+    }
+}
+
+// ============================================
+// MOSTRAR INDICADOR DE SALVAMENTO
+// ============================================
+function mostrarIndicadorSalvamento() {
+    let indicador = document.getElementById('save-indicator');
+    
+    if (!indicador) {
+        indicador = document.createElement('div');
+        indicador.id = 'save-indicator';
+        indicador.style.cssText = `
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(76, 175, 80, 0.9);
+            color: white;
+            padding: 8px 20px;
+            border-radius: 30px;
+            font-size: 0.9em;
+            font-weight: bold;
+            z-index: 100000;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            border: 2px solid gold;
+            transition: opacity 0.5s;
+            pointer-events: none;
+        `;
+        document.body.appendChild(indicador);
     }
     
-    updateVidasDisplay();
-    CryptoEncyclopedia.init();
-    BitcoinPriceWidget.init();
-    RankingSystem.init();
-    SoundSystem.init();
+    indicador.innerHTML = '💾 Jogo salvo ✓';
+    indicador.style.opacity = '1';
     
+    // Esconder após 2 segundos
     setTimeout(() => {
-        const enc = document.getElementById('crypto-encyclopedia');
-        if (enc) enc.style.display = 'none';
+        indicador.style.opacity = '0';
+    }, 2000);
+}
+
+// ============================================
+// CARREGAR JOGO SALVO
+// ============================================
+function carregarJogoSalvo() {
+    try {
+        const saved = localStorage.getItem(SAVE_KEY);
+        if (!saved) return false;
+        
+        const estado = JSON.parse(saved);
+        
+        // Verificar se o save é recente (menos de 24 horas)
+        const idade = Date.now() - estado.timestamp;
+        const UM_DIA = 24 * 60 * 60 * 1000;
+        
+        if (idade > UM_DIA) {
+            console.log('⌛ Save expirado (mais de 24 horas)');
+            localStorage.removeItem(SAVE_KEY);
+            return false;
+        }
+        
+        console.log('📂 Carregando jogo salvo de', new Date(estado.timestamp).toLocaleString());
+        
+        // Restaurar variáveis básicas
+        currentProblem = estado.currentProblem;
+        score = estado.score;
+        vidas = estado.vidas;
+        bitcoinQuantity = estado.bitcoinQuantity;
+        brokenBlocks = estado.brokenBlocks;
+        dificuldadeAtual = estado.dificuldadeAtual;
+        timeLimit = estado.timeLimit;
+        remainingTime = estado.remainingTime;
+        metasAlcancadas = estado.metasAlcancadas || [];
+        selosConquistados = estado.selosConquistados || [];
+        tempoTotalPartida = estado.tempoTotalPartida || 0;
+        
+        // Restaurar problema atual
+        if (estado.problemaAtual) {
+            problemaAtual = estado.problemaAtual;
+        }
+        
+        // Inicializar jogo com a dificuldade salva
+        document.getElementById('info-container').style.display = 'none';
+        document.getElementById('difficulty-selection').style.display = 'none';
+        document.getElementById('problem-container').style.display = 'flex';
+        document.getElementById('game-container').style.display = 'flex';
+        document.getElementById('hash-log').style.display = 'flex';
+        
+        // Esconder imagens
+        ['img-Bitcoin.esquerda', 'img-esquerda', 'img-logo.esquerda', 'img-Bitcoin.direita', 'img-direita', 'img-logo.direita'].forEach(id => {
+            const el = document.getElementById(id);
+            if (el) el.style.display = 'none';
+        });
+        
+        // Recriar blocos com estágios salvos
+        initializeBlocks();
+        if (estado.blocksStage) {
+            estado.blocksStage.forEach((stage, index) => {
+                if (index < blocks.length && stage > 0) {
+                    const block = blocks[index];
+                    block.setAttribute('data-stage', stage);
+                    
+                    // Aplicar cor baseada no estágio
+                    if (stage === 1) {
+                        block.style.backgroundColor = '#f1c40f';
+                    } else if (stage === 2) {
+                        block.style.backgroundColor = '#95a5a6';
+                    } else if (stage === 3) {
+                        block.style.backgroundColor = '#2ecc71';
+                    }
+                    
+                    const progress = block.querySelector('.block-progress');
+                    if (progress) {
+                        progress.textContent = stage === 1 ? '33%' : stage === 2 ? '66%' : '100%';
+                    }
+                }
+            });
+        }
+        
+        // Atualizar displays
+        updateBitcoinValue(false);
+        updateScoreDisplay(score);
+        updateVidasDisplay();
+        
+        // Mostrar problema atual
+        if (problemaAtual) {
+            document.getElementById('problem-number').textContent = `Bloco Nº: ${currentProblem}`;
+            document.getElementById('problem-question').innerHTML = `${problemaAtual.pergunta}<br><div class="texto-cifrado">${problemaAtual.textoCifrado}</div>`;
+        } else {
+            displayNextProblem();
+        }
+        
+        // Reiniciar timer
+        startTimer();
+        
+        // Mostrar timer global
+        const tempoDisplay = document.getElementById('tempo-global');
+        if (tempoDisplay) {
+            tempoDisplay.style.display = 'flex';
+        }
+        
+        // Mostrar mensagem de boas-vindas
+        mostrarMensagemLateral('🔄 Jogo carregado! Continue de onde parou.', 'info', 3000);
+        
+        return true;
+    } catch (e) {
+        console.error('Erro ao carregar jogo:', e);
+        return false;
+    }
+}
+
+// ============================================
+// NOVO: BOTÃO DE ENCERRAR PARTIDA
+// ============================================
+function criarBotaoEncerrar() {
+    const btn = document.createElement('button');
+    btn.id = 'btn-encerrar';
+    btn.innerHTML = '⏹️ Encerrar Partida';
+    btn.style.cssText = `
+        position: fixed;
+        top: 12px;
+        right: 220px;
+        padding: 10px 20px;
+        background: linear-gradient(135deg, #f44336, #d32f2f);
+        color: white;
+        border: none;
+        border-radius: 25px;
+        font-weight: bold;
+        font-size: 0.9em;
+        cursor: pointer;
+        z-index: 10000;
+        box-shadow: 0 4px 15px rgba(244, 67, 54, 0.4);
+        transition: all 0.3s ease;
+        border: 2px solid #ff9800;
+        display: none; /* Só aparece durante o jogo */
+    `;
+    
+    btn.onmouseover = () => {
+        btn.style.transform = 'scale(1.05)';
+        btn.style.boxShadow = '0 8px 25px rgba(244, 67, 54, 0.6)';
+    };
+    
+    btn.onmouseout = () => {
+        btn.style.transform = 'scale(1)';
+        btn.style.boxShadow = '0 4px 15px rgba(244, 67, 54, 0.4)';
+    };
+    
+    btn.onclick = encerrarPartida;
+    
+    document.body.appendChild(btn);
+}
+
+// ============================================
+// NOVO: FUNÇÃO PARA ENCERRAR PARTIDA
+// ============================================
+function encerrarPartida() {
+    // Confirmar se realmente quer encerrar
+    if (!confirm('⚠️ Deseja realmente encerrar esta partida?\n\nSeu progresso será registrado no ranking e você poderá começar uma nova partida.')) {
+        return;
+    }
+    
+    console.log('⏹️ Encerrando partida voluntariamente...');
+    
+    // Parar timers
+    clearInterval(timerInterval);
+    pararTimerGlobal();
+    
+    // Marcar como concluído para não continuar
+    jogoConcluido = true;
+    
+    // Mostrar mensagem de encerramento
+    const msg = document.getElementById('mensagem-final');
+    const txt = document.getElementById('mensagem-texto');
+    const btn = document.getElementById('restart-button');
+    
+    if (msg && txt) {
+        // Mostrar resumo da partida
+        let conquistasTexto = '';
+        if (selosConquistados.length > 0) {
+            conquistasTexto = '<div style="margin-top: 15px; background: rgba(255,215,0,0.2); padding: 10px; border-radius: 10px;">';
+            conquistasTexto += '<p style="color: gold; margin-bottom: 5px;">🏆 Conquistas:</p>';
+            selosConquistados.forEach(c => {
+                conquistasTexto += `<p style="margin: 3px 0;">${c.icone} ${c.titulo}</p>`;
+            });
+            conquistasTexto += '</div>';
+        }
+        
+        txt.innerHTML = `
+            <h2 style="color: #ff9800;">⏹️ Partida Encerrada</h2>
+            <p><strong>BTC:</strong> ${bitcoinQuantity.toFixed(8)}</p>
+            <p><strong>Pontos:</strong> ${score.toLocaleString()}</p>
+            <p><strong>Blocos:</strong> ${brokenBlocks}/100</p>
+            <p><strong>Tempo total:</strong> ${formatarTempo(tempoTotalPartida)}</p>
+            <p><strong>Dificuldade:</strong> ${dificuldadeAtual.toUpperCase()}</p>
+            ${conquistasTexto}
+        `;
+        
+        msg.style.display = 'block';
+    }
+    
+    // Salvar no ranking (com todas as conquistas)
+    setTimeout(() => {
+        RankingSystem.saveGameScore(false); // false = não é vitória, mas encerrou
+        
+        // Limpar save automático
+        localStorage.removeItem(SAVE_KEY);
     }, 500);
     
-    // Inicializar menu
-    if (!document.getElementById('main-menu')) criarMenu();
-    inicializarContadorVisitas();
+    if (btn) btn.style.display = 'inline-block';
+    
+    // Esconder botão de encerrar
+    const btnEncerrar = document.getElementById('btn-encerrar');
+    if (btnEncerrar) btnEncerrar.style.display = 'none';
+    
+    // Tocar som
+    if (SoundSystem) SoundSystem.click();
+}
+
+// ============================================
+// SALVAMENTO AUTOMÁTICO PERIÓDICO
+// ============================================
+setInterval(() => {
+    // Salvar a cada 30 segundos se o jogo estiver ativo
+    if (!jogoConcluido && vidas > 0 && currentProblem > 1) {
+        salvarJogo();
+    }
+}, 30000);
+
+// ============================================
+// PREVENIR PERDA ACIDENTAL
+// ============================================
+window.addEventListener('beforeunload', (e) => {
+    // Se o jogo estiver ativo, avisar antes de sair
+    if (!jogoConcluido && vidas > 0 && currentProblem > 1) {
+        // Salvar automaticamente antes de sair
+        salvarJogo();
+        
+        // Mostrar aviso (opcional)
+        e.preventDefault();
+        e.returnValue = 'Tem certeza que deseja sair? Seu progresso foi salvo.';
+    }
 });
+
 // ============================================
 // DECODIFICADOR - FERRAMENTAS DE APOIO
 // ============================================
 
-// Abrir decodificador
 function abrirDecodificador() {
+    console.log('🔧 Abrindo decodificador - Dificuldade atual:', dificuldadeAtual);
+    
     fecharMenu();
     const modal = document.getElementById('decodificador-modal');
     if (modal) {
         modal.style.display = 'flex';
-        // Reset para nível fácil
-        abrirDecodNivel('facil');
         
-        // 🆕 ATUALIZAR COM PROBLEMA ATUAL
+        atualizarEstadosDecodificador();
+        
         setTimeout(() => {
-            atualizarDecodificadorComProblema();
-        }, 100);
+            abrirDecodNivel(dificuldadeAtual);
+            forcarPreenchimentoDecodificador();
+        }, 200);
         
         if (SoundSystem) SoundSystem.click();
     }
 }
 
-// Fechar decodificador
 function fecharDecodificador() {
     const modal = document.getElementById('decodificador-modal');
     if (modal) {
@@ -2427,19 +2976,60 @@ function fecharDecodificador() {
     if (SoundSystem) SoundSystem.click();
 }
 
-// Abrir nível no decodificador
 // ============================================
-// FUNÇÃO PARA ABRIR NÍVEL NO DECODIFICADOR
+// SISTEMA DE HABILITAÇÃO DOS NÍVEIS DO DECODIFICADOR
 // ============================================
-function abrirDecodNivel(nivel) {
-    console.log('📂 Abrindo nível:', nivel);
+
+function atualizarEstadosDecodificador() {
+    console.log('🎮 Atualizando estados do decodificador - Dificuldade atual:', dificuldadeAtual);
     
-    // Esconder todos os conteúdos
+    const botoesNivel = document.querySelectorAll('.decod-nivel');
+    
+    botoesNivel.forEach(btn => {
+        const nivel = btn.getAttribute('data-nivel');
+        
+        if (nivel === dificuldadeAtual) {
+            btn.disabled = false;
+            btn.style.opacity = '1';
+            btn.style.cursor = 'pointer';
+            btn.style.pointerEvents = 'auto';
+            
+            if (nivel === 'facil') btn.style.background = 'linear-gradient(135deg,#00aa00,#006600)';
+            if (nivel === 'medio') btn.style.background = 'linear-gradient(135deg,#ffaa00,#cc8800)';
+            if (nivel === 'dificil') btn.style.background = 'linear-gradient(135deg,#ff4400,#aa2200)';
+        } else {
+            btn.disabled = true;
+            btn.style.opacity = '0.4';
+            btn.style.cursor = 'not-allowed';
+            btn.style.pointerEvents = 'none';
+            btn.style.background = 'rgba(255,255,255,0.1)';
+        }
+    });
+    
+    const nivelAtualDiv = document.getElementById(`decod-${dificuldadeAtual}`);
+    if (nivelAtualDiv && nivelAtualDiv.style.display !== 'block') {
+        abrirDecodNivel(dificuldadeAtual);
+    }
+}
+
+function abrirDecodNivel(nivel) {
+    console.log('📂 Tentando abrir nível:', nivel, 'Dificuldade atual:', dificuldadeAtual);
+    
+    if (nivel !== dificuldadeAtual) {
+        console.log('🚫 Nível', nivel, 'não permitido - dificuldade atual é', dificuldadeAtual);
+        
+        mostrarMensagemLateral(`🚫 Nível ${nivel.toUpperCase()} bloqueado! Complete o nível ${dificuldadeAtual.toUpperCase()} primeiro.`, 'info', 3000);
+        
+        setTimeout(() => {
+            abrirDecodNivel(dificuldadeAtual);
+        }, 100);
+        return;
+    }
+    
     document.querySelectorAll('.decod-conteudo').forEach(el => {
         el.style.display = 'none';
     });
     
-    // Mostrar o nível selecionado
     const nivelDiv = document.getElementById(`decod-${nivel}`);
     if (nivelDiv) {
         nivelDiv.style.display = 'block';
@@ -2448,53 +3038,87 @@ function abrirDecodNivel(nivel) {
         return;
     }
     
-    // Atualizar aparência dos botões
     document.querySelectorAll('.decod-nivel').forEach(btn => {
-        btn.style.background = 'rgba(255,255,255,0.1)';
-        btn.style.color = 'white';
+        const btnNivel = btn.getAttribute('data-nivel');
+        
+        if (btnNivel === dificuldadeAtual) {
+            btn.style.background = 'rgba(255,255,255,0.1)';
+            btn.style.color = 'white';
+            btn.disabled = false;
+            btn.style.opacity = '1';
+            btn.style.cursor = 'pointer';
+            btn.style.pointerEvents = 'auto';
+        } else {
+            btn.disabled = true;
+            btn.style.opacity = '0.4';
+            btn.style.cursor = 'not-allowed';
+            btn.style.pointerEvents = 'none';
+            btn.style.background = 'rgba(255,255,255,0.1)';
+        }
     });
     
-    // Destacar botão ativo
     const btnAtivo = document.querySelector(`.decod-nivel[data-nivel="${nivel}"]`);
-    if (btnAtivo) {
+    if (btnAtivo && nivel === dificuldadeAtual) {
         if (nivel === 'facil') btnAtivo.style.background = 'linear-gradient(135deg,#00aa00,#006600)';
         if (nivel === 'medio') btnAtivo.style.background = 'linear-gradient(135deg,#ffaa00,#cc8800)';
         if (nivel === 'dificil') btnAtivo.style.background = 'linear-gradient(135deg,#ff4400,#aa2200)';
         btnAtivo.style.color = 'white';
     }
     
-    // Resetar resultado
     const resultado = document.getElementById('decod-resultado');
     if (resultado) resultado.innerHTML = 'Aguardando decodificação...';
+    
+    setTimeout(() => {
+        forcarPreenchimentoDecodificador();
+    }, 100);
 }
 
-// Selecionar método (para médio e difícil)
 function selecionarDecodMetodo(nivel, metodo) {
-    // Esconder todos os métodos deste nível
     console.log(`📂 Selecionando método ${metodo} no nível ${nivel}`);
-    document.querySelectorAll(`#decod-${nivel} .decod-metodo`).forEach(el => el.style.display = 'none');
     
-    // Mostrar método selecionado
-    document.getElementById(`decod-${nivel}-${metodo}`).style.display = 'block';
+    document.querySelectorAll(`#decod-${nivel} .decod-metodo`).forEach(el => {
+        el.style.display = 'none';
+    });
     
-    // Atualizar botões
-    const botoes = document.querySelectorAll(`#decod-${nivel} .btn-metodo`);
-    botoes.forEach(btn => btn.style.background = 'rgba(255,255,255,0.1)');
+    const metodoDiv = document.getElementById(`decod-${nivel}-${metodo}`);
+    if (metodoDiv) {
+        metodoDiv.style.display = 'block';
+    }
+    
+    document.querySelectorAll(`#decod-${nivel} .btn-metodo`).forEach(btn => {
+        btn.style.background = 'rgba(255,255,255,0.1)';
+    });
     
     const btnAtivo = document.getElementById(`decod-${nivel}-${metodo}-btn`);
     if (btnAtivo) {
-        if (nivel === 'medio') btnAtivo.style.background = 'linear-gradient(135deg, #FF9800, #F57C00)';
-        if (nivel === 'dificil') btnAtivo.style.background = 'linear-gradient(135deg, #f44336, #c62828)';
+        if (nivel === 'medio') btnAtivo.style.background = 'linear-gradient(135deg, #ffaa00, #cc8800)';
+        if (nivel === 'dificil') btnAtivo.style.background = 'linear-gradient(135deg, #ff4400, #aa2200)';
     }
     
-    // 🆕 ATUALIZAR COM PROBLEMA ATUAL
+    setTimeout(() => {
+        forcarPreenchimentoDecodificador();
+    }, 100);
+}
+
+function selecionarDecodFacil(tipo) {
+    const btnSimples = document.getElementById('decod-facil-simples-btn');
+    const btnCirculo = document.getElementById('decod-facil-circulo-btn');
+    
+    if (tipo === 'simples') {
+        document.getElementById('decod-facil-simples').style.display = 'block';
+        document.getElementById('decod-facil-circulo').style.display = 'none';
+        btnSimples.style.background = 'linear-gradient(135deg, #4CAF50, #2E7D32)';
+        btnCirculo.style.background = 'rgba(255,255,255,0.1)';
+    } else {
+        document.getElementById('decod-facil-simples').style.display = 'none';
+        document.getElementById('decod-facil-circulo').style.display = 'block';
+        btnCirculo.style.background = 'linear-gradient(135deg, #4CAF50, #2E7D32)';
+        btnSimples.style.background = 'rgba(255,255,255,0.1)';
+    }
+    
     atualizarDecodificadorComProblema();
 }
-// ============================================
-// FUNÇÕES DE DECODIFICAÇÃO POR NÍVEL
-// ============================================
 
-// Decodificar nível fácil (Cifra de César)
 function decodificarFacil() {
     const input = document.getElementById('decod-facil-input')?.value;
     const shift = parseInt(document.getElementById('decod-facil-shift')?.value || 0);
@@ -2509,9 +3133,7 @@ function decodificarFacil() {
     if (SoundSystem) SoundSystem.click();
 }
 
-// Decodificar nível médio (Cifra de César + ASCII)
 function decodificarMedio() {
-    // Verificar qual método está ativo no médio
     const metodoCesar = document.getElementById('decod-medio-cesar')?.style.display !== 'none';
     const metodoAscii = document.getElementById('decod-medio-ascii')?.style.display !== 'none';
     const resultado = document.getElementById('decod-resultado');
@@ -2541,7 +3163,6 @@ function decodificarMedio() {
     if (SoundSystem) SoundSystem.click();
 }
 
-// Decodificar nível difícil (Cifra de César + ASCII + Base64)
 function decodificarDificil() {
     const metodoCesar = document.getElementById('decod-dificil-cesar')?.style.display !== 'none';
     const metodoAscii = document.getElementById('decod-dificil-ascii')?.style.display !== 'none';
@@ -2580,7 +3201,6 @@ function decodificarDificil() {
     if (SoundSystem) SoundSystem.click();
 }
 
-// Funções auxiliares de decodificação
 function decodificarCesar(texto, shift) {
     try {
         let resultado = '';
@@ -2628,175 +3248,6 @@ function decodificarBase64(texto) {
     }
 }
 
-// ============================================
-// SELECIONAR MÉTODO (César, ASCII, Base64)
-// ============================================
-function selecionarDecodMetodo(nivel, metodo) {
-    console.log(`📂 Selecionando método ${metodo} no nível ${nivel}`);
-    
-    // Esconder todos os métodos deste nível
-    document.querySelectorAll(`#decod-${nivel} .decod-metodo`).forEach(el => {
-        el.style.display = 'none';
-    });
-    
-    // Mostrar método selecionado
-    const metodoDiv = document.getElementById(`decod-${nivel}-${metodo}`);
-    if (metodoDiv) {
-        metodoDiv.style.display = 'block';
-    }
-    
-    // Atualizar botões de método
-    document.querySelectorAll(`#decod-${nivel} .btn-metodo`).forEach(btn => {
-        btn.style.background = 'rgba(255,255,255,0.1)';
-    });
-    
-    // Destacar botão ativo
-    const btnAtivo = document.getElementById(`decod-${nivel}-${metodo}-btn`);
-    if (btnAtivo) {
-        if (nivel === 'medio') btnAtivo.style.background = 'linear-gradient(135deg, #ffaa00, #cc8800)';
-        if (nivel === 'dificil') btnAtivo.style.background = 'linear-gradient(135deg, #ff4400, #aa2200)';
-    }
-}
-// Função para o nível fácil
-function selecionarDecodFacil(tipo) {
-    const btnSimples = document.getElementById('decod-facil-simples-btn');
-    const btnCirculo = document.getElementById('decod-facil-circulo-btn');
-    
-    if (tipo === 'simples') {
-        document.getElementById('decod-facil-simples').style.display = 'block';
-        document.getElementById('decod-facil-circulo').style.display = 'none';
-        btnSimples.style.background = 'linear-gradient(135deg, #4CAF50, #2E7D32)';
-        btnCirculo.style.background = 'rgba(255,255,255,0.1)';
-    } else {
-        document.getElementById('decod-facil-simples').style.display = 'none';
-        document.getElementById('decod-facil-circulo').style.display = 'block';
-        btnCirculo.style.background = 'linear-gradient(135deg, #4CAF50, #2E7D32)';
-        btnSimples.style.background = 'rgba(255,255,255,0.1)';
-    }
-    
-    // 🆕 ATUALIZAR COM PROBLEMA ATUAL
-    atualizarDecodificadorComProblema();
-}
-
-// Decodificar nível fácil
-function decodificarFacil() {
-    const input = document.getElementById('decod-facil-input').value;
-    const shift = parseInt(document.getElementById('decod-facil-shift').value);
-    const resultado = document.getElementById('decod-resultado');
-    
-    if (!input) {
-        resultado.innerHTML = '⚠️ Digite uma mensagem para decodificar!';
-        return;
-    }
-    
-    resultado.innerHTML = decodificarCesar(input, shift);
-    if (SoundSystem) SoundSystem.click();
-}
-
-// Decodificar nível médio
-function decodificarMedio() {
-    const metodoCesar = document.getElementById('decod-medio-cesar').style.display !== 'none';
-    const resultado = document.getElementById('decod-resultado');
-    
-    if (metodoCesar) {
-        const input = document.getElementById('decod-medio-cesar-input').value;
-        const shift = parseInt(document.getElementById('decod-medio-shift').value);
-        
-        if (!input) {
-            resultado.innerHTML = '⚠️ Digite uma mensagem!';
-            return;
-        }
-        resultado.innerHTML = decodificarCesar(input, shift);
-    } else {
-        const input = document.getElementById('decod-medio-ascii-input').value;
-        if (!input) {
-            resultado.innerHTML = '⚠️ Digite códigos ASCII!';
-            return;
-        }
-        resultado.innerHTML = decodificarASCII(input);
-    }
-    if (SoundSystem) SoundSystem.click();
-}
-
-// Decodificar nível difícil
-function decodificarDificil() {
-    const metodoCesar = document.getElementById('decod-dificil-cesar').style.display !== 'none';
-    const metodoAscii = document.getElementById('decod-dificil-ascii').style.display !== 'none';
-    const metodoBase64 = document.getElementById('decod-dificil-base64').style.display !== 'none';
-    const resultado = document.getElementById('decod-resultado');
-    
-    if (metodoCesar) {
-        const input = document.getElementById('decod-dificil-cesar-input').value;
-        const shift = parseInt(document.getElementById('decod-dificil-shift').value);
-        if (!input) {
-            resultado.innerHTML = '⚠️ Digite uma mensagem!';
-            return;
-        }
-        resultado.innerHTML = decodificarCesar(input, shift);
-    } 
-    else if (metodoAscii) {
-        const input = document.getElementById('decod-dificil-ascii-input').value;
-        if (!input) {
-            resultado.innerHTML = '⚠️ Digite códigos ASCII!';
-            return;
-        }
-        resultado.innerHTML = decodificarASCII(input);
-    } 
-    else if (metodoBase64) {
-        const input = document.getElementById('decod-dificil-base64-input').value;
-        if (!input) {
-            resultado.innerHTML = '⚠️ Digite um texto Base64!';
-            return;
-        }
-        resultado.innerHTML = decodificarBase64(input);
-    }
-    if (SoundSystem) SoundSystem.click();
-}
-
-// Funções auxiliares de decodificação
-function decodificarCesar(texto, shift) {
-    let resultado = '';
-    for (let i = 0; i < texto.length; i++) {
-        let char = texto[i];
-        if (char.match(/[a-z]/i)) {
-            let code = texto.charCodeAt(i);
-            if (code >= 65 && code <= 90) {
-                char = String.fromCharCode(((code - 65 - shift + 26) % 26) + 65);
-            } else if (code >= 97 && code <= 122) {
-                char = String.fromCharCode(((code - 97 - shift + 26) % 26) + 97);
-            }
-        }
-        resultado += char;
-    }
-    return resultado || '❌ Erro ao decodificar';
-}
-
-function decodificarASCII(texto) {
-    try {
-        const codes = texto.split(/[,\s]+/);
-        let resultado = '';
-        for (let code of codes) {
-            if (code === '') continue;
-            const num = parseInt(code);
-            if (isNaN(num) || num < 0 || num > 255) {
-                return `❌ Código inválido: ${code}`;
-            }
-            resultado += String.fromCharCode(num);
-        }
-        return resultado;
-    } catch (e) {
-        return '❌ Erro ao decodificar ASCII';
-    }
-}
-
-function decodificarBase64(texto) {
-    try {
-        return atob(texto.replace(/\s/g, ''));
-    } catch (e) {
-        return '❌ Erro: Texto Base64 inválido!';
-    }
-}
-
 function copiarResultadoDecod() {
     const resultado = document.getElementById('decod-resultado').innerText;
     if (resultado && !resultado.includes('Aguardando') && !resultado.includes('⚠️') && !resultado.includes('❌')) {
@@ -2808,9 +3259,29 @@ function copiarResultadoDecod() {
     }
 }
 
-// Atualizar valores dos sliders
 document.addEventListener('DOMContentLoaded', function() {
-    // Slider fácil
+    // Configurações iniciais
+    document.getElementById('problem-container').style.display = 'none';
+    document.getElementById('hash-log').style.display = 'none';
+    document.getElementById('game-container').style.display = 'none';
+    document.getElementById('tipo-indicador').style.display = 'none';
+    
+    // Event listener para Enter
+    const answerInput = document.getElementById('answer');
+    if (answerInput) {
+        answerInput.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter' && typeof submitAnswer === 'function') submitAnswer();
+        });
+    }
+    
+    // Inicializar sistemas
+    updateVidasDisplay();
+    CryptoEncyclopedia.init();
+    BitcoinPriceWidget.init();
+    RankingSystem.init();
+    SoundSystem.init();
+    
+    // Sliders do decodificador
     const sliderFacil = document.getElementById('decod-facil-shift');
     if (sliderFacil) {
         sliderFacil.addEventListener('input', function(e) {
@@ -2818,7 +3289,6 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
     
-    // Slider médio
     const sliderMedio = document.getElementById('decod-medio-shift');
     if (sliderMedio) {
         sliderMedio.addEventListener('input', function(e) {
@@ -2826,38 +3296,68 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
     
-    // Slider difícil
     const sliderDificil = document.getElementById('decod-dificil-shift');
     if (sliderDificil) {
         sliderDificil.addEventListener('input', function(e) {
             document.getElementById('decod-dificil-shift-value').textContent = e.target.value;
         });
     }
+    
+    // Esconder enciclopédia após 500ms
+    setTimeout(() => {
+        const enc = document.getElementById('crypto-encyclopedia');
+        if (enc) enc.style.display = 'none';
+    }, 500);
+    
+    startHomeBubbles();
+
+    // Criar menu se não existir
+    if (!document.getElementById('main-menu')) criarMenu();
+    
+    // Inicializar contador de visitas
+    inicializarContadorVisitas();
+    
+    // NOVO: Criar botão de encerrar
+    criarBotaoEncerrar();
+    
+    // NOVO: Verificar se há jogo salvo
+    setTimeout(() => {
+        const temSave = localStorage.getItem(SAVE_KEY);
+        
+        if (temSave) {
+            // Perguntar se quer continuar
+            const continuar = confirm('🔄 Há um jogo em andamento salvo!\n\nDeseja continuar de onde parou?');
+            
+            if (continuar) {
+                carregarJogoSalvo();
+                
+                // Mostrar botão de encerrar
+                const btnEncerrar = document.getElementById('btn-encerrar');
+                if (btnEncerrar) btnEncerrar.style.display = 'block';
+            } else {
+                // Remover save se não quiser continuar
+                localStorage.removeItem(SAVE_KEY);
+            }
+        }
+    }, 1000);
 });
-// ============================================
-// FUNÇÃO PARA PREENCHER TEXTO CIFRADO AUTOMATICAMENTE
-// ============================================
+
 function preencherTextoAtual() {
-    // Verificar se há um problema atual
     if (!problemaAtual) {
         alert('⚠️ Nenhum problema ativo no momento. Inicie uma partida primeiro!');
         return false;
     }
     
-    // Pegar o texto cifrado do problema atual
     const textoCifrado = problemaAtual.textoCifrado;
     
-    // Determinar qual nível está ativo no decodificador
     const nivelAtivo = document.querySelector('.decod-conteudo[style*="display: block"]')?.id;
     
     if (!nivelAtivo) return false;
     
-    // Preencher o campo apropriado baseado no nível e método ativo
     if (nivelAtivo === 'decod-facil') {
         document.getElementById('decod-facil-input').value = textoCifrado;
         
     } else if (nivelAtivo === 'decod-medio') {
-        // Verificar qual método está ativo no médio
         const metodoCesar = document.getElementById('decod-medio-cesar').style.display !== 'none';
         const metodoAscii = document.getElementById('decod-medio-ascii').style.display !== 'none';
         
@@ -2884,50 +3384,23 @@ function preencherTextoAtual() {
     return true;
 }
 
-// Modificar a função abrirDecodificador para preencher automaticamente
-function abrirDecodificador() {
-    fecharMenu();
-    const modal = document.getElementById('decodificador-modal');
-    if (modal) {
-        modal.style.display = 'flex';
-        // Reset para nível fácil
-        abrirDecodNivel('facil');
-        
-        // 🆕 PREENCHER TEXTO ATUAL AUTOMATICAMENTE
-        setTimeout(() => {
-            if (!preencherTextoAtual()) {
-                // Se não houver problema atual, mostrar mensagem
-                document.getElementById('decod-resultado').innerHTML = '⚠️ Nenhum problema ativo. Inicie uma partida primeiro!';
-            }
-        }, 100);
-        
-        if (SoundSystem) SoundSystem.click();
-    }
-}
-// ============================================
-// FUNÇÃO PARA USAR RESPOSTA NO JOGO (NÃO FECHA MAIS)
-// ============================================
 function usarResultadoNoJogo() {
     const resultado = document.getElementById('decod-resultado').innerText;
     
-    // Verificações
     if (!resultado || resultado.includes('Aguardando') || resultado.includes('⚠️') || resultado.includes('❌')) {
         alert('❌ Nenhum resultado válido para usar!');
         return;
     }
     
-    // Verificar se o jogo está ativo
     if (jogoConcluido || vidas <= 0) {
         alert('❌ O jogo não está ativo no momento!');
         return;
     }
     
-    // Preencher a resposta no campo do jogo
     const answerInput = document.getElementById('answer');
     if (answerInput) {
         answerInput.value = resultado;
         
-        // Feedback visual
         answerInput.style.borderColor = '#4CAF50';
         answerInput.style.boxShadow = '0 0 20px rgba(76,175,80,0.5)';
         setTimeout(() => {
@@ -2935,15 +3408,10 @@ function usarResultadoNoJogo() {
             answerInput.style.boxShadow = '';
         }, 1500);
         
-        // ✅ REMOVIDO: Não pergunta mais se quer fechar
-        // A ferramenta continua aberta
-        
-        // Focar no campo de resposta (opcional)
         answerInput.focus();
         
         if (SoundSystem) SoundSystem.correct();
         
-        // Opcional: Mostrar mensagem de confirmação
         const resultadoDiv = document.getElementById('decod-resultado');
         const msgSucesso = document.createElement('div');
         msgSucesso.style.cssText = `
@@ -2958,40 +3426,31 @@ function usarResultadoNoJogo() {
         msgSucesso.textContent = '✅ Resposta copiada para o jogo!';
         resultadoDiv.parentElement.appendChild(msgSucesso);
         
-        // Remover mensagem após 2 segundos
         setTimeout(() => {
             if (msgSucesso.parentElement) msgSucesso.remove();
         }, 2000);
     }
 }
-// ============================================
-// ATUALIZAR DECODIFICADOR COM PROBLEMA ATUAL
-// ============================================
+
 function atualizarDecodificadorComProblema() {
-    // Verificar se o decodificador está aberto
     const modal = document.getElementById('decodificador-modal');
     if (!modal || modal.style.display !== 'flex') return;
     
-    // Verificar se há problema atual
     if (!problemaAtual) {
         document.getElementById('decod-resultado').innerHTML = '⚠️ Nenhum problema ativo. Inicie uma partida!';
         return;
     }
     
-    // Limpar resultados anteriores
     document.getElementById('decod-resultado').innerHTML = 'Aguardando decodificação...';
     
-    // Pegar o texto cifrado
     const textoCifrado = problemaAtual.textoCifrado;
     
-    // Determinar qual nível está ativo
     const nivelAtivo = document.querySelector('.decod-conteudo[style*="display: block"]')?.id;
     
     if (!nivelAtivo) return;
     
     console.log(`🔄 Atualizando decodificador com: ${textoCifrado}`);
     
-    // Preencher o campo apropriado
     if (nivelAtivo === 'decod-facil') {
         document.getElementById('decod-facil-input').value = textoCifrado;
         
@@ -3019,27 +3478,19 @@ function atualizarDecodificadorComProblema() {
         }
     }
 }
-// ============================================
-// FUNÇÃO PARA SER CHAMADA QUANDO O PROBLEMA MUDAR
-// ============================================
+
 function onProblemaMudou() {
-    // Atualizar o decodificador se estiver aberto
     atualizarDecodificadorComProblema();
 }
 
-// ============================================
-// MODO TESTE - PAUSAR VERIFICAÇÃO
-// ============================================
 let modoTesteAtivo = false;
 
 function toggleModoTeste() {
     modoTesteAtivo = !modoTesteAtivo;
     
-    // Feedback visual
     const status = modoTesteAtivo ? 'ATIVADO' : 'DESATIVADO';
     const cor = modoTesteAtivo ? '#4CAF50' : '#f44336';
     
-    // Criar ou atualizar indicador
     let indicador = document.getElementById('modo-teste-indicador');
     if (!indicador) {
         indicador = document.createElement('div');
@@ -3067,50 +3518,83 @@ function toggleModoTeste() {
     
     console.log(`🧪 Modo teste ${status}`);
     
-    // Beep de feedback
     if (SoundSystem) SoundSystem.click();
 }
 
 // ============================================
-// GERADOR DE BLOCOS REALISTAS
+// GERADOR DE BLOCOS REALISTAS - VERSÃO CORRIGIDA (HEXADECIMAL)
 // ============================================
 
-// Histórico de hashes para criar a cadeia
 let ultimosHashes = [];
 
 function gerarBlocoRealista(numeroBloco, texto = '') {
     // Hash anterior (do último bloco, ou genesis se for o primeiro)
     const hashAnterior = ultimosHashes.length > 0 
         ? ultimosHashes[ultimosHashes.length - 1].hash 
-        : '00000000000000000000000000000000';
+        : '0000000000000000000000000000000000000000'; // Genesis hash (64 chars)
     
-    // Gerar nonce aleatório (entre 0 e 999999)
-    const nonce = Math.floor(Math.random() * 1000000);
+    // Gerar nonce aleatório (entre 0 e 4294967295 - 32 bits)
+    const nonce = Math.floor(Math.random() * 4294967295);
     
-    // Dados do bloco
-    const timestamp = Date.now();
-    const dados = `${numeroBloco}${nonce}${timestamp}${texto}`;
+    // Timestamp atual em segundos (Unix timestamp)
+    const timestamp = Math.floor(Date.now() / 1000);
     
-    // Gerar hash (simulação)
+    // Dificuldade simulada (número de zeros à esquerda no hash)
+    const dificuldade = 4; // 4 zeros = dificuldade baixa
+    
+    // Simular mineração: encontrar um hash com zeros à esquerda
     let hash = '';
-    for (let i = 0; i < dados.length; i++) {
-        hash += dados.charCodeAt(i).toString(16);
-    }
-    hash = hash.substring(0, 32).padStart(32, '0');
+    let tentativas = 0;
+    const maxTentativas = 10000; // Evitar loop infinito
     
-    // Formatar hash como 8 grupos de 4 caracteres
-    const hashFormatado = hash.match(/.{1,4}/g).join(' ');
+    do {
+        tentativas++;
+        // Dados do bloco: número + nonce + timestamp + texto + tentativa
+        const dados = `${numeroBloco}-${nonce + tentativas}-${timestamp}-${texto}-${Math.random()}`;
+        
+        // Gerar hash SHA-256 simulado (64 caracteres hex)
+        hash = '';
+        for (let i = 0; i < dados.length; i++) {
+            const charCode = dados.charCodeAt(i);
+            // Converter para hex (0-9a-f)
+            const hex = (charCode ^ (tentativas + i)).toString(16).padStart(2, '0');
+            hash += hex;
+        }
+        
+        // Completar até 64 caracteres
+        while (hash.length < 64) {
+            hash += Math.floor(Math.random() * 16).toString(16);
+        }
+        hash = hash.substring(0, 64);
+        
+    } while (hash.substring(0, dificuldade) !== '0'.repeat(dificuldade) && tentativas < maxTentativas);
+    
+    // Formatar hash em grupos de 2 caracteres para melhor visualização
+    const hashFormatado = hash.match(/.{1,2}/g).join(' ');
+    
+    // Calcular merkle root (simulado)
+    const merkleRoot = Array(8).fill(0).map(() => 
+        Math.floor(Math.random() * 65536).toString(16).padStart(4, '0')
+    ).join(' ');
     
     const bloco = {
         numero: numeroBloco,
         hashAnterior: hashAnterior,
-        nonce: nonce,
+        merkleRoot: merkleRoot,
+        nonce: nonce + tentativas,
+        timestamp: timestamp,
         hash: hashFormatado,
-        timestamp: new Date().toLocaleString('pt-BR')
+        dataHora: new Date(timestamp * 1000).toLocaleString('pt-BR'),
+        tamanho: Math.floor(Math.random() * 500000) + 1000000, // 1MB a 1.5MB
+        transacoes: Math.floor(Math.random() * 1000) + 500, // 500 a 1500 transações
+        minerador: ['AntPool', 'F2Pool', 'ViaBTC', 'Binance Pool', 'Foundry USA'][Math.floor(Math.random() * 5)]
     };
     
-    // Armazenar para próximo bloco
-    ultimosHashes.push({ numero: numeroBloco, hash: hashFormatado });
+    // Armazenar para próximo bloco (apenas o hash, sem formatação)
+    ultimosHashes.push({ 
+        numero: numeroBloco, 
+        hash: hash // hash sem formatação
+    });
     
     // Manter apenas últimos 20 hashes na memória
     if (ultimosHashes.length > 20) {
@@ -3121,7 +3605,7 @@ function gerarBlocoRealista(numeroBloco, texto = '') {
 }
 
 // ============================================
-// ADICIONAR BLOCO REALISTA - VERSÃO CORRIGIDA
+// ADICIONAR BLOCO REALISTA - VERSÃO MELHORADA
 // ============================================
 function adicionarBlocoRealista(bloco) {
     const cadeia = document.getElementById('blockchain-cadeia');
@@ -3129,109 +3613,185 @@ function adicionarBlocoRealista(bloco) {
     
     const blocoDiv = document.createElement('div');
     blocoDiv.className = 'bloco-blockchain';
-    blocoDiv.setAttribute('data-numero', bloco.numero); // Para referência futura
+    blocoDiv.setAttribute('data-numero', bloco.numero);
     blocoDiv.style.cssText = `
         background: linear-gradient(135deg, #1a1a2e, #16213e);
         border: 2px solid #f7931a;
         border-radius: 12px;
         padding: 18px;
-        margin-bottom: 12px;
+        margin-bottom: 15px;
         font-family: 'Courier New', monospace;
-        font-size: 0.95em;
+        font-size: 0.9em;
         color: #00ff00;
-        box-shadow: 0 6px 20px rgba(247, 147, 26, 0.3);
+        box-shadow: 0 8px 25px rgba(247, 147, 26, 0.3);
         transition: all 0.3s ease;
         width: 100%;
         animation: novoBloco 0.5s ease-out;
+        border-left: 6px solid #f7931a;
     `;
+    
+    // Determinar cor baseada na dificuldade
+    const corDestaque = dificuldadeAtual === 'facil' ? '#4CAF50' : 
+                       dificuldadeAtual === 'medio' ? '#FF9800' : '#f44336';
     
     blocoDiv.innerHTML = `
-        <div style="display: flex; justify-content: space-between; margin-bottom: 12px; padding-bottom: 8px; border-bottom: 2px solid rgba(255,255,255,0.1);">
-            <span style="color: #f7931a; font-weight: bold; font-size: 1.2em;">⛏️ BLOCO #${bloco.numero}</span>
-            <span style="color: #888; font-size: 0.85em;">${bloco.timestamp}</span>
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; padding-bottom: 10px; border-bottom: 2px solid rgba(255,255,255,0.1);">
+            <div style="display: flex; align-items: center; gap: 10px;">
+                <span style="color: #f7931a; font-weight: bold; font-size: 1.3em;">⛓️ BLOCO #${bloco.numero}</span>
+                <span style="background: ${corDestaque}; color: black; padding: 3px 10px; border-radius: 15px; font-size: 0.7em; font-weight: bold;">${dificuldadeAtual.toUpperCase()}</span>
+            </div>
+            <span style="color: #888; font-size: 0.8em;">⏱️ ${bloco.dataHora}</span>
         </div>
-        <div style="border-left: 4px solid #4CAF50; padding-left: 12px; margin: 10px 0;">
-            <div style="color: #4CAF50; font-size: 0.9em; margin-bottom: 3px;">🔗 HASH ANTERIOR</div>
-            <div style="color: #00ff00; word-break: break-all; font-family: monospace;">${bloco.hashAnterior}</div>
+        
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px;">
+            <div style="background: rgba(0,0,0,0.3); padding: 10px; border-radius: 8px;">
+                <div style="color: #4CAF50; font-size: 0.8em; margin-bottom: 5px;">📦 HASH ANTERIOR</div>
+                <div style="color: #00ff00; font-family: monospace; font-size: 0.8em; word-break: break-all;">${bloco.hashAnterior}</div>
+            </div>
+            <div style="background: rgba(0,0,0,0.3); padding: 10px; border-radius: 8px;">
+                <div style="color: #FF9800; font-size: 0.8em; margin-bottom: 5px;">🌳 MERKLE ROOT</div>
+                <div style="color: #ffaa00; font-family: monospace; font-size: 0.8em; word-break: break-all;">${bloco.merkleRoot}</div>
+            </div>
         </div>
-        <div style="display: flex; gap: 25px; margin: 12px 0; color: #ffaa00; font-size: 1.1em;">
-            <span>⚡ NONCE: ${bloco.nonce}</span>
+        
+        <div style="display: flex; gap: 20px; margin: 15px 0; padding: 10px; background: rgba(247,147,26,0.1); border-radius: 8px;">
+            <div>
+                <div style="color: #888; font-size: 0.7em;">⚡ NONCE</div>
+                <div style="color: #f7931a; font-weight: bold;">${bloco.nonce.toLocaleString()}</div>
+            </div>
+            <div>
+                <div style="color: #888; font-size: 0.7em;">📅 TIMESTAMP</div>
+                <div style="color: white;">${bloco.timestamp}</div>
+            </div>
+            <div>
+                <div style="color: #888; font-size: 0.7em;">📊 TAMANHO</div>
+                <div style="color: white;">${(bloco.tamanho / 1000000).toFixed(2)} MB</div>
+            </div>
+            <div>
+                <div style="color: #888; font-size: 0.7em;">🔄 TRANSAÇÕES</div>
+                <div style="color: white;">${bloco.transacoes.toLocaleString()}</div>
+            </div>
         </div>
-        <div style="border-left: 4px solid #f7931a; padding-left: 12px; margin-top: 10px;">
-            <div style="color: #f7931a; font-size: 0.9em; margin-bottom: 3px;">📦 HASH ATUAL</div>
-            <div style="color: #00ff00; font-weight: bold; word-break: break-all; font-family: monospace;">${bloco.hash}</div>
+        
+        <div style="border-left: 4px solid ${corDestaque}; padding-left: 15px; margin-top: 10px;">
+            <div style="color: ${corDestaque}; font-size: 0.9em; margin-bottom: 5px; display: flex; justify-content: space-between;">
+                <span>🔑 HASH DO BLOCO</span>
+                <span style="color: #888; font-size: 0.7em;">⛏️ ${bloco.minerador}</span>
+            </div>
+            <div style="color: #00ff00; font-weight: bold; font-family: monospace; font-size: 1em; word-break: break-all; background: rgba(0,255,0,0.05); padding: 10px; border-radius: 5px;">
+                ${bloco.hash}
+            </div>
+        </div>
+        
+        <div style="margin-top: 15px; font-size: 0.7em; color: #666; text-align: right;">
+            🔒 ${bloco.hash.substring(0, 10)}... ${bloco.hash.substring(bloco.hash.length - 10)}
         </div>
     `;
     
-    // 🔴 FORÇAR INSERÇÃO NO INÍCIO (TOPO)
+    // Inserir no TOPO (bloco mais recente primeiro)
     if (cadeia.firstChild) {
         cadeia.insertBefore(blocoDiv, cadeia.firstChild);
     } else {
         cadeia.appendChild(blocoDiv);
     }
     
-    // 🔴 REMOVER BLOCOS EXTRAS (manter só os 10 mais recentes)
-    while (cadeia.children.length > 10) {
+    // Manter apenas os 15 blocos mais recentes
+    while (cadeia.children.length > 15) {
         cadeia.removeChild(cadeia.lastChild);
     }
     
-    // 🔴 DEBUG: Mostrar ordem no console
-    console.log('Ordem dos blocos na cadeia:');
-    const blocos = Array.from(cadeia.children).map(div => div.getAttribute('data-numero'));
-    console.log(blocos.join(' → '));
+    // Debug
+    console.log(`✅ Bloco #${bloco.numero} minerado:`, {
+        hash: bloco.hash,
+        nonce: bloco.nonce,
+        minerador: bloco.minerador
+    });
 }
 
-// Modificar updateHashLog para usar o novo sistema
+// ============================================
+// FUNÇÃO PARA GERAR HASH SHA-256 REAL (OPCIONAL)
+// ============================================
+async function gerarHashSHA256(dados) {
+    if (window.crypto && window.crypto.subtle) {
+        try {
+            const encoder = new TextEncoder();
+            const data = encoder.encode(dados);
+            const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+            const hashArray = Array.from(new Uint8Array(hashBuffer));
+            const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+            return hashHex;
+        } catch (e) {
+            console.warn('Crypto API falhou, usando simulação');
+            return null;
+        }
+    }
+    return null;
+}
+
+// ============================================
+// MODIFICAR updateHashLog PARA USAR O NOVO SISTEMA
+// ============================================
 function updateHashLog(blockNumber) {
-    // Gerar bloco realista
+    // Gerar bloco realista com hash hexadecimal
     const bloco = gerarBlocoRealista(blockNumber, problemaAtual?.textoCifrado || '');
+    
+    // Adicionar à blockchain visual
     adicionarBlocoRealista(bloco);
     
-    // Manter também o formato antigo (opcional)
+    // Também manter o log simples (opcional)
     const hashDisplay = document.getElementById('hash-display');
     if (hashDisplay) {
         if (hashDisplay.textContent.trim() === "Nenhum bloco quebrado ainda.") {
             hashDisplay.innerHTML = '';
         }
+        
         const el = document.createElement('div');
         el.className = 'hash-box';
         el.style.cssText = `
-            background: rgba(0,0,0,0.5);
+            background: rgba(0,0,0,0.7);
             border-left: 4px solid #f7931a;
             padding: 10px 15px;
             margin: 8px 0;
             border-radius: 8px;
             font-family: 'Courier New', monospace;
-            font-size: 0.9em;
+            font-size: 0.85em;
             color: #00ff00;
+            box-shadow: 0 2px 10px rgba(247,147,26,0.2);
         `;
-        el.textContent = `Bloco #${blockNumber} | ${bloco.timestamp} | Hash: ${bloco.hash}`;
-        hashDisplay.prepend(el);
         
-        while (hashDisplay.children.length > 5) {
+        // Mostrar informações resumidas
+        el.innerHTML = `
+            <div style="display: flex; justify-content: space-between;">
+                <span>⛓️ BLOCO #${blockNumber}</span>
+                <span style="color: #888;">${bloco.minerador}</span>
+            </div>
+            <div style="font-size: 0.8em; color: #4CAF50;">${bloco.hash}</div>
+        `;
+        
+        // Inserir no topo
+        if (hashDisplay.firstChild) {
+            hashDisplay.insertBefore(el, hashDisplay.firstChild);
+        } else {
+            hashDisplay.appendChild(el);
+        }
+        
+        // Manter apenas últimos 8
+        while (hashDisplay.children.length > 8) {
             hashDisplay.removeChild(hashDisplay.lastChild);
         }
     }
 }
 
-// ============================================
-// CORREÇÃO DO TIMER GLOBAL - ADICIONE NO FINAL
-// ============================================
-
-// Sobrescrever a função startGame para garantir o timer
 const startGameOriginal = startGame;
 startGame = function(difficulty) {
-    // Chamar a função original
     startGameOriginal(difficulty);
     
-    // Garantir que o timer seja iniciado
     setTimeout(() => {
         if (typeof iniciarTimerGlobal === 'function') {
             iniciarTimerGlobal();
             console.log('⏱️ Timer reiniciado após startGame');
         }
         
-        // Mostrar o display
         const tempoDisplay = document.getElementById('tempo-global');
         if (tempoDisplay) {
             tempoDisplay.style.display = 'flex';
@@ -3239,7 +3799,6 @@ startGame = function(difficulty) {
     }, 500);
 };
 
-// Garantir que a função iniciarTimerGlobal existe e funciona
 if (typeof iniciarTimerGlobal !== 'function') {
     iniciarTimerGlobal = function() {
         if (timerGlobalInterval) clearInterval(timerGlobalInterval);
@@ -3261,7 +3820,6 @@ if (typeof iniciarTimerGlobal !== 'function') {
     };
 }
 
-// Forçar atualização do display a cada segundo (fallback)
 setInterval(() => {
     const tempoDisplay = document.getElementById('tempo-global');
     if (tempoDisplay && tempoDisplay.style.display !== 'none' && tempoTotalPartida > 0) {
@@ -3270,9 +3828,7 @@ setInterval(() => {
         tempoDisplay.innerHTML = `⏱️ ${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
     }
 }, 1000);
-// ============================================
-// DEBUG DO TIMER
-// ============================================
+
 setInterval(() => {
     if (jogoConcluido) return;
     console.log('⏱️ Status:', {
@@ -3283,11 +3839,6 @@ setInterval(() => {
     });
 }, 2000);
 
-// ============================================
-// CORREÇÃO DO AUTO-PREENCHIMENTO DO DECODIFICADOR
-// ============================================
-
-// Garantir que o preenchimento automático funcione para todos os níveis
 function forcarPreenchimentoDecodificador() {
     if (!problemaAtual) return;
     
@@ -3296,11 +3847,9 @@ function forcarPreenchimentoDecodificador() {
     
     console.log('🔄 Forçando preenchimento do decodificador com:', textoCifrado);
     
-    // Preencher nível fácil
     const facilInput = document.getElementById('decod-facil-input');
     if (facilInput) facilInput.value = textoCifrado;
     
-    // Preencher nível médio (ambos os métodos)
     const medioCesarInput = document.getElementById('decod-medio-cesar-input');
     if (medioCesarInput) medioCesarInput.value = textoCifrado;
     
@@ -3309,7 +3858,6 @@ function forcarPreenchimentoDecodificador() {
         medioAsciiInput.value = textoCifrado;
     }
     
-    // Preencher nível difícil (todos os métodos)
     const dificilCesarInput = document.getElementById('decod-dificil-cesar-input');
     if (dificilCesarInput) dificilCesarInput.value = textoCifrado;
     
@@ -3324,117 +3872,10 @@ function forcarPreenchimentoDecodificador() {
     }
 }
 
-// Modificar a função abrirDecodificador para garantir o preenchimento
-const abrirDecodificadorOriginal = abrirDecodificador;
-abrirDecodificador = function() {
-    console.log('🔧 Abrindo decodificador');
-    
-    fecharMenu();
-    const modal = document.getElementById('decodificador-modal');
-    if (modal) {
-        modal.style.display = 'flex';
-        
-        // Abrir nível fácil por padrão
-        abrirDecodNivel('facil');
-        
-        // Forçar preenchimento após abrir
-        setTimeout(() => {
-            forcarPreenchimentoDecodificador();
-            
-            // Se não houver problema, mostrar mensagem
-            if (!problemaAtual) {
-                document.getElementById('decod-resultado').innerHTML = '⚠️ Nenhum problema ativo. Inicie uma partida primeiro!';
-            }
-        }, 200);
-        
-        if (SoundSystem) SoundSystem.click();
-    }
-};
-
-// Modificar abrirDecodNivel para atualizar o texto quando mudar de nível
-const abrirDecodNivelOriginal = abrirDecodNivel;
-abrirDecodNivel = function(nivel) {
-    console.log('📂 Abrindo nível:', nivel);
-    
-    // Esconder todos os conteúdos
-    document.querySelectorAll('.decod-conteudo').forEach(el => {
-        el.style.display = 'none';
-    });
-    
-    // Mostrar o nível selecionado
-    const nivelDiv = document.getElementById(`decod-${nivel}`);
-    if (nivelDiv) {
-        nivelDiv.style.display = 'block';
-    } else {
-        console.error(`❌ Nível ${nivel} não encontrado`);
-        return;
-    }
-    
-    // Atualizar aparência dos botões
-    document.querySelectorAll('.decod-nivel').forEach(btn => {
-        btn.style.background = 'rgba(255,255,255,0.1)';
-        btn.style.color = 'white';
-    });
-    
-    // Destacar botão ativo
-    const btnAtivo = document.querySelector(`.decod-nivel[data-nivel="${nivel}"]`);
-    if (btnAtivo) {
-        if (nivel === 'facil') btnAtivo.style.background = 'linear-gradient(135deg,#00aa00,#006600)';
-        if (nivel === 'medio') btnAtivo.style.background = 'linear-gradient(135deg,#ffaa00,#cc8800)';
-        if (nivel === 'dificil') btnAtivo.style.background = 'linear-gradient(135deg,#ff4400,#aa2200)';
-        btnAtivo.style.color = 'white';
-    }
-    
-    // Forçar preenchimento ao mudar de nível
-    setTimeout(() => {
-        forcarPreenchimentoDecodificador();
-    }, 100);
-    
-    // Resetar resultado
-    const resultado = document.getElementById('decod-resultado');
-    if (resultado) resultado.innerHTML = 'Aguardando decodificação...';
-};
-
-// Modificar selecionarDecodMetodo para preencher ao mudar de método
-const selecionarDecodMetodoOriginal = selecionarDecodMetodo;
-selecionarDecodMetodo = function(nivel, metodo) {
-    console.log(`📂 Selecionando método ${metodo} no nível ${nivel}`);
-    
-    // Esconder todos os métodos deste nível
-    document.querySelectorAll(`#decod-${nivel} .decod-metodo`).forEach(el => {
-        el.style.display = 'none';
-    });
-    
-    // Mostrar método selecionado
-    const metodoDiv = document.getElementById(`decod-${nivel}-${metodo}`);
-    if (metodoDiv) {
-        metodoDiv.style.display = 'block';
-    }
-    
-    // Atualizar botões de método
-    document.querySelectorAll(`#decod-${nivel} .btn-metodo`).forEach(btn => {
-        btn.style.background = 'rgba(255,255,255,0.1)';
-    });
-    
-    // Destacar botão ativo
-    const btnAtivo = document.getElementById(`decod-${nivel}-${metodo}-btn`);
-    if (btnAtivo) {
-        if (nivel === 'medio') btnAtivo.style.background = 'linear-gradient(135deg, #ffaa00, #cc8800)';
-        if (nivel === 'dificil') btnAtivo.style.background = 'linear-gradient(135deg, #ff4400, #aa2200)';
-    }
-    
-    // Forçar preenchimento ao mudar de método
-    setTimeout(() => {
-        forcarPreenchimentoDecodificador();
-    }, 100);
-};
-
-// Garantir que o preenchimento também ocorra quando o problema mudar
 const displayNextProblemOriginal = displayNextProblem;
 displayNextProblem = function() {
     if (displayNextProblemOriginal) displayNextProblemOriginal();
     
-    // Se o decodificador estiver aberto, atualizar
     const modal = document.getElementById('decodificador-modal');
     if (modal && modal.style.display === 'flex') {
         setTimeout(() => {
@@ -3443,34 +3884,26 @@ displayNextProblem = function() {
     }
 };
 
-// ============================================
-// USAR RESPOSTA E ENVIAR AUTOMATICAMENTE
-// ============================================
 function usarResultadoEEnviar() {
     const resultado = document.getElementById('decod-resultado').innerText;
     
-    // Verificações
     if (!resultado || resultado.includes('Aguardando') || resultado.includes('⚠️') || resultado.includes('❌')) {
         alert('❌ Nenhum resultado válido para usar!');
         return;
     }
     
-    // Verificar se o jogo está ativo
     if (jogoConcluido || vidas <= 0) {
         alert('❌ O jogo não está ativo no momento!');
         return;
     }
     
-    // Preencher a resposta no campo do jogo
     const answerInput = document.getElementById('answer');
     if (answerInput) {
         answerInput.value = resultado;
         
-        // Feedback visual
         answerInput.style.borderColor = '#4CAF50';
         answerInput.style.boxShadow = '0 0 20px rgba(76,175,80,0.5)';
         
-        // Efeito de sucesso
         const msgSucesso = document.createElement('div');
         msgSucesso.style.cssText = `
             position: fixed;
@@ -3492,7 +3925,6 @@ function usarResultadoEEnviar() {
         
         setTimeout(() => msgSucesso.remove(), 1500);
         
-        // 🔥 ENVIAR A RESPOSTA AUTOMATICAMENTE
         setTimeout(() => {
             submitAnswer();
         }, 300);
@@ -3501,18 +3933,14 @@ function usarResultadoEEnviar() {
     }
 }
 
-
-console.log('✅ Correção do decodificador aplicada!');
-
-// ============================================
-// 20. LOG INICIAL
-// ============================================
 console.log('✅ JogoBitcoin carregado com sucesso!');
+console.log('✅ Sistema de salvamento ativado!');
+console.log('✅ Botão de encerrar partida criado!');
 console.log(`💰 Bitcoin atual: ${bitcoinQuantity.toFixed(8)} BTC`);
+
 function testarConquista() {
     console.log('🧪 Testando conquista...');
     
-    // Simular quebra de 5 blocos em 1 minuto
     const metaTeste = {
         id: 'velocidade_5',
         nome: '⚡ Minerador Relâmpago (Teste)',
@@ -3523,5 +3951,10 @@ function testarConquista() {
     
     alcançarMeta(metaTeste);
 }
-
-// Chamar no console: testarConquista()
+// Intercepte o evento de teclado
+document.addEventListener("keydown", (e) => {
+  if (e.key === "F5") {
+    e.preventDefault(); // Impede o recarregamento
+    //alert("Use o botão de salvar do jogo!");
+  }
+});
