@@ -1,0 +1,19 @@
+name: chat-demo
+metadata:
+  template: chat-demo
+infra:
+  provider: bicep
+  path: infra
+services:
+  chatserver:
+    project: .
+    language: python
+    host: appservice
+    hooks:
+      prepackage:
+        windows:
+          shell: pwsh
+          run: ./scripts/prepackage.ps1
+        posix:
+          shell: sh
+          run: ./scripts/prepackage.sh

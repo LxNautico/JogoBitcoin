@@ -1,8 +1,21 @@
-const mensagensDeIncentivo = [
-    "Você está indo muito bem!",
-    "Ótimo trabalho! Continue assim!",
-    "Você é incrível!",
-    "Quase lá, continue minerando!",
-    "Parabéns, você está se superando!",
-    "Sua determinação é inspiradora!"
-];
+const CryptoEncyclopedia = {
+    entries: {
+        'Bitcoin': { description: 'Primeira criptomoeda, criada por Satoshi Nakamoto em 2008.', link: 'https://pt.wikipedia.org/wiki/Bitcoin', category: 'Criptomoeda' },
+        'Ethereum': { description: 'Plataforma para contratos inteligentes.', link: 'https://pt.wikipedia.org/wiki/Ethereum', category: 'Plataforma' },
+        'Blockchain': { description: 'Tecnologia de registro distribuído.', link: 'https://pt.wikipedia.org/wiki/Blockchain', category: 'Tecnologia' },
+        'Smart Contract': { description: 'Contrato auto-executável.', link: 'https://pt.wikipedia.org/wiki/Contrato_inteligente', category: 'Tecnologia' },
+        'Proof of Work': { description: 'Mecanismo de consenso.', link: 'https://pt.wikipedia.org/wiki/Proof-of-work', category: 'Consenso' },
+        'Proof of Stake': { description: 'Mecanismo de consenso.', link: 'https://pt.wikipedia.org/wiki/Proof-of-stake', category: 'Consenso' },
+        'Halving': { description: 'Redução da recompensa.', link: 'https://pt.wikipedia.org/wiki/Halving', category: 'Evento' },
+        'Wallet': { description: 'Carteira digital.', link: 'https://pt.wikipedia.org/wiki/Carteira_de_criptomoeda', category: 'Ferramenta' },
+        'Miner': { description: 'Equipamento de mineração.', link: 'https://pt.wikipedia.org/wiki/Minerador_de_bitcoin', category: 'Hardware' },
+        'Hash': { description: 'Função criptográfica.', link: 'https://pt.wikipedia.org/wiki/Fun%C3%A7%C3%A3o_hash_criptogr%C3%A1fica', category: 'Criptografia' },
+        'Token': { description: 'Representação digital.', link: 'https://pt.wikipedia.org/wiki/Token_(ci%C3%AAncia_da_computa%C3%A7%C3%A3o)', category: 'Conceito' },
+        'NFT': { description: 'Token não-fungível.', link: 'https://pt.wikipedia.org/wiki/Token_n%C3%A3o_fung%C3%ADvel', category: 'Token' },
+        'DeFi': { description: 'Finanças descentralizadas.', link: 'https://pt.wikipedia.org/wiki/Finan%C3%A7as_descentralizadas', category: 'Ecossistema' },
+        'Stablecoin': { description: 'Criptomoeda estável.', link: 'https://pt.wikipedia.org/wiki/Stablecoin', category: 'Criptomoeda' },
+        'DAO': { description: 'Organização autônoma.', link: 'https://pt.wikipedia.org/wiki/Organiza%C3%A7%C3%A3o_aut%C3%B4noma_descentralizada', category: 'Governança' },
+        'Coinbase': { description: 'Exchange americana.', link: 'https://pt.wikipedia.org/wiki/Coinbase', category: 'Exchange' },
+        'Satoshi Nakamoto': { description: 'Criador do Bitcoin.', link: 'https://pt.wikipedia.org/wiki/Satoshi_Nakamoto', category: 'Pessoa' },
+        'Vitalik Buterin': { description: 'Criador do Ethereum.', link: 'https://pt.wikipedia.org/wiki/Vitalik_Buterin', category: 'Pessoa' }
+    },
