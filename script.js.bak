@@ -38,64 +38,12 @@ let chatUsername = null;
 let soundTipShown = false;
 let skinsOwned = new Set();
 let skinAtiva = null;
-let coinsOwned = new Set();
-let activeCoinId = 'btc';
-let activeCoinSymbol = 'BTC';
-let currentUser = null;
-let blockchainHistory = [];
-let coinBalances = {}; // saldo por moeda
-let clear100Progress = { facil: false, medio: false, dificil: false }; // progresso 100 blocos por dificuldade
-let satoshiUnlocked = false;
-
-function saveSpecialProgress() {
-    try {
-        localStorage.setItem(nsKey('clear100_progress'), JSON.stringify(clear100Progress));
-        localStorage.setItem(nsKey('satoshi_unlocked'), satoshiUnlocked ? '1' : '0');
-    } catch {}
-}
-
-function saveSpecialProgress() {
-    try {
-        localStorage.setItem(nsKey('clear100_progress'), JSON.stringify(clear100Progress));
-        localStorage.setItem(nsKey('satoshi_unlocked'), satoshiUnlocked ? '1' : '0');
-    } catch {}
-}
-
-function getCurrentUserId() {
-    return currentUser?.username || 'guest';
-}
-function nsKey(key) {
-    return `jb:${getCurrentUserId()}:${key}`;
-}
-function clearCurrentUserSession(full = true) {
-    currentUser = null;
-    if (Auth && Auth.currentKey) {
-        localStorage.removeItem(Auth.currentKey);
-    }
-    const walletBtn = document.getElementById('wallet-toggle');
-    if (walletBtn) walletBtn.style.display = 'none';
-    try { pararTimerGlobal(); } catch {}
-    if (typeof timerInterval !== 'undefined' && timerInterval) {
-        clearInterval(timerInterval);
-        timerInterval = null;
-    }
-    if (full) jogoConcluido = true;
-    updateProfileUI();
-    clear100Progress = { facil: false, medio: false, dificil: false };
-    satoshiUnlocked = false;
-}
 
 // ============================================
 // 2. CONFIGURAÇÕES E CONSTANTES
 // ============================================
 const ENC_BTC_REWARD = 0.00000100;
 const ENC_SCORE_REWARD = 50;
-function getActiveBalance() {
-    return coinBalances[activeCoinId] || 0;
-}
-function syncActiveBalance() {
-    bitcoinQuantity = getActiveBalance();
-}
 
 // ============================================
 // METAS DE DESEMPENHO - VERSÃO REALISTA
@@ -183,74 +131,6 @@ const metasDisponiveis = [
     }
 ];
 
-// ============================================
-// AUTENTICAÇÃO LOCAL (USUÁRIO/SENHA SIMPLES)
-// ============================================
-const Auth = {
-    usersKey: 'jb_users',
-    currentKey: 'jb_current_user',
-    users: [],
-
-    load() {
-        try {
-            this.users = JSON.parse(localStorage.getItem(this.usersKey) || '[]');
-        } catch { this.users = []; }
-        try {
-            const saved = JSON.parse(localStorage.getItem(this.currentKey) || 'null');
-            if (saved && saved.username) currentUser = saved;
-        } catch { currentUser = null; }
-    },
-
-    saveUsers() {
-        localStorage.setItem(this.usersKey, JSON.stringify(this.users));
-    },
-
-    setCurrent(user) {
-        currentUser = user;
-        localStorage.setItem(this.currentKey, JSON.stringify(user));
-        updateProfileUI();
-        chatUsername = null; // força ressincronizar com usuário logado
-        location.reload();
-    },
-
-    register(username, password) {
-        if (!username || !password) { alert('Informe usuário e senha.'); return; }
-        if (this.users.some(u => u.username === username)) { alert('Usuário já existe.'); return; }
-        this.users.push({ username, password });
-        this.saveUsers();
-        this.setCurrent({ username });
-    },
-
-    login(username, password) {
-        const user = this.users.find(u => u.username === username && u.password === password);
-        if (!user) { alert('Usuário ou senha inválidos.'); return; }
-        this.setCurrent({ username });
-    },
-
-    logout() {
-        currentUser = null;
-        localStorage.removeItem(this.currentKey);
-        updateProfileUI();
-        chatUsername = null;
-        location.reload();
-    },
-
-    useGuest() {
-        this.setCurrent({ username: 'Convidado' });
-    }
-};
-
-function updateProfileUI() {
-    const profileCurrent = document.getElementById('profile-current');
-    if (profileCurrent) {
-        profileCurrent.textContent = currentUser?.username ? `Logado como: ${currentUser.username}` : 'Modo convidado';
-    }
-    const profileUser = document.getElementById('profile-username');
-    const profilePass = document.getElementById('profile-password');
-    if (profileUser) profileUser.value = '';
-    if (profilePass) profilePass.value = '';
-}
-
 // Mensagens de incentivo
 const mensagensDeIncentivo = [
     "Você está indo muito bem!",
@@ -265,15 +145,14 @@ const mensagensDeIncentivo = [
 // 3. FUNÇÕES DO SISTEMA DE TEMPO
 // ============================================
 
-function iniciarTimerGlobal(resetStart = true) {
+function iniciarTimerGlobal() {
     if (timerGlobalInterval) {
         clearInterval(timerGlobalInterval);
         timerGlobalInterval = null;
     }
-    if (resetStart || !tempoInicioPartida) {
-        tempoInicioPartida = Date.now();
-        tempoTotalPartida = 0;
-    }
+    
+    tempoInicioPartida = Date.now();
+    tempoTotalPartida = 0;
     
     startGlobalInterval();
     
@@ -390,7 +269,7 @@ function alcançarMeta(meta) {
     }
     
     // Salvar no ranking
-    const ultimoJogador = RankingSystem.getCurrentPlayerName() || localStorage.getItem(nsKey('jogobitcoin_lastname'));
+    const ultimoJogador = localStorage.getItem('jogobitcoin_lastname');
     if (ultimoJogador && ultimoJogador !== 'Anônimo') {
         RankingSystem.adicionarConquista(ultimoJogador, conquista);
     }
@@ -717,359 +596,6 @@ const CryptoEncyclopedia = {
 };
 
 // ============================================
-// COLECIONÁVEIS: MOEDAS
-// ============================================
-const CoinStore = {
-    coins: [
-        { id: 'btc', nome: 'Bitcoin', symbol: 'BTC', precoBtc: 0.03000000, desc: 'A primeira e mais valiosa.', info: 'Bitcoin é a primeira moeda digital descentralizada criada em 2009 por Satoshi Nakamoto.' },
-        { id: 'eth', nome: 'Ethereum', symbol: 'ETH', precoBtc: 0.01800000, desc: 'Plataforma de contratos.', info: 'Ethereum suporta smart contracts e dApps, criado por Vitalik Buterin.' },
-        { id: 'ltc', nome: 'Litecoin', symbol: 'LTC', precoBtc: 0.01000000, desc: 'Prata digital.', info: 'Litecoin é um fork do Bitcoin com confirmações mais rápidas.' },
-        { id: 'ada', nome: 'Cardano', symbol: 'ADA', precoBtc: 0.00900000, desc: 'Pesquisa acadêmica.', info: 'Cardano usa prova de participação e tem foco em revisão acadêmica.' },
-        { id: 'dot', nome: 'Polkadot', symbol: 'DOT', precoBtc: 0.01100000, desc: 'Multichain.', info: 'Polkadot conecta blockchains distintas por parachains.' },
-        { id: 'sol', nome: 'Solana', symbol: 'SOL', precoBtc: 0.01400000, desc: 'Alta performance.', info: 'Solana prioriza throughput alto com prova de histórico.' }
-    ],
-
-    load() {
-        try {
-            const o = JSON.parse(localStorage.getItem(nsKey('coins_owned')) || '[]');
-            coinsOwned = new Set(o);
-        } catch { coinsOwned = new Set(); }
-        // Garantir BTC sempre disponível
-        coinsOwned.add('btc');
-        try {
-            const bal = JSON.parse(localStorage.getItem(nsKey('coin_balances')) || '{}');
-            coinBalances = bal && typeof bal === 'object' ? bal : {};
-        } catch { coinBalances = {}; }
-        this.coins.forEach(c => { if (coinBalances[c.id] == null) coinBalances[c.id] = 0; });
-        // desbloqueio especial
-        try {
-            satoshiUnlocked = localStorage.getItem(nsKey('satoshi_unlocked')) === '1';
-            clear100Progress = JSON.parse(localStorage.getItem(nsKey('clear100_progress')) || '{}') || {};
-        } catch { satoshiUnlocked = false; clear100Progress = { facil:false, medio:false, dificil:false }; }
-        if (satoshiUnlocked) {
-            coinsOwned.add('satoshi');
-        }
-        // Carregar moeda ativa
-        try {
-            const savedActive = localStorage.getItem(nsKey('active_coin'));
-            if (savedActive && this.coins.some(c => c.id === savedActive)) {
-                activeCoinId = savedActive;
-            }
-        } catch {}
-        this.syncActiveSymbol();
-        syncActiveBalance();
-    },
-
-    save() {
-        localStorage.setItem(nsKey('coins_owned'), JSON.stringify(Array.from(coinsOwned)));
-        localStorage.setItem(nsKey('coin_balances'), JSON.stringify(coinBalances));
-        saveSpecialProgress();
-    },
-
-    syncActiveSymbol() {
-        const c = this.coins.find(x => x.id === activeCoinId) || this.coins[0];
-        activeCoinSymbol = c ? c.symbol : 'BTC';
-        localStorage.setItem(nsKey('active_coin'), activeCoinId);
-        syncActiveBalance();
-        updateBitcoinValue(false);
-        if (typeof Wallet !== 'undefined' && Wallet.render) Wallet.render();
-    },
-
-    render() {
-        const list = document.getElementById('coins-list');
-        if (!list) return;
-        list.innerHTML = '';
-        this.coins.forEach(c => {
-            const owned = coinsOwned.has(c.id);
-            const active = activeCoinId === c.id;
-            const lockedSatoshi = (c.id === 'satoshi' && !satoshiUnlocked);
-            if (c.id === 'satoshi' && !lockedSatoshi) {
-                // Não exibir na lista de compra; será mostrada via conquistas
-                return;
-            }
-            const card = document.createElement('div');
-            card.className = 'skin-card';
-            card.innerHTML = `
-                <div class="skin-preview" style="background:#1b2735; display:flex; align-items:center; justify-content:center; font-size:1.4em;">💰</div>
-                <div class="skin-info">
-                    <h4>${c.nome} ${owned ? '✅' : ''}</h4>
-                    <div style="font-size:0.9em; opacity:0.9;">${c.desc}</div>
-                    <div style="margin-top:6px; color:#ffd180;">Preço: ${c.precoBtc.toFixed(8)} BTC</div>
-                </div>
-                <div class="skin-actions" style="gap:6px;">
-                    <button class="coin-info" data-info="${c.id}">ℹ️</button>
-                    ${
-                        lockedSatoshi ? `<button class="skin-apply" disabled>Conquista necessária</button>` :
-                        owned ? (active ? `<button disabled class="skin-apply">Ativa</button>` : `<button class="skin-apply" data-activate="${c.id}">Usar</button>`) :
-                        `<button class="skin-buy" data-coin="${c.id}">Comprar</button>`
-                    }
-                </div>
-            `;
-            list.appendChild(card);
-        });
-
-        list.querySelectorAll('[data-coin]').forEach(btn => {
-            btn.onclick = () => this.buy(btn.getAttribute('data-coin'));
-        });
-        list.querySelectorAll('[data-info]').forEach(btn => {
-            btn.onclick = () => this.showInfo(btn.getAttribute('data-info'));
-        });
-        list.querySelectorAll('[data-activate]').forEach(btn => {
-            btn.onclick = () => this.setActive(btn.getAttribute('data-activate'));
-        });
-    },
-
-    showInfo(id) {
-        const coin = this.coins.find(c => c.id === id);
-        if (!coin) return;
-        alert(`${coin.nome}\n\n${coin.info}`);
-    },
-
-    setActive(id) {
-        if (!coinsOwned.has(id)) { alert('Compre a moeda para ativá-la como mineração.'); return; }
-        activeCoinId = id;
-        this.syncActiveSymbol();
-        this.render();
-        mostrarMensagemLateral(`🚀 Mineração agora em ${activeCoinSymbol}.`, 'bonus', 2200);
-    },
-
-    checkCoinsAchievement() {
-        if (!RankingSystem || !RankingSystem.getCurrentPlayerName) return;
-        if (coinsOwned.size !== this.coins.length) return;
-        const nome = RankingSystem.getCurrentPlayerName();
-        const conquista = {
-            id: 'coins_master',
-            titulo: 'Colecionador de Moedas',
-            icone: '🪙',
-            descricao: 'Comprou todas as moedas colecionáveis'
-        };
-        const added = RankingSystem.adicionarConquista(nome, conquista);
-        if (added) {
-            mostrarMensagemLateral('🪙 Colecionador de Moedas: comprou todas!', 'bonus', 3500);
-        }
-    },
-
-    buy(id) {
-        const coin = this.coins.find(c => c.id === id);
-        if (!coin) return;
-        if (coinsOwned.has(id)) return;
-        if (getActiveBalance() < coin.precoBtc) {
-            alert(`${activeCoinSymbol} insuficiente para comprar esta moeda.`);
-            return;
-        }
-        coinBalances[activeCoinId] = (coinBalances[activeCoinId] || 0) - coin.precoBtc;
-        syncActiveBalance();
-        updateBitcoinValue(false);
-        coinsOwned.add(id);
-        this.save();
-        this.render();
-        if (SoundSystem) SoundSystem.play('conquest');
-        mostrarMensagemLateral(`🪙 Moeda comprada: ${coin.nome}`, 'bonus', 2500);
-        this.checkCoinsAchievement();
-    }
-};
-
-// ============================================
-// CARTEIRA BTC COM RENDIMENTO
-// ============================================
-const Wallet = {
-    storageKey: 'wallet',
-    hourlyRate: 0.01, // 1% por hora (ajustado para sessões < 1h)
-    data: { balances: {}, lastAccrual: Date.now() },
-
-    load() {
-        try {
-            const saved = JSON.parse(localStorage.getItem(nsKey(this.storageKey)) || '{}');
-            const bal = saved.balances && typeof saved.balances === 'object' ? saved.balances : {};
-            this.data = {
-                balances: bal,
-                lastAccrual: saved.lastAccrual || Date.now()
-            };
-            this.accrue(); // aplica rendimento pendente
-        } catch {
-            this.data = { balances: {}, lastAccrual: Date.now() };
-        }
-        // garantir todas as moedas
-        CoinStore.coins.forEach(c => {
-            if (this.data.balances[c.id] == null) this.data.balances[c.id] = 0;
-        });
-        if (satoshiUnlocked) {
-            coinsOwned.add('satoshi');
-            if (coinBalances['satoshi'] == null) coinBalances['satoshi'] = 0;
-        }
-    },
-
-    save() {
-        localStorage.setItem(nsKey(this.storageKey), JSON.stringify(this.data));
-    },
-
-    accrue() {
-        const now = Date.now();
-        const elapsedMs = now - (this.data.lastAccrual || now);
-        if (elapsedMs <= 0) return 0;
-        const elapsedHours = elapsedMs / (1000 * 60 * 60);
-        Object.keys(this.data.balances).forEach(k => {
-            const interest = this.data.balances[k] * this.hourlyRate * elapsedHours;
-            if (interest > 0) this.data.balances[k] += interest;
-        });
-        this.data.lastAccrual = now;
-        this.save();
-        return true;
-    },
-
-    deposit(amount) {
-        const v = Number(amount);
-        if (!v || v <= 0) { alert('Informe um valor válido.'); return; }
-        const saldo = getActiveBalance();
-        if (saldo < v) { alert(`${activeCoinSymbol} insuficiente para depositar.`); return; }
-        this.accrue();
-        coinBalances[activeCoinId] = saldo - v;
-        this.data.balances[activeCoinId] = (this.data.balances[activeCoinId] || 0) + v;
-        syncActiveBalance();
-        updateBitcoinValue(false);
-        this.save();
-        this.render();
-        mostrarMensagemLateral(`💼 Depositou ${v.toFixed(8)} ${activeCoinSymbol} na carteira.`, 'bonus', 2500);
-    },
-    
-    withdraw(amount) {
-        const v = Number(amount);
-        if (!v || v <= 0) { alert('Informe um valor válido.'); return; }
-        this.accrue();
-        if ((this.data.balances[activeCoinId] || 0) < v) { alert('Saldo insuficiente na carteira.'); return; }
-        this.data.balances[activeCoinId] -= v;
-        coinBalances[activeCoinId] = getActiveBalance() + v;
-        syncActiveBalance();
-        updateBitcoinValue(false);
-        this.save();
-        this.render();
-        mostrarMensagemLateral(`💰 Sacou ${v.toFixed(8)} ${activeCoinSymbol} da carteira.`, 'bonus', 2500);
-        checkCoinsMasterAchievement();
-    },
-
-    open() {
-        this.accrue();
-        this.render();
-        const modal = document.getElementById('wallet-modal');
-        if (modal) modal.style.display = 'flex';
-    },
-
-    close() {
-        const modal = document.getElementById('wallet-modal');
-        if (modal) modal.style.display = 'none';
-    },
-
-    render() {
-        const bal = document.getElementById('wallet-balance');
-        const rate = document.getElementById('wallet-rate');
-        if (bal) {
-            bal.innerHTML = '';
-            Object.entries(this.data.balances).forEach(([id, val]) => {
-                const div = document.createElement('div');
-                const coin = CoinStore.coins.find(c => c.id === id);
-                const sym = coin ? coin.symbol : id.toUpperCase();
-                const livre = coinBalances[id] || 0;
-                div.textContent = `${sym}: carteira ${Number(val || 0).toFixed(8)} | livre ${livre.toFixed(8)}${id === activeCoinId ? ' ← ativa' : ''}`;
-                bal.appendChild(div);
-            });
-        }
-        if (rate) rate.textContent = `${(this.hourlyRate * 100).toFixed(2)}% por hora`;
-    }
-};
-
-// ============================================
-// LISTA VISUAL DE CONQUISTAS
-// ============================================
-const achievementCatalog = () => {
-    const base = metasDisponiveis.map(meta => ({
-        id: meta.id,
-        titulo: meta.nome,
-        icone: meta.icone || '🏆',
-        requisito: meta.descricao || 'Complete o desafio especificado.'
-    }));
-    base.push(
-        { id: 'skins_master', titulo: 'Colecionador de Skins', icone: '🎨', requisito: 'Compre todas as skins disponíveis.' },
-        { id: 'coins_master', titulo: 'Colecionador de Moedas', icone: '🪙', requisito: 'Compre todas as moedas colecionáveis.' },
-        { id: 'all_coins_1000', titulo: 'Maestro das Criptos', icone: '🌐', requisito: 'Alcance pelo menos 0.05 unidades em cada moeda.' },
-        { id: 'satoshi_medal', titulo: 'Medalha Satoshi', icone: '🪙', requisito: 'Quebre 100 blocos em cada dificuldade (Fácil, Médio, Difícil).' }
-    );
-    return base;
-};
-
-const AchievementsUI = {
-    open() {
-        this.render();
-        const modal = document.getElementById('achievements-modal');
-        if (modal) modal.style.display = 'flex';
-    },
-    close() {
-        const modal = document.getElementById('achievements-modal');
-        if (modal) modal.style.display = 'none';
-    },
-    render() {
-        const list = document.getElementById('achievements-list');
-        if (!list) return;
-        const jogador = RankingSystem.getCurrentPlayerName();
-        const conquistas = RankingSystem.getConquistasDoJogador(jogador);
-        const idsConquistados = new Set(conquistas.map(c => c.id));
-        list.innerHTML = '';
-        achievementCatalog().forEach(item => {
-            const ok = idsConquistados.has(item.id);
-            const card = document.createElement('div');
-            card.className = 'achievement-card' + (ok ? '' : ' disabled');
-            card.innerHTML = `
-                <div class="achievement-icon">${item.icone}</div>
-                <div class="achievement-info">
-                    <strong>${item.titulo}</strong>
-                    <small>${item.requisito}</small>
-                </div>
-            `;
-            list.appendChild(card);
-        });
-    }
-};
-
-function checkCoinsMasterAchievement() {
-    if (!CoinStore || !CoinStore.coins) return;
-    const totalOk = CoinStore.coins.every(c => {
-        if (c.id === 'satoshi') return true; // não conta na meta de 0.05
-        const livre = coinBalances[c.id] || 0;
-        const carteira = (Wallet.data?.balances || {})[c.id] || 0;
-        return (livre + carteira) >= 0.05;
-    });
-    if (!totalOk) return;
-    const nome = RankingSystem.getCurrentPlayerName();
-    const conquista = { id: 'all_coins_1000', titulo: 'Maestro das Criptos', icone: '🌐', descricao: 'Alcance 0.05 de cada moeda.' };
-    if (RankingSystem.adicionarConquista(nome, conquista)) {
-        mostrarMensagemLateral('🌐 Conquista: Maestro das Criptos (0.05 de cada moeda)', 'bonus', 4000);
-    }
-}
-
-function checkSatoshiUnlock() {
-    if (satoshiUnlocked) return;
-    if (clear100Progress.facil && clear100Progress.medio && clear100Progress.dificil) {
-        satoshiUnlocked = true;
-        const nome = RankingSystem.getCurrentPlayerName();
-        const conquista = { id: 'satoshi_medal', titulo: 'Medalha Satoshi', icone: '🪙', descricao: 'Quebre 100 blocos em cada dificuldade.' };
-        RankingSystem.adicionarConquista(nome, conquista);
-        mostrarMensagemLateral('🪙 Medalha Satoshi desbloqueada! (100 blocos em cada nível)', 'bonus', 4500);
-        console.log('Medalha Satoshi desbloqueada');
-        saveSpecialProgress();
-    }
-}
-
-// Log helper para debug da medalha
-window.logMedalha = function() {
-    console.log('Medalha Satoshi debug', {
-        satoshiUnlocked,
-        clear100Progress,
-        coinBalances: coinBalances['satoshi'],
-        wallet: Wallet?.data?.balances?.satoshi
-    });
-};
-
-
-// ============================================
 // 6. WIDGET DE PREÇO DO BITCOIN
 // ============================================
 const BitcoinPriceWidget = {
@@ -1138,15 +664,6 @@ const BitcoinPriceWidget = {
 // 7. SISTEMA DE RANKING
 // ============================================
 const RankingSystem = {
-    getCurrentPlayerName: function() {
-        if (currentUser?.username) return currentUser.username;
-        try {
-            const n = localStorage.getItem(nsKey('jb_last_player_name'));
-            if (n && n.trim().length > 0) return n;
-        } catch {}
-        if (chatUsername) return chatUsername;
-        return 'Jogador';
-    },
     maxEntries: 10,
     storageKey: 'jogobitcoin_ranking',
     conquistasKey: 'jogobitcoin_conquistas',
@@ -1208,9 +725,6 @@ const RankingSystem = {
             time: time || 0
         };
         this.ranking.push(newEntry);
-        try {
-            localStorage.setItem(nsKey('jb_last_player_name'), newEntry.name);
-        } catch {}
         this.ranking.sort((a, b) => b.score - a.score);
         if (this.ranking.length > this.maxEntries) {
             this.ranking = this.ranking.slice(0, this.maxEntries);
@@ -1237,10 +751,6 @@ const RankingSystem = {
                     data: new Date().toLocaleDateString('pt-BR')
                 });
                 this.saveConquistas();
-                const modal = document.getElementById('achievements-modal');
-                if (modal && modal.style.display === 'flex' && typeof AchievementsUI !== 'undefined') {
-                    AchievementsUI.render();
-                }
                 return true;
             }
             return false;
@@ -1506,43 +1016,50 @@ const RankingSystem = {
     },
     
     saveGameScore: function(isVictory) {
-        let nomeFinal = RankingSystem.getCurrentPlayerName();
-        if (!currentUser || currentUser.username === 'Convidado') {
-            const entrada = prompt(`🎮 ${isVictory ? 'PARABÉNS!' : 'GAME OVER'}\n\nDigite seu nome (ou deixe Convidado):`, localStorage.getItem(nsKey('jogobitcoin_lastname')) || 'Convidado');
-            if (entrada !== null && entrada.trim()) nomeFinal = entrada.trim();
-        }
-        localStorage.setItem(nsKey('jogobitcoin_lastname'), nomeFinal);
-        
-        if (selosConquistados.length > 0 && nomeFinal) {
-            selosConquistados.forEach(conquista => {
-                const conquistaFormatada = {
-                    id: conquista.id,
-                    titulo: conquista.titulo,
-                    icone: conquista.icone,
-                    descricao: ''
-                };
-                this.adicionarConquista(nomeFinal, conquistaFormatada);
-            });
-        }
-        
-        this.addScore(
-            nomeFinal || 'Anônimo',
-            score,
-            bitcoinQuantity,
-            brokenBlocks,
-            dificuldadeAtual,
-            tempoTotalPartida
+        const playerName = prompt(
+            `🎮 ${isVictory ? 'PARABÉNS!' : 'GAME OVER'}\n\nDigite seu nome para o ranking:`,
+            localStorage.getItem('jogobitcoin_lastname') || ''
         );
         
-        setTimeout(() => this.showRanking(), 1000);
-        
-        setTimeout(() => {
-            try {
-                abrirAvaliacao(() => abrirCompartilharFinal(nomeFinal || 'Jogador'));
-            } catch (e) {
-                console.warn('Avaliação/compartilhar não pôde ser aberta:', e);
+        if (playerName !== null) {
+            const nomeLimpo = playerName.trim();
+            if (nomeLimpo) {
+                localStorage.setItem('jogobitcoin_lastname', nomeLimpo);
             }
-        }, 800);
+            
+            if (selosConquistados.length > 0 && nomeLimpo) {
+                console.log(`🏆 Salvando ${selosConquistados.length} conquistas da sessão para ${nomeLimpo}`);
+                selosConquistados.forEach(conquista => {
+                    const conquistaFormatada = {
+                        id: conquista.id,
+                        titulo: conquista.titulo,
+                        icone: conquista.icone,
+                        descricao: ''
+                    };
+                    this.adicionarConquista(nomeLimpo, conquistaFormatada);
+                });
+            }
+            
+            this.addScore(
+                nomeLimpo || 'Anônimo',
+                score,
+                bitcoinQuantity,
+                brokenBlocks,
+                dificuldadeAtual,
+                tempoTotalPartida
+            );
+            
+            setTimeout(() => this.showRanking(), 1000);
+            
+            // Após registrar nome, solicitar avaliação e depois compartilhar
+            setTimeout(() => {
+                try {
+                    abrirAvaliacao(() => abrirCompartilharFinal(nomeLimpo || 'Jogador'));
+                } catch (e) {
+                    console.warn('Avaliação/compartilhar não pôde ser aberta:', e);
+                }
+            }, 800);
+        }
     },
     
     debug: function() {
@@ -1550,68 +1067,6 @@ const RankingSystem = {
         console.log('🔍 Conquistas:', this.conquistasPorJogador);
     }
 };
-
-// Migração de rankings/conquistas antigos (por usuário) para o global
-function migrateLegacyData() {
-    const FLAG = 'jb_migrated_rank_v1';
-    if (localStorage.getItem(FLAG)) return;
-
-    // Carregar ranking global existente
-    let globalRanking = [];
-    try {
-        const saved = localStorage.getItem(RankingSystem.storageKey);
-        globalRanking = saved ? JSON.parse(saved) : [];
-    } catch { globalRanking = []; }
-
-    // Carregar conquistas globais existentes
-    let globalConquistas = {};
-    try {
-        const savedC = localStorage.getItem(RankingSystem.conquistasKey);
-        globalConquistas = savedC ? JSON.parse(savedC) : {};
-    } catch { globalConquistas = {}; }
-
-    // Percorrer chaves antigas com namespace jb:<user>:...
-    for (let i = 0; i < localStorage.length; i++) {
-        const key = localStorage.key(i);
-        if (!key) continue;
-        if (key.endsWith(':jogobitcoin_ranking')) {
-            try {
-                const arr = JSON.parse(localStorage.getItem(key) || '[]');
-                if (Array.isArray(arr)) {
-                    globalRanking = globalRanking.concat(arr);
-                }
-            } catch {}
-        }
-        if (key.endsWith(':jogobitcoin_conquistas')) {
-            try {
-                const map = JSON.parse(localStorage.getItem(key) || '{}');
-                if (map && typeof map === 'object') {
-                    Object.entries(map).forEach(([jogador, conquistas]) => {
-                        if (!globalConquistas[jogador]) globalConquistas[jogador] = [];
-                        const existentes = new Set((globalConquistas[jogador] || []).map(c => c.id));
-                        (conquistas || []).forEach(c => {
-                            if (c && c.id && !existentes.has(c.id)) {
-                                globalConquistas[jogador].push(c);
-                            }
-                        });
-                    });
-                }
-            } catch {}
-        }
-    }
-
-    // Ordenar e salvar o ranking global
-    try {
-        globalRanking.sort((a, b) => (b.score || 0) - (a.score || 0));
-        localStorage.setItem(RankingSystem.storageKey, JSON.stringify(globalRanking));
-    } catch {}
-    // Salvar conquistas globais
-    try {
-        localStorage.setItem(RankingSystem.conquistasKey, JSON.stringify(globalConquistas));
-    } catch {}
-
-    localStorage.setItem(FLAG, '1');
-}
 
 // ============================================
 // 8. SISTEMA DE SONS
@@ -1981,17 +1436,6 @@ const SistemaProblemas = {
 // ============================================
 
 function startGame(difficulty) {
-    if (!currentUser) {
-        const profileModal = document.getElementById('profile-modal');
-        if (profileModal) profileModal.style.display = 'flex';
-        alert('Faça login ou entre como Convidado antes de iniciar.');
-        pararTimerGlobal();
-        tempoTotalPartida = 0;
-        const tempoModern = document.getElementById('tempo-modern');
-        if (tempoModern) tempoModern.textContent = '00:00';
-        return;
-    }
-    jogoConcluido = false;
     dificuldadeAtual = difficulty;
     switch(difficulty) {
         case 'facil': timeLimit = 60; break;
@@ -2009,12 +1453,6 @@ function startGame(difficulty) {
     document.getElementById('problem-container').style.display = 'flex';
     document.getElementById('game-container').style.display = 'flex';
     document.getElementById('hash-log').style.display = 'flex';
-    const decod = document.getElementById('decodificador-modal');
-    const cir = document.getElementById('decoded-info-circulo');
-    if (decod) decod.style.display = 'flex';
-    if (cir) cir.style.display = 'block';
-    const walletBtn = document.getElementById('wallet-toggle');
-    if (walletBtn) walletBtn.style.display = 'block';
     document.body.classList.remove('show-crypto');
     stopHomeBubbles();
     enciclopediaVisitados = new Set();
@@ -2048,7 +1486,8 @@ function startGame(difficulty) {
         btnEncerrar.style.display = 'block';
     }
     
-    // Se havia save anterior e o usuário optou por novo jogo, sobrescreveremos assim que salvar
+    // Limpar save anterior ao começar novo jogo
+    localStorage.removeItem(SAVE_KEY);
     
     displayNextProblem();
 }
@@ -2109,7 +1548,7 @@ function resetGame() {
     initializeBlocks();
     
     // Limpar save
-    localStorage.removeItem(getSaveKey());
+    localStorage.removeItem(SAVE_KEY);
 }
 
 function initializeBlocks() {
@@ -2421,13 +1860,10 @@ function updateBitcoinValue(shouldAdd = true) {
             case 'medio': add = 0.01200000; break;
             case 'dificil': add = 0.01500000; break;
         }
-        coinBalances[activeCoinId] = (coinBalances[activeCoinId] || 0) + add;
-        bitcoinQuantity = coinBalances[activeCoinId];
+        bitcoinQuantity += add;
     }
-    syncActiveBalance();
     const disp = document.getElementById('bitcoin-value');
-    if (disp) disp.textContent = `${bitcoinQuantity.toFixed(8)} ${activeCoinSymbol}`;
-    checkCoinsMasterAchievement();
+    if (disp) disp.textContent = `${bitcoinQuantity.toFixed(8)} BTC`;
 }
 
 function updateBlocks() {
@@ -2457,11 +1893,6 @@ function updateBlocks() {
             updateScore(300);
             triggerBlockExplosion(block);
             brokenBlocks++;
-            if (brokenBlocks >= 100) {
-                clear100Progress[dificuldadeAtual] = true;
-                saveSpecialProgress();
-                checkSatoshiUnlock();
-            }
             
             if (brokenBlocks === 100) bitcoinQuantity += 0.00050000;
             
@@ -2809,7 +2240,6 @@ function perderVida() {
 }
 
 function gameOver() {
-    salvarJogo(true);
     jogoConcluido = true;
     clearInterval(timerInterval);
     pararTimerGlobal();
@@ -2823,19 +2253,18 @@ function gameOver() {
         msg.style.display = 'block';
     }
     SoundSystem.gameover();
-    setTimeout(() => { RankingSystem.saveGameScore(false); clearCurrentUserSession(false); }, 1500);
+    setTimeout(() => RankingSystem.saveGameScore(false), 1500);
     if (btn) btn.style.display = 'inline-block';
     
     // Esconder botão de encerrar
     const btnEncerrar = document.getElementById('btn-encerrar');
     if (btnEncerrar) btnEncerrar.style.display = 'none';
     
-    // Manter save para permitir retomada
-    clearCurrentUserSession(false);
+    // Limpar save
+    localStorage.removeItem(SAVE_KEY);
 }
 
 function endGame(isVictory = true) {
-    salvarJogo(true);
     jogoConcluido = true;
     clearInterval(timerInterval);
     pararTimerGlobal();
@@ -2854,14 +2283,15 @@ function endGame(isVictory = true) {
         }
         msg.style.display = 'block';
     }
-    setTimeout(() => { RankingSystem.saveGameScore(isVictory); clearCurrentUserSession(false); }, 1500);
+    setTimeout(() => RankingSystem.saveGameScore(isVictory), 1500);
     if (btn) btn.style.display = 'inline-block';
     
     // Esconder botão de encerrar
     const btnEncerrar = document.getElementById('btn-encerrar');
     if (btnEncerrar) btnEncerrar.style.display = 'none';
     
-    // Manter save para retomar progresso
+    // Limpar save
+    localStorage.removeItem(SAVE_KEY);
 }
 
 function formatarTempo(segundos) {
@@ -3110,21 +2540,7 @@ function updateHashLog(blockNumber) {
 }
 
 function showHelp() {
-    alert(`🎮 AJUDA DO JOGOBITCOIN
-
-1) Faça login ou Convidado (nome do perfil aparece no chat e ranking).
-2) Escolha a dificuldade e quebre blocos descriptografando (César/ASCII/Base64).
-3) Ferramentas: Circulo de César e Decode ficam acessíveis no jogo.
-4) Carteira 💼 guarda saldos de todas as moedas; rendimento por hora.
-5) Skins e Moedas colecionáveis (🎨/Moedas). Troque a moeda ativa para minerar outro ativo.
-6) Conquistas: veja no 🏆; especiais:
-   • Maestro das Criptos: 0.05 de cada moeda.
-   • Medalha Satoshi: 100 blocos em Fácil, Médio e Difícil.
-7) Chat: usa o nome do perfil logado, sincroniza entre abas.
-8) Save automático: retoma blocos quebrados, tempo e cadeia.
-9) Ajuda rápida: ?texto no chat para falar com o bot.
-
-Bons blocos!`);
+    alert(`🎮 AJUDA DO JOGOBITCOIN\n\n1. Escolha dificuldade\n\n2. Descriptografe usando duas ferramentas: Circulo de césar ou Decode,(cada uma delas com sua experiência)\n\n3. Digite resposta\n\n4. Enter\n\n5. Aproveite cada Capítulo da Historia do Bitcoin\n  como pausa do jogo\n\nTipos: Cifra de César, ASCII, Base64`);
 }
 
 let gameStartTime = Date.now();
@@ -3423,7 +2839,7 @@ function mostrarConquistas() {
 
 function verMinhasConquistas() {
     fecharMenu();
-    const ultimoJogador = RankingSystem.getCurrentPlayerName() || localStorage.getItem(nsKey('jogobitcoin_lastname'));
+    const ultimoJogador = localStorage.getItem('jogobitcoin_lastname');
     
     if (!ultimoJogador) {
         alert('👤 Você ainda não tem um nome registrado. Jogue uma partida primeiro!');
@@ -3714,15 +3130,14 @@ document.head.insertAdjacentHTML('beforeend', `
 // ============================================
 
 // Chave para localStorage
-const SAVE_KEY_BASE = 'jogobitcoin_save';
-const getSaveKey = () => nsKey(SAVE_KEY_BASE);
+const SAVE_KEY = 'jogobitcoin_save';
 
 // ============================================
 // SALVAR ESTADO DO JOGO
 // ============================================
-function salvarJogo(force = false) {
-    // Só salvar se o jogo estiver ativo, a menos que seja forçado
-    if (!force && (jogoConcluido || vidas <= 0)) return;
+function salvarJogo() {
+    // Só salvar se o jogo estiver ativo
+    if (jogoConcluido || vidas <= 0) return;
     
     const estado = {
         // Progresso básico
@@ -3730,7 +3145,6 @@ function salvarJogo(force = false) {
         score: score,
         vidas: vidas,
         bitcoinQuantity: bitcoinQuantity,
-        coinBalances: coinBalances,
         brokenBlocks: brokenBlocks,
         dificuldadeAtual: dificuldadeAtual,
         timeLimit: timeLimit,
@@ -3759,15 +3173,10 @@ function salvarJogo(force = false) {
         // Tempo
         tempoTotalPartida: tempoTotalPartida,
         tempoInicioPartida: tempoInicioPartida
-        ,
-        // Blockchain visual
-        cadeiaHTML: (document.getElementById('blockchain-cadeia') || {}).innerHTML || '',
-        ultimosHashes: ultimosHashes,
-        blockchainHistory: blockchainHistory
     };
     
     try {
-        localStorage.setItem(getSaveKey(), JSON.stringify(estado));
+        localStorage.setItem(SAVE_KEY, JSON.stringify(estado));
         console.log('💾 Jogo salvo automaticamente:', new Date().toLocaleTimeString());
         
         // Mostrar indicador de salvamento
@@ -3820,7 +3229,7 @@ function mostrarIndicadorSalvamento() {
 // ============================================
 function carregarJogoSalvo() {
     try {
-        const saved = localStorage.getItem(getSaveKey());
+        const saved = localStorage.getItem(SAVE_KEY);
         if (!saved) return false;
         
         const estado = JSON.parse(saved);
@@ -3831,7 +3240,7 @@ function carregarJogoSalvo() {
         
         if (idade > UM_DIA) {
             console.log('⌛ Save expirado (mais de 24 horas)');
-            localStorage.removeItem(getSaveKey());
+            localStorage.removeItem(SAVE_KEY);
             return false;
         }
         
@@ -3842,8 +3251,6 @@ function carregarJogoSalvo() {
         score = estado.score;
         vidas = estado.vidas;
         bitcoinQuantity = estado.bitcoinQuantity;
-        coinBalances = estado.coinBalances || {};
-        CoinStore.coins.forEach(c => { if (coinBalances[c.id] == null) coinBalances[c.id] = 0; });
         brokenBlocks = estado.brokenBlocks;
         dificuldadeAtual = estado.dificuldadeAtual;
         timeLimit = estado.timeLimit;
@@ -3851,9 +3258,6 @@ function carregarJogoSalvo() {
         metasAlcancadas = estado.metasAlcancadas || [];
         selosConquistados = estado.selosConquistados || [];
         tempoTotalPartida = estado.tempoTotalPartida || 0;
-        tempoInicioPartida = Date.now() - (tempoTotalPartida * 1000);
-        if (estado.ultimosHashes) ultimosHashes = estado.ultimosHashes;
-        blockchainHistory = estado.blockchainHistory || [];
         
         // Restaurar problema atual
         if (estado.problemaAtual) {
@@ -3913,22 +3317,11 @@ function carregarJogoSalvo() {
         
         // Reiniciar timer
         startTimer();
-        iniciarTimerGlobal(false); // retoma do tempo salvo
-        const tempoDisplay = document.getElementById('tempo-global');
-        if (tempoDisplay) tempoDisplay.style.display = 'flex';
-        syncActiveBalance();
         
-        // Restaurar blockchain visual
-        const cadeia = document.getElementById('blockchain-cadeia');
-        if (cadeia) {
-            cadeia.innerHTML = '';
-            const historico = estado.blockchainHistory || [];
-            if (historico.length > 0) {
-                historico.forEach(b => adicionarBlocoRealista(b));
-            } else if (estado.cadeiaHTML) {
-                cadeia.innerHTML = estado.cadeiaHTML; // fallback
-            }
-            cadeia.style.display = 'flex';
+        // Mostrar timer global
+        const tempoDisplay = document.getElementById('tempo-global');
+        if (tempoDisplay) {
+            tempoDisplay.style.display = 'flex';
         }
         
         // Mostrar mensagem de boas-vindas
@@ -4034,7 +3427,8 @@ function encerrarPartida() {
     setTimeout(() => {
         RankingSystem.saveGameScore(false); // false = não é vitória, mas encerrou
         
-        clearCurrentUserSession(false);
+        // Limpar save automático
+        localStorage.removeItem(SAVE_KEY);
     }, 500);
     
     if (btn) btn.style.display = 'inline-block';
@@ -4426,7 +3820,7 @@ function highlightRulerTick(slider, ruler) {
 // AVISO RÁPIDO DE SOM
 // ============================================
 function showSoundToast() {
-    const KEY = nsKey('jb_sound_tip_v3');
+    const KEY = 'jb_sound_tip_v3';
     if (soundTipShown || localStorage.getItem(KEY)) return;
     soundTipShown = true;
     localStorage.setItem(KEY, '1');
@@ -4470,39 +3864,32 @@ function showSoundToast() {
 // ============================================
 const SkinStore = {
     skins: [
-        { id: 'neon', nome: 'Neon Grid', precoBtc: 0.02000000, desc: 'Ciano e magenta pulsando em grade futurista.' },
+        { id: 'neon', nome: 'Neon Grid', precoBtc: 0.02000000, desc: 'Brilho ciano e magenta, visual futurista.' },
         { id: 'midnight', nome: 'Midnight Blue', precoBtc: 0.01500000, desc: 'Azul profundo com bordas frias.' },
         { id: 'sunset', nome: 'Sunset', precoBtc: 0.01800000, desc: 'Gradiente quente laranja/dourado.' },
-        { id: 'matrix', nome: 'Matrix Code', precoBtc: 0.02200000, desc: 'Verde neon com faixas de código caindo.' },
-        { id: 'lava', nome: 'Lava Core', precoBtc: 0.02100000, desc: 'Vermelho/âmbar incandescente com glow.' },
-        { id: 'ice', nome: 'Ice Shards', precoBtc: 0.01900000, desc: 'Azul-gelo translúcido com brilho cristal.' },
-        { id: 'aurora', nome: 'Aurora Rose', precoBtc: 0.02050000, desc: 'Lilas com rosa neon e brilho boreal.' },
-        { id: 'cyberpink', nome: 'Cyber Pink', precoBtc: 0.02150000, desc: 'Rosa choque com linhas ciano.' },
-        { id: 'galaxy', nome: 'Galaxy Glow', precoBtc: 0.02250000, desc: 'Roxo profundo com estrelas cintilantes.' },
-        { id: 'goldpulse', nome: 'Gold Pulse', precoBtc: 0.02300000, desc: 'Ouro vibrante com pulso luminoso.' }
+        { id: 'matrix', nome: 'Matrix Code', precoBtc: 0.02200000, desc: 'Verde terminal com queda de código.' },
+        { id: 'lava', nome: 'Lava Core', precoBtc: 0.02100000, desc: 'Vermelho/âmbar incandescente.' },
+        { id: 'ice', nome: 'Ice Shards', precoBtc: 0.01900000, desc: 'Azul gelo com brilho cristal.' }
     ],
     
     load() {
         try {
-            const o = JSON.parse(localStorage.getItem(nsKey('skins_owned')) || '[]');
+            const o = JSON.parse(localStorage.getItem('jb_skins_owned') || '[]');
             skinsOwned = new Set(o);
         } catch { skinsOwned = new Set(); }
-        skinAtiva = localStorage.getItem(nsKey('skin_active'));
+        skinAtiva = localStorage.getItem('jb_skin_active');
         if (skinAtiva) this.apply(skinAtiva, false);
-        CoinStore.load();
-        this.initTabs();
     },
     
     save() {
-        localStorage.setItem(nsKey('skins_owned'), JSON.stringify(Array.from(skinsOwned)));
-        if (skinAtiva) localStorage.setItem(nsKey('skin_active'), skinAtiva);
+        localStorage.setItem('jb_skins_owned', JSON.stringify(Array.from(skinsOwned)));
+        if (skinAtiva) localStorage.setItem('jb_skin_active', skinAtiva);
     },
     
     open() {
         const modal = document.getElementById('skins-modal');
         if (!modal) return;
         this.render();
-        CoinStore.render();
         modal.style.display = 'flex';
     },
     
@@ -4545,56 +3932,9 @@ const SkinStore = {
     
     previewColor(id) {
         if (id === 'neon') return 'linear-gradient(135deg, #00ffff, #ff00ff)';
-        if (id === 'midnight') return 'linear-gradient(135deg, #071423, #0d2337 60%, #040b13)';
-        if (id === 'sunset') return 'linear-gradient(135deg, #ff9966 0%, #ff5e62 50%, #ffa751 100%)';
-        if (id === 'matrix') return 'linear-gradient(180deg, rgba(0,26,15,0.95), rgba(0,41,25,0.95)), repeating-linear-gradient(180deg, rgba(0,255,128,0.35) 0 6px, transparent 6px 12px)';
-        if (id === 'lava') return 'linear-gradient(135deg, #ff1f00 0%, #ff6a00 45%, #ffd200 100%)';
-        if (id === 'ice') return 'linear-gradient(135deg, #a8f0ff 0%, #d7f5ff 45%, #8fe4ff 100%)';
-        if (id === 'aurora') return 'linear-gradient(135deg, #b832fa, #ff6ec7)';
-        if (id === 'cyberpink') return 'linear-gradient(135deg, #ff3cac 0%, #784ba0 50%, #2b86c5 100%)';
-        if (id === 'galaxy') return 'radial-gradient(circle at 30% 30%, #ffe1ff, #7a1fa2 40%, #0b1021)';
-        if (id === 'goldpulse') return 'linear-gradient(135deg, #ffdd55, #ff8800)';
+        if (id === 'midnight') return 'linear-gradient(135deg, #0b1b2b, #041017)';
+        if (id === 'sunset') return 'linear-gradient(135deg, #f46b45, #eea849)';
         return '#888';
-    },
-
-    initTabs() {
-        if (this.tabsReady) return;
-        this.tabsReady = true;
-        const tabs = document.querySelectorAll('#skins-tabs button');
-        const skinsList = document.getElementById('skins-list');
-        const coinsList = document.getElementById('coins-list');
-        tabs.forEach(btn => {
-            btn.onclick = () => {
-                tabs.forEach(b => b.classList.remove('active'));
-                btn.classList.add('active');
-                const tab = btn.getAttribute('data-tab');
-                if (tab === 'skins') {
-                    if (skinsList) skinsList.style.display = 'block';
-                    if (coinsList) coinsList.style.display = 'none';
-                    this.render();
-                } else {
-                    if (skinsList) skinsList.style.display = 'none';
-                    if (coinsList) coinsList.style.display = 'block';
-                    CoinStore.render();
-                }
-            };
-        });
-    },
-    
-    checkSkinsAchievement() {
-        if (!RankingSystem || !RankingSystem.getCurrentPlayerName) return;
-        if (skinsOwned.size !== this.skins.length) return;
-        const nome = RankingSystem.getCurrentPlayerName();
-        const conquista = {
-            id: 'skins_master',
-            titulo: 'Colecionador de Skins',
-            icone: '🎖️',
-            descricao: 'Comprou todas as skins'
-        };
-        const adicionou = RankingSystem.adicionarConquista(nome, conquista);
-        if (adicionou) {
-            mostrarMensagemLateral('🎖️ Colecionador de Skins: comprou todas!', 'bonus', 3500);
-        }
     },
     
     buy(id) {
@@ -4613,7 +3953,6 @@ const SkinStore = {
         this.render();
         if (SoundSystem) SoundSystem.play('conquest');
         mostrarMensagemLateral(`🎨 Skin comprada: ${skin.nome}`, 'bonus', 2500);
-        this.checkSkinsAchievement();
     },
     
     apply(id, persist = true) {
@@ -4629,31 +3968,26 @@ const CHAT_STORAGE_KEY = 'jb_chat_messages';
 
 function loadChatMessages() {
     try {
-        return JSON.parse(localStorage.getItem(nsKey(CHAT_STORAGE_KEY)) || '[]');
+        return JSON.parse(localStorage.getItem(CHAT_STORAGE_KEY) || '[]');
     } catch {
         return [];
     }
 }
 
 function saveChatMessages(msgs) {
-    localStorage.setItem(nsKey(CHAT_STORAGE_KEY), JSON.stringify(msgs.slice(-100))); // limita a 100
+    localStorage.setItem(CHAT_STORAGE_KEY, JSON.stringify(msgs.slice(-100))); // limita a 100
 }
 
 function ensureChatUsername() {
     if (chatUsername) return chatUsername;
-    if (currentUser?.username) {
-        chatUsername = currentUser.username;
-        localStorage.setItem(nsKey('jb_chat_username'), chatUsername);
-        return chatUsername;
-    }
-    const saved = localStorage.getItem(nsKey('jb_chat_username'));
+    const saved = localStorage.getItem('jb_chat_username');
     if (saved) {
         chatUsername = saved;
         return chatUsername;
     }
     const random = Math.floor(Math.random() * 900) + 100;
     chatUsername = `Jogador-${random}`;
-    localStorage.setItem(nsKey('jb_chat_username'), chatUsername);
+    localStorage.setItem('jb_chat_username', chatUsername);
     return chatUsername;
 }
 
@@ -4749,25 +4083,10 @@ function initGameChat() {
             return `A cada 6 blocos liberamos um capítulo da história do Bitcoin. Falta pouco? Blocos: ${blocoInfo}.`;
         }
         if (lower.includes('conquista') || lower.includes('meta') || lower.includes('selo')) {
-            return `Conquistas: metas de velocidade/speedrun/perfeição, 📚 Mente Enciclopédica (visite todos verbetes), Maestro das Criptos (0.05 de cada moeda) e Medalha Satoshi (100 blocos em Fácil, Médio e Difícil). Veja todas em 🏆.`;
-        }
-        if (lower.includes('moeda') || lower.includes('minera') || lower.includes('trocar')) {
-            return `Moedas: escolha a ativa na aba Moedas. Minerar dá saldo nessa moeda. A carteira mostra todas (livre + carteira). Troque a ativa para minerar outro ativo.`;
-        }
-        if (lower.includes('carteira') || lower.includes('juros')) {
-            return `Carteira 💼: guarda saldos por moeda, rende ~1% por hora. Deposite/saque na moeda ativa. Conquista “Maestro das Criptos” exige 0.05 de cada (livre+carteira).`;
-        }
-        if (lower.includes('skin')) {
-            return `Skins: botão 🎨 abre a loja. Compre com BTC do jogo; conquista “Colecionador de Skins” ao comprar todas.`;
-        }
-        if (lower.includes('decode') || lower.includes('ferramenta') || lower.includes('circulo')) {
-            return `Ferramentas de decode: Circulo de César e painel Decode (César/ASCII/Base64). Se não aparecerem, abra pelo menu “Ferramentas de Decodificação”.`;
-        }
-        if (lower.includes('chat')) {
-            return `Chat: usa seu nome de perfil. “?texto” fala direto com o bot; sincroniza entre abas.`;
+            return `Conquistas: velocidade, speedrun, perfeição e 📚 Mente Enciclopédica. Visite todos os verbetes, quebre blocos rápido e mantenha 3 vidas para selos especiais.`;
         }
         // fallback contextual com dica sorteada
-        return 'Precisa de ajuda? Exemplos: regras, passo a passo, tempo, vidas, hash, chave/cesar, ASCII, Base64, enciclopédia, dificuldade, erro, bloco, som, ranking/score, capítulos, conquistas, moedas, carteira, skins, decode, chat. Prefixe com "?" para falar direto comigo.';
+        return 'Precisa de ajuda? Use termos: regras, passo a passo, tempo, vidas, hash, chave/cesar, ASCII, Base64, enciclopédia, dificuldade, erro, bloco, som, ranking/score, capítulos, conquistas. Prefixe com "?" para falar direto comigo.';
     };
 
     const renderMessages = () => {
@@ -4824,7 +4143,7 @@ function initGameChat() {
     renderMessages();
     
     window.addEventListener('storage', (e) => {
-        if (e.key && e.key.endsWith(CHAT_STORAGE_KEY)) renderMessages();
+        if (e.key === CHAT_STORAGE_KEY) renderMessages();
     });
 }
 
@@ -4840,10 +4159,6 @@ function copiarResultadoDecod() {
 }
 
 document.addEventListener('DOMContentLoaded', function() {
-    Auth.load();
-    updateProfileUI();
-    migrateLegacyData();
-    
     // Configurações iniciais
     document.getElementById('problem-container').style.display = 'none';
     document.getElementById('hash-log').style.display = 'none';
@@ -4898,52 +4213,6 @@ document.addEventListener('DOMContentLoaded', function() {
     if (skinsBtn) skinsBtn.onclick = () => SkinStore.open();
     const skinsClose = document.getElementById('skins-close');
     if (skinsClose) skinsClose.onclick = () => SkinStore.close();
-
-    // Carteira BTC
-    Wallet.load();
-    const walletBtn = document.getElementById('wallet-toggle');
-    if (walletBtn) { walletBtn.onclick = () => Wallet.open(); walletBtn.style.display = 'none'; }
-    const walletClose = document.getElementById('wallet-close');
-    if (walletClose) walletClose.onclick = () => Wallet.close();
-    const walletDeposit = document.getElementById('wallet-deposit');
-    const walletWithdraw = document.getElementById('wallet-withdraw');
-    const walletAccrue = document.getElementById('wallet-accrue');
-    const walletInput = document.getElementById('wallet-amount');
-    if (walletDeposit && walletInput) walletDeposit.onclick = () => Wallet.deposit(walletInput.value);
-        if (walletWithdraw && walletInput) walletWithdraw.onclick = () => Wallet.withdraw(walletInput.value);
-        if (walletAccrue) walletAccrue.onclick = () => { Wallet.accrue(); Wallet.render(); mostrarMensagemLateral('Rendimento atualizado!', 'bonus', 1800); };
-
-    // Conquistas (visual)
-    const achBtn = document.getElementById('achievements-toggle');
-    const achClose = document.getElementById('achievements-close');
-    if (achBtn) achBtn.onclick = () => AchievementsUI.open();
-    if (achClose) achClose.onclick = () => AchievementsUI.close();
-
-    // Perfil/Login
-    const profileBtn = document.getElementById('profile-toggle');
-    const profileModal = document.getElementById('profile-modal');
-    const profileClose = document.getElementById('profile-close');
-    const profileLogin = document.getElementById('profile-login');
-    const profileRegister = document.getElementById('profile-register');
-    const profileGuest = document.getElementById('profile-guest');
-    const profileLogout = document.getElementById('profile-logout');
-    const profileUser = document.getElementById('profile-username');
-    const profilePass = document.getElementById('profile-password');
-    const profileCurrent = document.getElementById('profile-current');
-    const openProfile = () => {
-        if (profileModal) profileModal.style.display = 'flex';
-        if (profileCurrent) profileCurrent.textContent = currentUser?.username ? `Logado como: ${currentUser.username}` : 'Modo convidado';
-    };
-    if (profileBtn) profileBtn.onclick = openProfile;
-    if (profileClose) profileClose.onclick = () => profileModal && (profileModal.style.display = 'none');
-    if (profileLogin) profileLogin.onclick = () => Auth.login(profileUser.value.trim(), profilePass.value.trim());
-    if (profileRegister) profileRegister.onclick = () => Auth.register(profileUser.value.trim(), profilePass.value.trim());
-    if (profileGuest) profileGuest.onclick = () => Auth.useGuest();
-    if (profileLogout) profileLogout.onclick = () => Auth.logout();
-    // Se não houver usuário logado, sugere abrir o modal
-    if (!currentUser && profileModal) {
-        setTimeout(() => { profileModal.style.display = 'flex'; }, 600);
-    }
     
     // Aviso rápido de som (exibe uma vez)
     setTimeout(showSoundToast, 400);
@@ -4967,7 +4236,7 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // NOVO: Verificar se há jogo salvo
     setTimeout(() => {
-        const temSave = localStorage.getItem(getSaveKey());
+        const temSave = localStorage.getItem(SAVE_KEY);
         
         if (temSave) {
             // Perguntar se quer continuar
@@ -4981,7 +4250,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 if (btnEncerrar) btnEncerrar.style.display = 'block';
             } else {
                 // Remover save se não quiser continuar
-                localStorage.removeItem(getSaveKey());
+                localStorage.removeItem(SAVE_KEY);
             }
         }
     }, 1000);
@@ -5190,22 +4459,28 @@ function gerarBlocoRealista(numeroBloco, texto = '') {
     // Simular mineração: encontrar um hash com zeros à esquerda
     let hash = '';
     let tentativas = 0;
-    const maxTentativas = 5000; // Evitar loop infinito
-    
-    const gerarHexAleatorio = (len) => {
-        let s = '';
-        for (let i = 0; i < len; i++) {
-            s += Math.floor(Math.random() * 16).toString(16);
-        }
-        return s;
-    };
+    const maxTentativas = 10000; // Evitar loop infinito
     
     do {
         tentativas++;
-        // Gera um hash pseudo-aleatório de 64 chars hex
-        const base = gerarHexAleatorio(64);
-        // Garante zeros à esquerda conforme dificuldade
-        hash = '0'.repeat(dificuldade) + base.slice(dificuldade, 64);
+        // Dados do bloco: número + nonce + timestamp + texto + tentativa
+        const dados = `${numeroBloco}-${nonce + tentativas}-${timestamp}-${texto}-${Math.random()}`;
+        
+        // Gerar hash SHA-256 simulado (64 caracteres hex)
+        hash = '';
+        for (let i = 0; i < dados.length; i++) {
+            const charCode = dados.charCodeAt(i);
+            // Converter para hex (0-9a-f)
+            const hex = (charCode ^ (tentativas + i)).toString(16).padStart(2, '0');
+            hash += hex;
+        }
+        
+        // Completar até 64 caracteres
+        while (hash.length < 64) {
+            hash += Math.floor(Math.random() * 16).toString(16);
+        }
+        hash = hash.substring(0, 64);
+        
     } while (hash.substring(0, dificuldade) !== '0'.repeat(dificuldade) && tentativas < maxTentativas);
     
     // Formatar hash em grupos de 2 caracteres para melhor visualização
@@ -5239,9 +4514,6 @@ function gerarBlocoRealista(numeroBloco, texto = '') {
     if (ultimosHashes.length > 20) {
         ultimosHashes.shift();
     }
-    
-    // Registrar no histórico completo (para recriar a cadeia ao retomar)
-    blockchainHistory.push(bloco);
     
     return bloco;
 }
@@ -5426,14 +4698,11 @@ function updateHashLog(blockNumber) {
 
 const startGameOriginal = startGame;
 startGame = function(difficulty) {
-    const wasLogged = !!currentUser;
     startGameOriginal(difficulty);
-    if (!currentUser || !wasLogged) return; // não iniciar timers se não logou
     
     setTimeout(() => {
-        if (!currentUser) return;
         if (typeof iniciarTimerGlobal === 'function') {
-            iniciarTimerGlobal(true); // reseta para novo jogo
+            iniciarTimerGlobal();
             console.log('⏱️ Timer reiniciado após startGame');
         }
         

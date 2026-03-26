@@ -13,6 +13,7 @@
   },
   "dependencies": {
     "@azure/web-pubsub-client": "^1.0.2",
+    "socket.io-client": "^4.7.5",
     "@tailwindcss/vite": "^4.1.11",
     "@types/dompurify": "^3.0.5",
     "dompurify": "^3.2.6",

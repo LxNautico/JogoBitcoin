@@ -730,14 +730,91 @@
 
     <!-- LOJA DE SKINS -->
     <button id="skins-toggle" title="Loja de skins">🎨</button>
+    <!-- CONQUISTAS -->
+    <button id="achievements-toggle" title="Conquistas">🏆</button>
+    <!-- CARTEIRA DE BTC -->
+    <button id="wallet-toggle" title="Carteira de BTC">💼</button>
+    <!-- PERFIL / LOGIN -->
+    <button id="profile-toggle" title="Perfil e Login">👤</button>
     <div id="skins-modal">
         <div id="skins-header">
             <span>Loja de Skins</span>
             <button id="skins-close">×</button>
         </div>
-        <div id="skins-list"></div>
+        <div id="skins-tabs">
+            <button data-tab="skins" class="active">Skins</button>
+            <button data-tab="coins">Moedas</button>
+        </div>
+        <div id="skins-list" data-section="skins"></div>
+        <div id="coins-list" data-section="coins" style="display:none;"></div>
         <div id="skins-footer">
-            <small>Compre usando BTC ganho no jogo. Skins são só cosméticas.</small>
+            <small>Compre usando BTC ganho no jogo. Itens são cosméticos/colecionáveis.</small>
+        </div>
+    </div>
+
+    <!-- MODAL CONQUISTAS -->
+    <div id="achievements-modal">
+        <div id="achievements-panel">
+            <div id="achievements-header">
+                <span>Conquistas</span>
+                <button id="achievements-close">×</button>
+            </div>
+            <div id="achievements-body">
+                <div id="achievements-list"></div>
+                <small style="opacity:0.75;">Desbloqueie jogando: as conquistas ativadas ficam realçadas.</small>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL PERFIL/LOGIN -->
+    <div id="profile-modal">
+        <div id="profile-panel">
+            <div id="profile-header">
+                <span>Perfil</span>
+                <button id="profile-close">×</button>
+            </div>
+            <div id="profile-body">
+                <div id="profile-current"></div>
+                <div class="profile-actions">
+                    <input id="profile-username" placeholder="Usuário" autocomplete="username">
+                    <input id="profile-password" type="password" placeholder="Senha" autocomplete="current-password">
+                    <div style="display:flex; gap:8px; flex-wrap:wrap;">
+                        <button id="profile-login">Entrar</button>
+                        <button id="profile-register">Criar conta</button>
+                        <button id="profile-guest" style="background:#607d8b;color:white;">Convidado</button>
+                        <button id="profile-logout" style="background:#f44336;color:white;">Sair</button>
+                    </div>
+                    <small style="opacity:0.7;">Dados ficam salvos por usuário neste dispositivo.</small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL CARTEIRA -->
+    <div id="wallet-modal">
+        <div id="wallet-panel">
+            <div id="wallet-header">
+                <span>Carteira de BTC</span>
+                <button id="wallet-close">×</button>
+            </div>
+            <div id="wallet-body">
+                <p>Saldo na carteira: <strong id="wallet-balance">0.00000000 BTC</strong></p>
+                <p>Rendimento automático: <strong id="wallet-rate">1% ao dia</strong></p>
+                <p style="font-size:0.85em; opacity:0.8;">O rendimento é creditado quando você abre a carteira ou clica em “Atualizar rendimento”.</p>
+                
+                <div class="wallet-actions">
+                    <label>Valor (BTC):</label>
+                    <input id="wallet-amount" type="number" step="0.00000001" min="0" placeholder="0.00000000">
+                    <div style="display:flex; gap:10px; margin-top:8px;">
+                        <button id="wallet-deposit">Depositar</button>
+                        <button id="wallet-withdraw">Sacar</button>
+                    </div>
+                </div>
+                
+                <div style="margin-top:12px;">
+                    <button id="wallet-accrue" style="width:100%;">Atualizar rendimento</button>
+                </div>
+            </div>
         </div>
     </div>
 
