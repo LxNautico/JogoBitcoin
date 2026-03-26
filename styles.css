@@ -1928,3 +1928,106 @@ body[data-skin="goldpulse"] #blocks-container .block {
     from { background-position: 0 -180px; }
     to   { background-position: 0 0; }
 }
+
+/* ========== RESPONSIVIDADE MOBILE ========== */
+@media screen and (max-width: 900px) {
+    /* Empilhar contêineres e preencher a tela */
+    body {
+        flex-direction: column !important;
+        overflow-y: auto !important;
+        padding-bottom: 70px !important; /* Espaço inferior para botões flutuantes */
+    }
+
+    .container {
+        width: 100% !important;
+        min-height: auto !important;
+        border-left: none !important;
+        border-right: none !important;
+        border-bottom: 2px solid rgba(0, 255, 255, 0.3) !important;
+    }
+
+    /* Ordenação Flex: 1 - Menu Inicial. 2 - Jogo Ativo Top. 3 - Jogo Ativo Bottom. */
+    .container.center { order: 1; min-height: 100vh !important; justify-content: flex-start; }
+    .container.left { order: 2; border-top: 2px solid rgba(255, 170, 0, 0.5) !important; }
+    .container.right { order: 3; }
+
+    /* Reduzir ruído visual das decorações e palavras de fundo */
+    .crypto-words, .chain-decor {
+        display: none !important;
+    }
+
+    /* Ajustar textos principais para Mobile */
+    #difficulty-selection h2 { font-size: 1.8em !important; margin-bottom: 30px !important; }
+    #difficulty-selection button { 
+        padding: 12px 20px !important; 
+        font-size: 1em !important; 
+        width: 90% !important; 
+        margin: 5px auto !important; 
+        display: block !important; 
+    }
+    
+    /* Decodificador César */
+    #circulo-cesar > div { 
+        padding: 15px !important; 
+        width: 95% !important; 
+        transform: scale(0.9); 
+    }
+    .circulo-externo, .circulo-interno { 
+        transform: scale(0.85); 
+        margin-top: -10px; 
+    }
+
+    /* Redimensionar as janelas Modais para Mobile */
+    #decodificador-modal > div,
+    #skins-modal, #achievements-modal, #wallet-modal, #profile-modal {
+        width: 95% !important;
+        padding: 15px !important;
+        max-height: 85vh !important;
+        overflow-y: auto !important;
+    }
+
+    /* Responsividade do Painel de Entrada de Jogo */
+    #problem-container { padding: 15px !important; }
+    #answer { width: 100% !important; }
+    #problem-container button { width: 100% !important; padding: 12px !important; }
+
+    /* Hash Log - Reduzir Fontes */
+    #hash-log { padding: 10px !important; }
+    .hash-box { font-size: 0.7em !important; }
+    
+    /* BOTÕES FLUTUANTES (Bottom Action Bar) */
+    #chat-toggle, #skins-toggle, #achievements-toggle, #wallet-toggle, #profile-toggle, .help-button {
+        position: fixed !important;
+        bottom: 10px !important;
+        top: auto !important;
+        width: 45px !important;
+        height: 45px !important;
+        padding: 0 !important;
+        display: flex !important;
+        justify-content: center !important;
+        align-items: center !important;
+        border-radius: 50% !important;
+        font-size: 1.4em !important;
+        z-index: 10000 !important;
+        background: linear-gradient(135deg, #00ffff, #0088aa) !important;
+        color: black !important;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.5) !important;
+    }
+
+    /* Espaçamento Inteligente do Menu Circular Móvel Inferior */
+    #chat-toggle         { left: 10px !important; }
+    #skins-toggle        { left: 65px !important; }
+    #achievements-toggle { left: 120px !important; }
+    
+    #wallet-toggle       { right: 120px !important; }
+    #profile-toggle      { right: 65px !important; }
+    
+    .help-button { 
+        right: 10px !important; 
+        font-size: 0 !important; /* Esconder o texto para mostrar apenas o icone */
+    }
+    .help-button::after { 
+        content: '❓'; 
+        font-size: 16px; 
+    }
+}
