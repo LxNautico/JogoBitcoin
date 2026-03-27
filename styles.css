@@ -1810,40 +1810,48 @@ body {
 }
 
 /* Temas de skin (aplicados no body via data-skin) */
+/* 1. NEON - Cyberpunk Vibes */
 body[data-skin="neon"] {
-    background: radial-gradient(circle at 20% 20%, rgba(0,255,255,0.08), transparent 30%), radial-gradient(circle at 80% 40%, rgba(255,0,255,0.08), transparent 28%), #0b1020;
+    background: radial-gradient(circle at 10% 20%, rgba(0, 255, 255, 0.15) 0%, transparent 40%),
+                radial-gradient(circle at 90% 80%, rgba(255, 0, 255, 0.15) 0%, transparent 40%),
+                #050508;
 }
-
 body[data-skin="neon"] #blocks-container .block {
-    border-color: #00ffff !important;
-    box-shadow: 0 0 10px rgba(0,255,255,0.3);
+    border-color: #0ff !important;
+    background: rgba(0, 255, 255, 0.1) !important;
+    box-shadow: 0 0 15px rgba(0, 255, 255, 0.4), inset 0 0 10px rgba(0, 255, 255, 0.2);
 }
 
+/* 2. MIDNIGHT - Dark Sapphire */
 body[data-skin="midnight"] {
-    background: linear-gradient(135deg, #0b1b2b, #041017);
+    background: linear-gradient(135deg, #020b14, #0a1128, #001f3f);
 }
-
 body[data-skin="midnight"] #blocks-container .block {
-    border-color: #90caf9 !important;
-    box-shadow: 0 0 6px rgba(144,202,249,0.25);
+    border-color: #4da8da !important;
+    background: rgba(18, 52, 86, 0.8) !important;
+    box-shadow: 0 0 12px rgba(77, 168, 218, 0.3), inset 0 0 8px rgba(77, 168, 218, 0.2);
 }
 
+/* 3. SUNSET - Retrowave 80s */
 body[data-skin="sunset"] {
-    background: linear-gradient(135deg, #f46b45, #eea849);
+    background: linear-gradient(180deg, #10002b 0%, #3c096c 40%, #c77dff 80%, #ff9e00 100%);
 }
-
 body[data-skin="sunset"] #blocks-container .block {
-    border-color: #ffe082 !important;
-    box-shadow: 0 0 8px rgba(255,224,130,0.35);
+    border-color: #ff9e00 !important;
+    background: linear-gradient(135deg, rgba(255, 158, 0, 0.6), rgba(224, 170, 255, 0.2)) !important;
+    box-shadow: 0 0 16px rgba(255, 158, 0, 0.5), inset 0 0 10px rgba(255, 158, 0, 0.3);
 }
 
+/* 4. MATRIX - True Terminal Green */
 body[data-skin="matrix"] {
-    background: radial-gradient(circle at 15% 20%, rgba(0,255,120,0.10), transparent 30%), #031308;
+    background: radial-gradient(circle at center, rgba(0, 40, 0, 0.6) 0%, #000000 100%);
     position: relative;
 }
 body[data-skin="matrix"] #blocks-container .block {
-    border-color: #6bff6b !important;
-    box-shadow: 0 0 14px rgba(80,255,120,0.55);
+    border-color: #00ff41 !important;
+    background: rgba(0, 255, 65, 0.1) !important;
+    box-shadow: 0 0 15px rgba(0, 255, 65, 0.4), inset 0 0 10px rgba(0, 255, 65, 0.2);
+    text-shadow: 0 0 5px #00ff41;
 }
 body[data-skin="matrix"]::after {
     content: '';
@@ -1851,23 +1859,26 @@ body[data-skin="matrix"]::after {
     inset: 0;
     pointer-events: none;
     background-image:
-        linear-gradient(180deg, rgba(0,255,120,0.22) 0 35%, transparent 65% 100%),
-        repeating-linear-gradient(180deg, rgba(0,255,120,0.08) 0 6px, transparent 6px 12px);
+        linear-gradient(180deg, rgba(0,255,65,0.1) 0 35%, transparent 65% 100%),
+        repeating-linear-gradient(180deg, rgba(0,255,65,0.05) 0 4px, transparent 4px 8px);
     background-size: 100% 160px;
-    animation: matrixRain 1.6s linear infinite;
-    opacity: 0.6;
+    animation: matrixRain 2s linear infinite;
+    opacity: 0.8;
 }
 
+/* 5. LAVA - Volcanic Ash / Magma */
 body[data-skin="lava"] {
-    background: linear-gradient(135deg, #7b1d00, #d84315, #ff7043);
+    background: radial-gradient(circle at bottom, rgba(140, 15, 0, 0.5) 0%, #0d0d0d 80%);
 }
 body[data-skin="lava"] #blocks-container .block {
-    border-color: #ffcc80 !important;
-    box-shadow: 0 0 10px rgba(255,112,67,0.4);
+    border-color: #ff4500 !important;
+    background: linear-gradient(135deg, rgba(255, 69, 0, 0.7), rgba(139, 0, 0, 0.3)) !important;
+    box-shadow: 0 0 18px rgba(255, 69, 0, 0.5), inset 0 0 15px rgba(255, 69, 0, 0.4);
 }
 
+/* 6. ICE - Frosted Glass */
 body[data-skin="ice"] {
-    background: linear-gradient(135deg, #eaf7ff, #cdeaff, #9edbff);
+    background: linear-gradient(135deg, #0b1d3a, #1a365d, #2c5282);
 }
 body[data-skin="ice"]::after {
     content: '';
@@ -1875,53 +1886,71 @@ body[data-skin="ice"]::after {
     inset: 0;
     pointer-events: none;
     background-image:
-        radial-gradient(circle at 20% 20%, rgba(255,255,255,0.8) 0 10%, transparent 20%),
-        radial-gradient(circle at 70% 30%, rgba(255,255,255,0.7) 0 8%, transparent 18%),
-        radial-gradient(circle at 40% 70%, rgba(255,255,255,0.75) 0 9%, transparent 19%);
-    opacity: 0.7;
+        radial-gradient(circle at 10% 20%, rgba(255, 255, 255, 0.1) 0 5%, transparent 15%),
+        radial-gradient(circle at 80% 80%, rgba(200, 230, 255, 0.15) 0 8%, transparent 20%);
+    backdrop-filter: blur(2px) saturate(120%);
 }
 body[data-skin="ice"] #blocks-container .block {
-    border-color: #e8f4ff !important; /* branco frio */
-    background: linear-gradient(145deg, rgba(255,255,255,0.35), rgba(210,230,255,0.12));
-    box-shadow:
-        0 0 18px rgba(200,230,255,0.55),
-        inset 0 0 12px rgba(255,255,255,0.25),
-        inset 0 0 22px rgba(180,210,255,0.15);
-    backdrop-filter: blur(4px) saturate(160%);
-    transition: 0.25s ease;
+    border-color: #e2f1ff !important;
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.3), rgba(255, 255, 255, 0.05)) !important;
+    box-shadow: 0 0 15px rgba(180, 220, 255, 0.4), inset 0 0 12px rgba(255, 255, 255, 0.3);
+    backdrop-filter: blur(5px);
 }
 
-/* Novas skins */
+/* 7. AURORA - Borealis Lights */
 body[data-skin="aurora"] {
-    background: radial-gradient(circle at 20% 25%, rgba(255,110,199,0.15), transparent 30%), radial-gradient(circle at 75% 40%, rgba(184,50,250,0.18), transparent 32%), #0c0b1a;
+    background: linear-gradient(135deg, #00100d 0%, #032b26 40%, #051937 80%, #17002e 100%);
 }
 body[data-skin="aurora"] #blocks-container .block {
-    border-color: #ff8dfc !important;
-    box-shadow: 0 0 12px rgba(255,141,252,0.5);
+    border-color: #00ffcc !important;
+    background: rgba(0, 255, 204, 0.1) !important;
+    box-shadow: 0 0 16px rgba(0, 255, 204, 0.5), inset 0 0 10px rgba(0, 255, 204, 0.3);
 }
 
+/* 8. CYBERPINK - Tokyo Night */
 body[data-skin="cyberpink"] {
-    background: linear-gradient(135deg, #ff3cac 0%, #784ba0 50%, #2b86c5 100%);
+    background: radial-gradient(ellipse at top right, rgba(219, 39, 119, 0.25) 0%, transparent 50%),
+                radial-gradient(ellipse at bottom left, rgba(107, 33, 168, 0.3) 0%, transparent 50%),
+                #0d0415;
 }
 body[data-skin="cyberpink"] #blocks-container .block {
-    border-color: #ffd1ff !important;
-    box-shadow: 0 0 12px rgba(255,209,255,0.55);
+    border-color: #ff2a85 !important;
+    background: rgba(255, 42, 133, 0.15) !important;
+    box-shadow: 0 0 18px rgba(255, 42, 133, 0.5), inset 0 0 12px rgba(255, 42, 133, 0.25);
 }
 
+/* 9. GALAXY - Deep Cosmos Nebula */
 body[data-skin="galaxy"] {
-    background: radial-gradient(circle at 20% 30%, rgba(255,225,255,0.08), transparent 25%), radial-gradient(circle at 70% 20%, rgba(110,170,255,0.12), transparent 28%), #0b1021;
+    background: radial-gradient(circle at 30% 20%, rgba(75, 0, 130, 0.3), transparent 40%),
+                radial-gradient(circle at 70% 80%, rgba(25, 25, 112, 0.4), transparent 40%),
+                #04000a;
+}
+body[data-skin="galaxy"]::after {
+    content: '';
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    background-image: 
+        radial-gradient(circle at center, white 1px, transparent 1px),
+        radial-gradient(circle at center, rgba(255,255,255,0.8) 1px, transparent 1px);
+    background-size: 100px 100px, 60px 60px;
+    background-position: 0 0, 30px 30px;
+    opacity: 0.15;
 }
 body[data-skin="galaxy"] #blocks-container .block {
-    border-color: #c5a3ff !important;
-    box-shadow: 0 0 14px rgba(197,163,255,0.55);
+    border-color: #b388ff !important;
+    background: rgba(138, 43, 226, 0.3) !important;
+    box-shadow: 0 0 18px rgba(138, 43, 226, 0.6), inset 0 0 12px rgba(138, 43, 226, 0.3);
 }
 
+/* 10. GOLDPULSE - Liquid Luxury */
 body[data-skin="goldpulse"] {
-    background: linear-gradient(135deg, #ffefba 0%, #ffc107 45%, #ff8f00 100%);
+    background: radial-gradient(circle at 50% 0%, rgba(184, 134, 11, 0.3) 0%, #0d0d0d 60%);
 }
 body[data-skin="goldpulse"] #blocks-container .block {
-    border-color: #ffe082 !important;
-    box-shadow: 0 0 12px rgba(255,224,130,0.6);
+    border-color: #ffdf00 !important;
+    background: linear-gradient(135deg, rgba(255, 223, 0, 0.4), rgba(218, 165, 32, 0.1)) !important;
+    box-shadow: 0 0 15px rgba(255, 215, 0, 0.5), inset 0 0 10px rgba(218, 165, 32, 0.3);
 }
 
 @keyframes matrixRain {
