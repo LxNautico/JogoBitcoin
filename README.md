@@ -182,6 +182,8 @@ Esses arquivos compõem a identidade visual, as fases, os desafios e os elemento
 
 🔗 [jogobitcoin.netlify.app](https://jogobitcoin.netlify.app)
 
+🔗 [lxnautico.github.io/JogoBitcoin](https://lxnautico.github.io/JogoBitcoin/)
+
 ---
 
 ## 📦 Instalação (opcional)
