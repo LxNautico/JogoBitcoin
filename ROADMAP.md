@@ -33,6 +33,10 @@ Este documento apresenta todas as melhorias implementadas e planejadas para o Jo
   - Cards interativos com sombras e hover effects
   - Paleta de cores otimizada (laranja Bitcoin + tons escuros)
   - Animações suaves de entrada
+- ✅ **Implementação de Múltiplas Moedas no Tracker** (Fixes #21)
+  - Adição dinâmica de logos SVG oficiais (cryptocurrency-icons) integrados na mineração
+- ✅ **Limpeza do Design da Tela Inicial** (Fixes #22)
+  - Ocultação de menus flutuantes dinâmicos no estado ocioso e integração do Círculo de César na Sidebar
 
 ### 📱 Responsividade Mobile
 - ✅ **Layout e Adaptação Completa para Dispositivos Móveis** (Fixes #15)
@@ -199,6 +203,8 @@ Este documento apresenta todas as melhorias implementadas e planejadas para o Jo
 | #18 | Implementar sistema de tempo | 🔴 Difícil | `js`, `feature` |
 | #19 | Adicionar efeitos sonoros de ação | 🟡 Médio | `áudio`, `js` |
 | #20 | Melhorar acessibilidade | 🟡 Médio | `a11y`, `ux` |
+| ~~#21~~ | ~~Implementar widget multi-moeda e logos SVGs~~ | ✅ **Concluído** | `ui`, `feature` |
+| ~~#22~~ | ~~Limpeza de UI (menus fantasma) e Tracker César~~ | ✅ **Concluído** | `ui`, `bugfix` |
 
 **Contribua!** Veja o [CONTRIBUTING.md](CONTRIBUTING.md) para mais detalhes.
 
@@ -212,12 +218,13 @@ Este documento apresenta todas as melhorias implementadas e planejadas para o Jo
 | 2.0.0 | Mar/2026 | Nova interface, sistema de conquistas, ferramentas de decodificação |
 | 2.1.0 | Mar/2026 | Loja de skins, carteira, simulador blockchain, perfil de jogador, chat e áudios narrativos |
 | 2.2.0 | Mar/2026 | Responsividade Mobile e adaptação layout celular (App UI) |
+| 2.2.1 | Mar/2026 | Suporte multi-moedas, Logos SVGs Oficiais, Correção UI Inicial e Círculo de César Integrado |
 | 2.3.0 | Mai/2026 | (Planejado) Sistema de tempo e recompensas |
 
 ---
 
 **Última atualização:** Março 2026  
-**Versão atual:** 2.2.0  
+**Versão atual:** 2.2.1  
 **Contribuidores:** [Alex](https://github.com/LxNautico) e [Junior]
 
 ---
