@@ -51,14 +51,14 @@ function saveSpecialProgress() {
     try {
         localStorage.setItem(nsKey('clear100_progress'), JSON.stringify(clear100Progress));
         localStorage.setItem(nsKey('satoshi_unlocked'), satoshiUnlocked ? '1' : '0');
-    } catch {}
+    } catch { }
 }
 
 function saveSpecialProgress() {
     try {
         localStorage.setItem(nsKey('clear100_progress'), JSON.stringify(clear100Progress));
         localStorage.setItem(nsKey('satoshi_unlocked'), satoshiUnlocked ? '1' : '0');
-    } catch {}
+    } catch { }
 }
 
 function getCurrentUserId() {
@@ -74,7 +74,7 @@ function clearCurrentUserSession(full = true) {
     }
     const walletBtn = document.getElementById('wallet-toggle');
     if (walletBtn) walletBtn.style.display = 'none';
-    try { pararTimerGlobal(); } catch {}
+    try { pararTimerGlobal(); } catch { }
     if (typeof timerInterval !== 'undefined' && timerInterval) {
         clearInterval(timerInterval);
         timerInterval = null;
@@ -274,9 +274,9 @@ function iniciarTimerGlobal(resetStart = true) {
         tempoInicioPartida = Date.now();
         tempoTotalPartida = 0;
     }
-    
+
     startGlobalInterval();
-    
+
     console.log('⏱️ Timer global iniciado em', new Date().toLocaleTimeString());
 }
 
@@ -285,7 +285,7 @@ function startGlobalInterval() {
         if (!jogoConcluido) {
             tempoTotalPartida = Math.floor((Date.now() - tempoInicioPartida) / 1000);
             atualizarDisplayTempo();
-            
+
             const tempoModern = document.getElementById('tempo-modern');
             if (tempoModern) {
                 const mins = Math.floor(tempoTotalPartida / 60);
@@ -314,7 +314,7 @@ function resetTimerGlobal() {
 function atualizarDisplayTempo() {
     const tempoDisplay = document.getElementById('tempo-global');
     if (!tempoDisplay) return;
-    
+
     const minutos = Math.floor(tempoTotalPartida / 60);
     const segundos = tempoTotalPartida % 60;
     tempoDisplay.innerHTML = `⏱️ ${minutos.toString().padStart(2, '0')}:${segundos.toString().padStart(2, '0')}`;
@@ -325,25 +325,25 @@ function atualizarDisplayTempo() {
 // ============================================
 
 function verificarMetasTempo() {
-    console.log('⏱️ Verificando metas...', {brokenBlocks, tempoTotalPartida});
-    
+    console.log('⏱️ Verificando metas...', { brokenBlocks, tempoTotalPartida });
+
     metasDisponiveis.forEach(meta => {
         if (metasAlcancadas.includes(meta.id)) return;
-        
+
         if (meta.blocos && !isNaN(meta.blocos)) {
             if (brokenBlocks >= meta.blocos && tempoTotalPartida <= meta.tempoMax) {
                 console.log('🏆 Meta atingida:', meta.nome);
                 alcançarMeta(meta);
             }
         }
-        
+
         if (meta.dificuldade && meta.dificuldade === dificuldadeAtual) {
             if (brokenBlocks >= TamMax && tempoTotalPartida <= meta.tempoMax) {
                 console.log('🏆 Meta speedrun atingida:', meta.nome);
                 alcançarMeta(meta);
             }
         }
-        
+
         if (meta.id === 'precisao_total' && brokenBlocks >= TamMax && vidas === 3) {
             console.log('🏆 Meta perfeição atingida:', meta.nome);
             alcançarMeta(meta);
@@ -357,21 +357,21 @@ function verificarMetasTempo() {
 
 function alcançarMeta(meta) {
     if (metasAlcancadas.includes(meta.id)) return;
-    
+
     metasAlcancadas.push(meta.id);
     console.log('🏆 META ALCANÇADA:', meta.nome);
-    
+
     // Aplicar recompensas
     if (meta.recompensa.pontos) {
         score += meta.recompensa.pontos;
         updateScoreDisplay(score);
     }
-    
+
     if (meta.recompensa.bitcoin) {
-    bitcoinQuantity += meta.recompensa.bitcoin;
-    updateBitcoinValue(false);
+        bitcoinQuantity += meta.recompensa.bitcoin;
+        updateBitcoinValue(false);
     }
-    
+
     // Registrar conquista
     const conquista = {
         id: meta.id,
@@ -379,7 +379,7 @@ function alcançarMeta(meta) {
         icone: meta.icone,
         descricao: meta.descricao
     };
-    
+
     if (meta.recompensa.titulo) {
         selosConquistados.push({
             id: meta.id,
@@ -388,13 +388,13 @@ function alcançarMeta(meta) {
             data: new Date().toLocaleDateString()
         });
     }
-    
+
     // Salvar no ranking
     const ultimoJogador = RankingSystem.getCurrentPlayerName() || localStorage.getItem(nsKey('jogobitcoin_lastname'));
     if (ultimoJogador && ultimoJogador !== 'Anônimo') {
         RankingSystem.adicionarConquista(ultimoJogador, conquista);
     }
-    
+
     // ✅ MOSTrar CONQUISTA NA LATERAL (como mensagem de 5 segundos)
     mostrarConquistaNaLateral(meta);
 }
@@ -406,7 +406,7 @@ function mostrarConquistaNaLateral(meta) {
     // Formatar mensagem baseado no tipo de conquista
     let mensagem = '';
     let icone = meta.icone || '🏆';
-    
+
     // Personalizar mensagem por tipo de conquista
     if (meta.id.includes('velocidade')) {
         const blocos = meta.blocos;
@@ -423,13 +423,13 @@ function mostrarConquistaNaLateral(meta) {
     else {
         mensagem = `${icone} CONQUISTA: ${meta.nome} - ${meta.descricao} +${meta.recompensa.pontos} pts, +${meta.recompensa.bitcoin.toFixed(8)} BTC`;
     }
-    
+
     // Mostrar na lateral (mesmo local das mensagens de incentivo)
     mostrarMensagemLateral(mensagem, 'conquista', 5000);
-    
+
     // Também mostrar um popup temporário no centro (opcional, para dar mais destaque)
     mostrarPopupConquista(meta);
-    
+
     // Tocar som de conquista
     if (SoundSystem && SoundSystem.win) SoundSystem.win();
 }
@@ -457,7 +457,7 @@ function mostrarPopupConquista(meta) {
         animation: conquistaPop 0.5s ease-out;
         pointer-events: none;
     `;
-    
+
     popup.innerHTML = `
         <div style="font-size: 4em; margin-bottom: 10px;">${meta.icone || '🏆'}</div>
         <div style="font-size: 1.8em; font-weight: bold; margin-bottom: 5px;">CONQUISTA!</div>
@@ -468,9 +468,9 @@ function mostrarPopupConquista(meta) {
             <div style="background: rgba(0,0,0,0.2); padding: 5px 15px; border-radius: 20px;">+${meta.recompensa.bitcoin.toFixed(8)} BTC</div>
         </div>
     `;
-    
+
     document.body.appendChild(popup);
-    
+
     // Remover após 3 segundos
     setTimeout(() => {
         popup.style.animation = 'fadeOut 0.5s ease-out';
@@ -534,8 +534,8 @@ const CryptoEncyclopedia = {
         'Oracle': { description: 'Serviço que leva dados externos para contratos inteligentes.', link: 'https://en.wikipedia.org/wiki/Oracle_(blockchain)', category: 'Infraestrutura' },
         'Stablecoin Algorítmica': { description: 'Stablecoin que mantém paridade via algoritmos.', link: 'https://en.wikipedia.org/wiki/Algorithmic_stablecoin', category: 'Criptomoeda' }
     },
-    
-    init: function() {
+
+    init: function () {
         this.createEncyclopedia();
         this.populateSelector();
         this.createSearchBar();
@@ -543,23 +543,23 @@ const CryptoEncyclopedia = {
     },
 
     // Garante que toda palavra do jogo esteja na enciclopédia
-    syncWithGameList: function() {
+    syncWithGameList: function () {
         if (!this.entries || !Array.isArray(cryptoNomes)) return;
-        
+
         const seen = new Set(Object.keys(this.entries));
         cryptoNomes.forEach(raw => {
             if (!raw) return;
             const keyExact = raw;
             const keyLower = raw.toLowerCase();
-            
+
             // Verifica entradas case-insensitive
             const existing = Object.keys(this.entries).find(k => k.toLowerCase() === keyLower);
             if (existing) return;
-            
+
             const info = getQuickInfo(raw) || {};
             const desc = info.desc || `Termo do jogo: ${raw}.`;
             const category = info.category || 'Jogo';
-            
+
             this.entries[keyExact] = {
                 description: desc,
                 link: info.link || '',
@@ -567,21 +567,21 @@ const CryptoEncyclopedia = {
             };
             seen.add(keyExact);
         });
-        
+
         // Atualiza contador se o popup já estiver renderizado
         const counter = document.getElementById('entry-count');
         if (counter) counter.textContent = `${Object.keys(this.entries).length} conceitos`;
-        
+
         // Repopula lista se estiver aberta
         this.populateSelector();
     },
-    
-    createEncyclopedia: function() {
+
+    createEncyclopedia: function () {
         if (document.getElementById('crypto-encyclopedia')) return;
         const container = document.createElement('div');
         container.id = 'crypto-encyclopedia';
         container.style.cssText = `position: fixed; left: 20px; bottom: 20px; width: 450px; height: 500px; background: linear-gradient(135deg, rgba(26,26,46,0.98), rgba(40,40,60,0.98)); border: 2px solid #2196f3; border-radius: 15px; box-shadow: 0 15px 40px rgba(0,0,0,0.6); z-index: 9998; display: none; backdrop-filter: blur(10px); font-family: 'Exo 2', sans-serif; overflow: hidden; flex-direction: column;`;
-        
+
         container.innerHTML = `
             <div style="padding:20px; border-bottom:1px solid rgba(255,255,255,0.1); background:rgba(0,0,0,0.2);">
                 <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:15px;">
@@ -612,18 +612,18 @@ const CryptoEncyclopedia = {
         document.body.appendChild(container);
         this.createToggleButton();
     },
-    
-    createToggleButton: function() {
+
+    createToggleButton: function () {
         const button = document.createElement('button');
         button.id = 'encyclopedia-toggle';
         button.innerHTML = '📚';
         button.title = 'Enciclopédia Cripto';
         button.style.cssText = `position:fixed; left:20px; bottom:20px; width:60px; height:60px; border-radius:50%; background:linear-gradient(135deg,#2196f3,#1976d2); color:white; border:2px solid #64b5f6; font-size:1.8em; cursor:pointer; z-index:9999; box-shadow:0 6px 20px rgba(33,150,243,0.5); transition:all 0.3s ease; display:flex; align-items:center; justify-content:center;`;
-        
+
         button.onclick = () => {
             const enc = document.getElementById('crypto-encyclopedia');
             const allVisitados = enciclopediaVisitados.size >= Object.keys(CryptoEncyclopedia.entries || {}).length;
-            
+
             if (enc.style.display === 'flex') {
                 enc.style.display = 'none';
                 button.style.transform = 'scale(1)';
@@ -637,15 +637,15 @@ const CryptoEncyclopedia = {
         };
         document.body.appendChild(button);
     },
-    
-    createSearchBar: function() {
+
+    createSearchBar: function () {
         const searchInput = document.getElementById('crypto-search');
         if (searchInput) {
             searchInput.addEventListener('input', (e) => this.filterEntries(e.target.value.toLowerCase()));
         }
     },
-    
-    populateSelector: function() {
+
+    populateSelector: function () {
         const list = document.getElementById('crypto-list');
         if (!list) return;
         const sorted = Object.keys(this.entries).sort();
@@ -663,8 +663,8 @@ const CryptoEncyclopedia = {
             list.appendChild(item);
         });
     },
-    
-    filterEntries: function(term) {
+
+    filterEntries: function (term) {
         document.querySelectorAll('#crypto-list div').forEach(item => {
             if (item.textContent.toLowerCase().includes(term)) {
                 item.style.display = 'block';
@@ -673,13 +673,13 @@ const CryptoEncyclopedia = {
             }
         });
     },
-    
-    showEntry: function(key) {
+
+    showEntry: function (key) {
         const entry = this.entries[key];
         const info = document.getElementById('crypto-info');
         const wiki = document.getElementById('wiki-link');
         if (!entry || !info) return;
-        
+
         info.innerHTML = `
             <div style="margin-bottom:25px;">
                 <div style="font-size:1.8em; font-weight:bold; color:#fff; margin-bottom:10px;">${key}</div>
@@ -694,7 +694,7 @@ const CryptoEncyclopedia = {
             wiki.style.display = 'flex';
             wiki.textContent = `📖 Ver "${key}" na Wikipedia`;
         }
-        
+
         // Recompensa por entrada inédita
         if (!enciclopediaVisitados.has(key) && enciclopediaVisitados.size < Object.keys(this.entries || {}).length) {
             enciclopediaVisitados.add(key);
@@ -702,7 +702,7 @@ const CryptoEncyclopedia = {
             score += ENC_SCORE_REWARD;
             updateBitcoinValue(false);
             updateScoreDisplay(score);
-            
+
             // Conquista: todas as entradas visitadas
             const totalEntries = Object.keys(this.entries || {}).length;
             if (enciclopediaVisitados.size === totalEntries) {
@@ -719,6 +719,33 @@ const CryptoEncyclopedia = {
 // ============================================
 // COLECIONÁVEIS: MOEDAS
 // ============================================
+const coinIcons = {
+    BTC: '₿',
+    ETH: 'Ξ',
+    LTC: 'Ł',
+    ADA: '₳',
+    DOT: '⦿',
+    SOL: '◎',
+    STH: '🛡️'
+};
+function coinIcon(symbol) {
+    return coinIcons[symbol] || '🪙';
+}
+
+const cryptoLogos = {
+    BTC: 'https://cdn.jsdelivr.net/gh/atomiclabs/cryptocurrency-icons@1a63530be6e374711a8554f31b17e4cb92c25fa5/svg/color/btc.svg',
+    ETH: 'https://cdn.jsdelivr.net/gh/atomiclabs/cryptocurrency-icons@1a63530be6e374711a8554f31b17e4cb92c25fa5/svg/color/eth.svg',
+    LTC: 'https://cdn.jsdelivr.net/gh/atomiclabs/cryptocurrency-icons@1a63530be6e374711a8554f31b17e4cb92c25fa5/svg/color/ltc.svg',
+    ADA: 'https://cdn.jsdelivr.net/gh/atomiclabs/cryptocurrency-icons@1a63530be6e374711a8554f31b17e4cb92c25fa5/svg/color/ada.svg',
+    DOT: 'https://cdn.jsdelivr.net/gh/atomiclabs/cryptocurrency-icons@1a63530be6e374711a8554f31b17e4cb92c25fa5/svg/color/dot.svg',
+    SOL: 'https://cdn.jsdelivr.net/gh/atomiclabs/cryptocurrency-icons@1a63530be6e374711a8554f31b17e4cb92c25fa5/svg/color/sol.svg',
+    STH: 'https://cdn.jsdelivr.net/gh/atomiclabs/cryptocurrency-icons@1a63530be6e374711a8554f31b17e4cb92c25fa5/svg/color/btc.svg'
+};
+
+function getCryptoLogoUrl(symbol) {
+    return cryptoLogos[symbol] || cryptoLogos['BTC'];
+}
+
 const CoinStore = {
     coins: [
         { id: 'btc', nome: 'Bitcoin', symbol: 'BTC', precoBtc: 0.03000000, desc: 'A primeira e mais valiosa.', info: 'Bitcoin é a primeira moeda digital descentralizada criada em 2009 por Satoshi Nakamoto.' },
@@ -745,7 +772,7 @@ const CoinStore = {
         try {
             satoshiUnlocked = localStorage.getItem(nsKey('satoshi_unlocked')) === '1';
             clear100Progress = JSON.parse(localStorage.getItem(nsKey('clear100_progress')) || '{}') || {};
-        } catch { satoshiUnlocked = false; clear100Progress = { facil:false, medio:false, dificil:false }; }
+        } catch { satoshiUnlocked = false; clear100Progress = { facil: false, medio: false, dificil: false }; }
         if (satoshiUnlocked) {
             coinsOwned.add('satoshi');
         }
@@ -755,7 +782,7 @@ const CoinStore = {
             if (savedActive && this.coins.some(c => c.id === savedActive)) {
                 activeCoinId = savedActive;
             }
-        } catch {}
+        } catch { }
         this.syncActiveSymbol();
         syncActiveBalance();
     },
@@ -798,11 +825,10 @@ const CoinStore = {
                 </div>
                 <div class="skin-actions" style="gap:6px;">
                     <button class="coin-info" data-info="${c.id}">ℹ️</button>
-                    ${
-                        lockedSatoshi ? `<button class="skin-apply" disabled>Conquista necessária</button>` :
-                        owned ? (active ? `<button disabled class="skin-apply">Ativa</button>` : `<button class="skin-apply" data-activate="${c.id}">Usar</button>`) :
+                    ${lockedSatoshi ? `<button class="skin-apply" disabled>Conquista necessária</button>` :
+                    owned ? (active ? `<button disabled class="skin-apply">Ativa</button>` : `<button class="skin-apply" data-activate="${c.id}">Usar</button>`) :
                         `<button class="skin-buy" data-coin="${c.id}">Comprar</button>`
-                    }
+                }
                 </div>
             `;
             list.appendChild(card);
@@ -931,7 +957,7 @@ const Wallet = {
         this.render();
         mostrarMensagemLateral(`💼 Depositou ${v.toFixed(8)} ${activeCoinSymbol} na carteira.`, 'bonus', 2500);
     },
-    
+
     withdraw(amount) {
         const v = Number(amount);
         if (!v || v <= 0) { alert('Informe um valor válido.'); return; }
@@ -969,7 +995,7 @@ const Wallet = {
                 const coin = CoinStore.coins.find(c => c.id === id);
                 const sym = coin ? coin.symbol : id.toUpperCase();
                 const livre = coinBalances[id] || 0;
-                div.textContent = `${sym}: carteira ${Number(val || 0).toFixed(8)} | livre ${livre.toFixed(8)}${id === activeCoinId ? ' ← ativa' : ''}`;
+                div.textContent = `${coinIcon(sym)} ${sym}: carteira ${Number(val || 0).toFixed(8)} | livre ${livre.toFixed(8)}${id === activeCoinId ? ' ← ativa' : ''}`;
                 bal.appendChild(div);
             });
         }
@@ -1059,7 +1085,7 @@ function checkSatoshiUnlock() {
 }
 
 // Log helper para debug da medalha
-window.logMedalha = function() {
+window.logMedalha = function () {
     console.log('Medalha Satoshi debug', {
         satoshiUnlocked,
         clear100Progress,
@@ -1073,31 +1099,118 @@ window.logMedalha = function() {
 // 6. WIDGET DE PREÇO DO BITCOIN
 // ============================================
 const BitcoinPriceWidget = {
-    init: function() {
-        this.createWidget();
-        this.fetchBitcoinPrice();
-        setInterval(() => this.fetchBitcoinPrice(), 300000);
+    currentIndex: 0,
+    intervalId: null,
+
+    getCoins: function () {
+        if (typeof CoinStore !== 'undefined' && CoinStore.coins) {
+            return CoinStore.coins;
+        }
+        return [{ nome: 'Bitcoin', symbol: 'BTC' }];
     },
-    
-    createWidget: function() {
+
+    getIcon: function (symbol) {
+        if (typeof coinIcon === 'function') {
+            return coinIcon(symbol);
+        }
+        return '₿';
+    },
+
+    getColor: function (symbol) {
+        const colors = { BTC: '#f7931a', ETH: '#627eea', LTC: '#bfbbbb', ADA: '#0033ad', DOT: '#e6007a', SOL: '#14f195' };
+        return colors[symbol] || '#f7931a';
+    },
+
+    init: function () {
+        this.createWidget();
+        this.fetchPrice();
+        if (this.intervalId) clearInterval(this.intervalId);
+        this.intervalId = setInterval(() => this.fetchPrice(), 300000);
+    },
+
+    createWidget: function () {
         const widget = document.createElement('div');
         widget.id = 'bitcoin-price-widget';
-        widget.style.cssText = `position:fixed; bottom:20px; right:20px; background:linear-gradient(135deg, rgba(247,147,26,0.9), rgba(255,193,7,0.9)); color:white; padding:15px 25px; border-radius:15px; border:2px solid gold; box-shadow:0 8px 25px rgba(247,147,26,0.4); z-index:9999; font-family:'Courier New', monospace; font-weight:bold; min-width:250px; backdrop-filter:blur(10px); display:none;`;
+        widget.style.cssText = `position:fixed; bottom:20px; right:20px; background:linear-gradient(135deg, rgba(20,20,40,0.95), rgba(30,30,50,0.95)); color:white; padding:15px 25px; border-radius:15px; border:2px solid #f7931a; box-shadow:0 8px 25px rgba(247,147,26,0.4); z-index:9999; font-family:'Courier New', monospace; font-weight:bold; min-width:260px; backdrop-filter:blur(10px); display:none; user-select:none; transition: all 0.3s ease;`;
+
         widget.innerHTML = `
-            <div style="display:flex; align-items:center; gap:10px; margin-bottom:10px;"><div style="font-size:1.5em;">₿</div><div><div style="font-size:1.2em;">BITCOIN AGORA</div><div style="font-size:0.8em;">Preço em tempo real</div></div></div>
-            <div id="btc-price-display" style="text-align:center; font-size:1.5em;">Carregando...</div>
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+                <button id="widget-prev-btn" style="background:transparent; border:none; color:inherit; font-size:1.5em; cursor:pointer; padding:0 5px; opacity: 0.7; transition: opacity 0.2s;">◀</button>
+                <div style="display:flex; align-items:center; gap:10px;">
+                    <div id="widget-coin-icon" style="font-size:1.5em; color:#f7931a; text-shadow: 0 0 10px currentColor;">₿</div>
+                    <div style="text-align:center;">
+                        <div id="widget-coin-name" style="font-size:1.2em; text-transform:uppercase;">BITCOIN</div>
+                        <div style="font-size:0.7em; color:#aaa;">Preço em tempo real</div>
+                    </div>
+                </div>
+                <button id="widget-next-btn" style="background:transparent; border:none; color:inherit; font-size:1.5em; cursor:pointer; padding:0 5px; opacity: 0.7; transition: opacity 0.2s;">▶</button>
+            </div>
+            <div id="btc-price-display" style="text-align:center; font-size:1.5em; margin-top:5px;">Carregando...</div>
             <div id="btc-change-display" style="text-align:center; font-size:0.9em; margin-top:5px;">Atualizado: --</div>
         `;
         document.body.appendChild(widget);
+
+        const prevRow = document.getElementById('widget-prev-btn');
+        const nextRow = document.getElementById('widget-next-btn');
+        prevRow.onmouseover = () => prevRow.style.opacity = '1';
+        prevRow.onmouseout = () => prevRow.style.opacity = '0.7';
+        nextRow.onmouseover = () => nextRow.style.opacity = '1';
+        nextRow.onmouseout = () => nextRow.style.opacity = '0.7';
+
+        prevRow.onclick = (e) => { e.stopPropagation(); this.changeCoin(-1); };
+        nextRow.onclick = (e) => { e.stopPropagation(); this.changeCoin(1); };
+
         this.createToggleButton();
+        this.updateColors();
     },
-    
-    createToggleButton: function() {
+
+    changeCoin: function (dir) {
+        const coins = this.getCoins();
+        this.currentIndex += dir;
+        if (this.currentIndex < 0) this.currentIndex = coins.length - 1;
+        if (this.currentIndex >= coins.length) this.currentIndex = 0;
+
+        const coin = coins[this.currentIndex];
+
+        document.getElementById('widget-coin-icon').textContent = this.getIcon(coin.symbol);
+        document.getElementById('widget-coin-name').textContent = coin.nome;
+        document.getElementById('btc-price-display').innerHTML = 'Carregando...';
+        document.getElementById('btc-change-display').innerHTML = 'Atualizado: --';
+
+        this.updateColors();
+
+        if (typeof SoundSystem !== 'undefined' && SoundSystem.click) SoundSystem.click();
+
+        this.fetchPrice();
+    },
+
+    updateColors: function () {
+        const coins = this.getCoins();
+        const coin = coins[this.currentIndex];
+        const color = this.getColor(coin.symbol);
+
+        const iconEl = document.getElementById('widget-coin-icon');
+        const modal = document.getElementById('bitcoin-price-widget');
+        const btn = document.getElementById('btc-widget-toggle');
+
+        if (iconEl) iconEl.style.color = color;
+        if (modal) {
+            modal.style.border = `2px solid ${color}`;
+            modal.style.boxShadow = `0 8px 25px ${color}66`;
+        }
+        if (btn) {
+            btn.innerHTML = this.getIcon(coin.symbol);
+            btn.style.background = `linear-gradient(135deg, ${color}, ${color}dd)`;
+            btn.style.border = `2px solid ${color}`;
+            btn.style.boxShadow = `0 4px 15px ${color}66`;
+        }
+    },
+
+    createToggleButton: function () {
         const btn = document.createElement('button');
         btn.id = 'btc-widget-toggle';
-        btn.innerHTML = '₿';
         btn.title = 'Mostrar/Ocultar preço';
-        btn.style.cssText = `position:fixed; bottom:20px; right:20px; width:50px; height:50px; border-radius:50%; background:#f7931a; color:white; border:2px solid gold; font-size:1.5em; font-weight:bold; cursor:pointer; z-index:10000; box-shadow:0 4px 15px rgba(247,147,26,0.4); transition:all 0.3s ease;`;
+        btn.style.cssText = `position:fixed; bottom:20px; right:20px; width:50px; height:50px; border-radius:50%; background:#f7931a; color:white; border:2px solid #f7931a; font-size:1.5em; font-weight:bold; cursor:pointer; z-index:10000; box-shadow:0 4px 15px rgba(247,147,26,0.4); transition:all 0.3s ease; display:flex; justify-content:center; align-items:center;`;
         btn.onclick = () => {
             const w = document.getElementById('bitcoin-price-widget');
             if (w.style.display === 'block') {
@@ -1106,30 +1219,38 @@ const BitcoinPriceWidget = {
             } else {
                 w.style.display = 'block';
                 btn.style.transform = 'scale(1.1)';
-                if (SoundSystem) SoundSystem.click();
+                if (typeof SoundSystem !== 'undefined' && SoundSystem.click) SoundSystem.click();
             }
         };
         document.body.appendChild(btn);
     },
-    
-    fetchBitcoinPrice: async function() {
+
+    fetchPrice: async function () {
+        const coins = this.getCoins();
+        const coin = coins[this.currentIndex];
+        const cgId = coin.nome.toLowerCase();
+
         try {
-            const r = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=brl%2Cusd&include_24hr_change=true');
+            const r = await fetch(`https://api.coingecko.com/api/v3/simple/price?ids=${cgId}&vs_currencies=brl%2Cusd&include_24hr_change=true`);
             const d = await r.json();
-            if (d.bitcoin) this.updateDisplay(d.bitcoin);
+            if (d[cgId]) {
+                this.updateDisplay(d[cgId]);
+            } else {
+                this.updateDisplay({ brl: 0, usd: 0, brl_24h_change: 0, usd_24h_change: 0 });
+            }
         } catch (error) {
-            this.updateDisplay({ brl: 350000, usd: 65000, brl_24h_change: 0, usd_24h_change: 0 });
+            this.updateDisplay({ brl: 0, usd: 0, brl_24h_change: 0, usd_24h_change: 0 });
         }
     },
-    
-    updateDisplay: function(data) {
+
+    updateDisplay: function (data) {
         const price = document.getElementById('btc-price-display');
         const change = document.getElementById('btc-change-display');
         if (!price || !change) return;
         const brl = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(data.brl);
         const usd = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(data.usd);
         const chg = data.brl_24h_change || data.usd_24h_change || 0;
-        price.innerHTML = `<div>${brl}</div><div style="font-size:0.7em;">${usd}</div>`;
+        price.innerHTML = `<div>${brl}</div><div style="font-size:0.7em; margin-top: 3px;">${usd}</div>`;
         change.innerHTML = `<span style="color:${chg >= 0 ? '#4CAF50' : '#f44336'}">${chg >= 0 ? '📈' : '📉'} ${chg >= 0 ? '+' : ''}${chg.toFixed(2)}%</span>`;
     }
 };
@@ -1138,12 +1259,12 @@ const BitcoinPriceWidget = {
 // 7. SISTEMA DE RANKING
 // ============================================
 const RankingSystem = {
-    getCurrentPlayerName: function() {
+    getCurrentPlayerName: function () {
         if (currentUser?.username) return currentUser.username;
         try {
             const n = localStorage.getItem(nsKey('jb_last_player_name'));
             if (n && n.trim().length > 0) return n;
-        } catch {}
+        } catch { }
         if (chatUsername) return chatUsername;
         return 'Jogador';
     },
@@ -1152,14 +1273,14 @@ const RankingSystem = {
     conquistasKey: 'jogobitcoin_conquistas',
     ranking: [],
     conquistasPorJogador: {},
-    
-    init: function() {
+
+    init: function () {
         this.loadRanking();
         this.loadConquistas();
         this.createRankingButton();
     },
-    
-    loadRanking: function() {
+
+    loadRanking: function () {
         try {
             const saved = localStorage.getItem(this.storageKey);
             this.ranking = saved ? JSON.parse(saved) : [];
@@ -1173,8 +1294,8 @@ const RankingSystem = {
             this.ranking = [];
         }
     },
-    
-    loadConquistas: function() {
+
+    loadConquistas: function () {
         try {
             const saved = localStorage.getItem(this.conquistasKey);
             this.conquistasPorJogador = saved ? JSON.parse(saved) : {};
@@ -1182,21 +1303,21 @@ const RankingSystem = {
             this.conquistasPorJogador = {};
         }
     },
-    
-    saveRanking: function() {
+
+    saveRanking: function () {
         try {
             this.ranking.sort((a, b) => b.score - a.score);
             localStorage.setItem(this.storageKey, JSON.stringify(this.ranking));
-        } catch (error) {}
+        } catch (error) { }
     },
-    
-    saveConquistas: function() {
+
+    saveConquistas: function () {
         try {
             localStorage.setItem(this.conquistasKey, JSON.stringify(this.conquistasPorJogador));
-        } catch (error) {}
+        } catch (error) { }
     },
-    
-    addScore: function(playerName, score, bitcoin, blocks, difficulty, time) {
+
+    addScore: function (playerName, score, bitcoin, blocks, difficulty, time) {
         const newEntry = {
             id: Date.now(),
             name: playerName || 'Anônimo',
@@ -1210,7 +1331,7 @@ const RankingSystem = {
         this.ranking.push(newEntry);
         try {
             localStorage.setItem(nsKey('jb_last_player_name'), newEntry.name);
-        } catch {}
+        } catch { }
         this.ranking.sort((a, b) => b.score - a.score);
         if (this.ranking.length > this.maxEntries) {
             this.ranking = this.ranking.slice(0, this.maxEntries);
@@ -1218,13 +1339,13 @@ const RankingSystem = {
         this.saveRanking();
         return newEntry;
     },
-    
-    getConquistasDoJogador: function(jogador) {
+
+    getConquistasDoJogador: function (jogador) {
         if (!jogador || jogador === 'Anônimo') return [];
         return this.conquistasPorJogador[jogador] || [];
     },
-    
-    adicionarConquista: function(jogador, conquista) {
+
+    adicionarConquista: function (jogador, conquista) {
         if (!jogador || jogador === 'Anônimo') return false;
         try {
             if (!this.conquistasPorJogador[jogador]) {
@@ -1248,10 +1369,10 @@ const RankingSystem = {
             return false;
         }
     },
-    
-    verConquistasDe: function(jogador) {
+
+    verConquistasDe: function (jogador) {
         const conquistas = this.getConquistasDoJogador(jogador);
-        
+
         const overlay = document.createElement('div');
         overlay.style.cssText = `
             position: fixed;
@@ -1265,7 +1386,7 @@ const RankingSystem = {
             justify-content: center;
             align-items: center;
         `;
-        
+
         const container = document.createElement('div');
         container.style.cssText = `
             background: linear-gradient(135deg, #1a1a2e, #16213e);
@@ -1278,7 +1399,7 @@ const RankingSystem = {
             max-height: 70vh;
             overflow-y: auto;
         `;
-        
+
         let html = `
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
                 <h3 style="color: gold; margin: 0;">🏆 CONQUISTAS DE ${jogador.toUpperCase()}</h3>
@@ -1291,7 +1412,7 @@ const RankingSystem = {
                 ">×</button>
             </div>
         `;
-        
+
         if (conquistas.length === 0) {
             html += `<p style="text-align: center; color: #888; padding: 40px;">Nenhuma conquista encontrada para ${jogador}.</p>`;
         } else {
@@ -1314,7 +1435,7 @@ const RankingSystem = {
                 `;
             });
         }
-        
+
         html += `
             <div style="text-align: center; margin-top: 20px;">
                 <button onclick="this.parentElement.parentElement.parentElement.remove()" style="
@@ -1328,13 +1449,13 @@ const RankingSystem = {
                 ">Fechar</button>
             </div>
         `;
-        
+
         container.innerHTML = html;
         overlay.appendChild(container);
         document.body.appendChild(overlay);
     },
-    
-    buscarJogador: function() {
+
+    buscarJogador: function () {
         const nome = document.getElementById('busca-jogador-ranking')?.value;
         if (nome && nome.trim()) {
             this.verConquistasDe(nome.trim());
@@ -1342,10 +1463,10 @@ const RankingSystem = {
             alert('Digite um nome para buscar');
         }
     },
-    
-    showRanking: function() {
+
+    showRanking: function () {
         this.ranking.sort((a, b) => b.score - a.score);
-        
+
         const overlay = document.createElement('div');
         overlay.style.cssText = `
             position: fixed;
@@ -1359,7 +1480,7 @@ const RankingSystem = {
             justify-content: center;
             align-items: center;
         `;
-        
+
         const container = document.createElement('div');
         container.style.cssText = `
             background: linear-gradient(135deg, #1a1a2e, #16213e);
@@ -1372,9 +1493,9 @@ const RankingSystem = {
             max-height: 85vh;
             overflow-y: auto;
         `;
-        
+
         let html = `<h2 style="color: #f7931a; text-align: center; margin-bottom: 20px; font-size: 2em;">🏆 RANKING E CONQUISTAS</h2>`;
-        
+
         if (this.ranking.length === 0) {
             html += `<p style="text-align: center; color: #aaa; padding: 40px;">Nenhuma pontuação ainda. Seja o primeiro!</p>`;
         } else {
@@ -1389,11 +1510,11 @@ const RankingSystem = {
                     </tr>
                 </thead>
                 <tbody>`;
-            
+
             this.ranking.forEach((e, i) => {
-                const medal = i < 3 ? ['🥇','🥈','🥉'][i] : `${i+1}º`;
+                const medal = i < 3 ? ['🥇', '🥈', '🥉'][i] : `${i + 1}º`;
                 const totalConquistas = this.getConquistasDoJogador(e.name).length;
-                
+
                 html += `
                     <tr style="border-bottom: 1px solid rgba(255,255,255,0.1);">
                         <td style="padding: 15px; text-align: center; font-weight: bold;">${medal}</td>
@@ -1414,10 +1535,10 @@ const RankingSystem = {
                     </tr>
                 `;
             });
-            
+
             html += `</tbody></table>`;
         }
-        
+
         html += `
             <div style="margin: 20px 0; text-align: center;">
                 <input type="text" id="busca-jogador-ranking" placeholder="Digite o nome do jogador..." style="
@@ -1454,27 +1575,27 @@ const RankingSystem = {
                 ">Fechar</button>
             </div>
         `;
-        
+
         container.innerHTML = html;
         overlay.appendChild(container);
         document.body.appendChild(overlay);
-        
+
         setTimeout(() => {
             const busca = document.getElementById('busca-jogador-ranking');
             if (busca) busca.focus();
         }, 500);
     },
-    
-    createRankingButton: function() {
+
+    createRankingButton: function () {
         if (document.getElementById('ranking-button')) return;
-        
+
         const btn = document.createElement('button');
         btn.id = 'ranking-button';
         btn.innerHTML = '🏆 Ranking';
         btn.style.cssText = `
             position: fixed;
             top: 12px;
-            left: 120px;
+            left: 20px;
             padding: 10px 20px;
             background: rgba(33,150,243,0.9);
             color: white;
@@ -1486,33 +1607,33 @@ const RankingSystem = {
             box-shadow: 0 4px 8px rgba(0,0,0,0.3);
             transition: all 0.3s ease;
         `;
-        
+
         btn.onmouseover = () => {
             btn.style.transform = 'scale(1.05)';
             btn.style.boxShadow = '0 6px 12px rgba(0,0,0,0.4)';
         };
-        
+
         btn.onmouseout = () => {
             btn.style.transform = 'scale(1)';
             btn.style.boxShadow = '0 4px 8px rgba(0,0,0,0.3)';
         };
-        
+
         btn.onclick = () => {
             if (SoundSystem) SoundSystem.click();
             this.showRanking();
         };
-        
+
         document.body.appendChild(btn);
     },
-    
-    saveGameScore: function(isVictory) {
+
+    saveGameScore: function (isVictory) {
         let nomeFinal = RankingSystem.getCurrentPlayerName();
         if (!currentUser || currentUser.username === 'Convidado') {
             const entrada = prompt(`🎮 ${isVictory ? 'PARABÉNS!' : 'GAME OVER'}\n\nDigite seu nome (ou deixe Convidado):`, localStorage.getItem(nsKey('jogobitcoin_lastname')) || 'Convidado');
             if (entrada !== null && entrada.trim()) nomeFinal = entrada.trim();
         }
         localStorage.setItem(nsKey('jogobitcoin_lastname'), nomeFinal);
-        
+
         if (selosConquistados.length > 0 && nomeFinal) {
             selosConquistados.forEach(conquista => {
                 const conquistaFormatada = {
@@ -1524,7 +1645,7 @@ const RankingSystem = {
                 this.adicionarConquista(nomeFinal, conquistaFormatada);
             });
         }
-        
+
         this.addScore(
             nomeFinal || 'Anônimo',
             score,
@@ -1533,9 +1654,9 @@ const RankingSystem = {
             dificuldadeAtual,
             tempoTotalPartida
         );
-        
+
         setTimeout(() => this.showRanking(), 1000);
-        
+
         setTimeout(() => {
             try {
                 abrirAvaliacao(() => abrirCompartilharFinal(nomeFinal || 'Jogador'));
@@ -1544,8 +1665,8 @@ const RankingSystem = {
             }
         }, 800);
     },
-    
-    debug: function() {
+
+    debug: function () {
         console.log('🔍 Ranking:', this.ranking);
         console.log('🔍 Conquistas:', this.conquistasPorJogador);
     }
@@ -1580,7 +1701,7 @@ function migrateLegacyData() {
                 if (Array.isArray(arr)) {
                     globalRanking = globalRanking.concat(arr);
                 }
-            } catch {}
+            } catch { }
         }
         if (key.endsWith(':jogobitcoin_conquistas')) {
             try {
@@ -1596,7 +1717,7 @@ function migrateLegacyData() {
                         });
                     });
                 }
-            } catch {}
+            } catch { }
         }
     }
 
@@ -1604,11 +1725,11 @@ function migrateLegacyData() {
     try {
         globalRanking.sort((a, b) => (b.score || 0) - (a.score || 0));
         localStorage.setItem(RankingSystem.storageKey, JSON.stringify(globalRanking));
-    } catch {}
+    } catch { }
     // Salvar conquistas globais
     try {
         localStorage.setItem(RankingSystem.conquistasKey, JSON.stringify(globalConquistas));
-    } catch {}
+    } catch { }
 
     localStorage.setItem(FLAG, '1');
 }
@@ -1631,25 +1752,24 @@ const SoundSystem = {
     },
     audios: {}, enabled: true,
     ambientCtx: null, ambientGain: null, ambientInterval: null, ambientEnabled: true,
-    
-    init: function() {
+
+    init: function () {
         for (const [k, u] of Object.entries(this.urls)) {
-            try { 
-                this.audios[k] = new Audio(u); 
-                this.audios[k].volume = 0.7; 
-                this.audios[k].preload = 'auto'; 
-            } catch { 
-                this.createFallbackSound(k); 
+            try {
+                this.audios[k] = new Audio(u);
+                this.audios[k].volume = 0.7;
+                this.audios[k].preload = 'auto';
+            } catch {
+                this.createFallbackSound(k);
             }
         }
         this.createSoundToggle();
         this.setupAmbient();
     },
 
-    setupAmbient: function() {
+    setupAmbient: function () {
         try {
-            const saved = localStorage.getItem('jogobitcoin_ambient');
-            if (saved !== null) this.ambientEnabled = saved === 'true';
+            this.ambientEnabled = true;
 
             this.ambientCtx = new (window.AudioContext || window.webkitAudioContext)();
             this.ambientGain = this.ambientCtx.createGain();
@@ -1659,16 +1779,16 @@ const SoundSystem = {
             document.addEventListener('click', () => this.unlockAmbient(), { once: true });
             this.createAmbientToggle();
             if (this.ambientEnabled) this.startAmbient();
-        } catch {}
+        } catch { }
     },
 
-    unlockAmbient: function() {
+    unlockAmbient: function () {
         if (this.ambientCtx && this.ambientCtx.state === 'suspended') {
-            this.ambientCtx.resume().catch(() => {});
+            this.ambientCtx.resume().catch(() => { });
         }
     },
-    
-    createFallbackSound: function(t) {
+
+    createFallbackSound: function (t) {
         try {
             const ctx = new (window.AudioContext || window.webkitAudioContext)();
             const osc = ctx.createOscillator();
@@ -1682,20 +1802,20 @@ const SoundSystem = {
             gain.gain.setValueAtTime(0.25, ctx.currentTime);
             gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.35);
             osc.start(); osc.stop(ctx.currentTime + 0.35);
-        } catch {}
-    },
-    
-    play: function(n) { 
-        if (!this.enabled) return; 
-        if (this.audios[n]) { 
-            this.audios[n].currentTime = 0; 
-            const rate = (n === 'click' || n === 'block') ? (0.95 + Math.random()*0.1) : 1;
-            this.audios[n].playbackRate = rate;
-            this.audios[n].play().catch(() => {}); 
-        } 
+        } catch { }
     },
 
-    playUrl: function(id, url, volume = 0.85) {
+    play: function (n) {
+        if (!this.enabled) return;
+        if (this.audios[n]) {
+            this.audios[n].currentTime = 0;
+            const rate = (n === 'click' || n === 'block') ? (0.95 + Math.random() * 0.1) : 1;
+            this.audios[n].playbackRate = rate;
+            this.audios[n].play().catch(() => { });
+        }
+    },
+
+    playUrl: function (id, url, volume = 0.85) {
         if (!this.enabled) return;
         if (!this.audios[id]) {
             try {
@@ -1709,10 +1829,10 @@ const SoundSystem = {
         }
         const a = this.audios[id];
         a.currentTime = 0;
-        a.play().catch(() => {});
+        a.play().catch(() => { });
     },
 
-    playChapterVoice: function(chapterNumber) {
+    playChapterVoice: function (chapterNumber) {
         const num = String(chapterNumber).padStart(2, '0');
         const specificId = `chapterVoice_${num}`;
         const specificUrl = `sounds/chapter${num}_voice.m4a`;
@@ -1722,45 +1842,16 @@ const SoundSystem = {
             this.play('chapterVoice');
         }
     },
-    
-    createSoundToggle: function() {
-        if (document.getElementById('sound-toggle')) return;
-        const btn = document.createElement('button');
-        btn.id = 'sound-toggle'; btn.innerHTML = '🔊';
-        btn.style.cssText = 'position:fixed; top:12px; left:16px; width:40px; height:40px; border-radius:50%; background:#f7931a; color:white; border:none; font-size:1.2em; cursor:pointer; z-index:10000;';
-        btn.onclick = () => { 
-            this.enabled = !this.enabled; 
-            btn.innerHTML = this.enabled ? '🔊' : '🔇'; 
-            localStorage.setItem('jogobitcoin_sound', this.enabled); 
-        };
-        const saved = localStorage.getItem('jogobitcoin_sound');
-        if (saved !== null) { 
-            this.enabled = saved === 'true'; 
-            btn.innerHTML = this.enabled ? '🔊' : '🔇'; 
-        }
-        document.body.appendChild(btn);
+
+    createSoundToggle: function () {
+        this.enabled = true;
     },
 
-    createAmbientToggle: function() {
-        if (document.getElementById('ambient-toggle')) return;
-        const btn = document.createElement('button');
-        btn.id = 'ambient-toggle'; btn.innerHTML = '🎵';
-        btn.style.cssText = 'position:fixed; top:12px; left:68px; width:40px; height:40px; border-radius:50%; background:#3b4cca; color:white; border:none; font-size:1.2em; cursor:pointer; z-index:10000;';
-        btn.onclick = () => {
-            this.ambientEnabled = !this.ambientEnabled;
-            btn.innerHTML = this.ambientEnabled ? '🎵' : '🔈';
-            localStorage.setItem('jogobitcoin_ambient', this.ambientEnabled);
-            if (this.ambientEnabled) {
-                this.startAmbient();
-            } else {
-                this.stopAmbient();
-            }
-        };
-        btn.innerHTML = this.ambientEnabled ? '🎵' : '🔈';
-        document.body.appendChild(btn);
+    createAmbientToggle: function () {
+        this.ambientEnabled = true;
     },
 
-    chipNote: function(freq, start, duration = 0.18, volume = 0.18, type = 'square') {
+    chipNote: function (freq, start, duration = 0.18, volume = 0.18, type = 'square') {
         if (!this.ambientCtx || !this.ambientGain) return;
         const osc = this.ambientCtx.createOscillator();
         const gain = this.ambientCtx.createGain();
@@ -1773,7 +1864,7 @@ const SoundSystem = {
         osc.stop(start + duration + 0.05);
     },
 
-    noiseTap: function(start, duration = 0.08, volume = 0.05) {
+    noiseTap: function (start, duration = 0.08, volume = 0.05) {
         if (!this.ambientCtx || !this.ambientGain) return;
         const ctx = this.ambientCtx;
         const buffer = ctx.createBuffer(1, ctx.sampleRate * duration, ctx.sampleRate);
@@ -1792,7 +1883,7 @@ const SoundSystem = {
         noise.stop(start + duration + 0.05);
     },
 
-    playAmbientBar: function() {
+    playAmbientBar: function () {
         if (!this.ambientCtx || !this.ambientGain || !this.ambientEnabled) return;
         const ctx = this.ambientCtx;
         const now = ctx.currentTime + 0.05;
@@ -1818,7 +1909,7 @@ const SoundSystem = {
         padOsc.stop(now + 3.2);
     },
 
-    startAmbient: function() {
+    startAmbient: function () {
         if (!this.ambientCtx || !this.ambientGain) return;
         this.unlockAmbient();
         if (this.ambientInterval) clearInterval(this.ambientInterval);
@@ -1827,19 +1918,19 @@ const SoundSystem = {
         this.ambientInterval = setInterval(() => this.playAmbientBar(), 3200);
     },
 
-    stopAmbient: function() {
+    stopAmbient: function () {
         if (!this.ambientCtx || !this.ambientGain) return;
         if (this.ambientInterval) clearInterval(this.ambientInterval);
         this.ambientInterval = null;
         this.ambientGain.gain.setTargetAtTime(0.0001, this.ambientCtx.currentTime, 0.2);
     },
 
-    correct: function() { this.play('correct'); },
-    wrong: function() { this.play('wrong'); },
-    click: function() { this.play('click'); },
-    block: function() { this.play('block'); },
-    gameover: function() { this.play('gameover'); },
-    win: function() { this.play('win'); }
+    correct: function () { this.play('correct'); },
+    wrong: function () { this.play('wrong'); },
+    click: function () { this.play('click'); },
+    block: function () { this.play('block'); },
+    gameover: function () { this.play('gameover'); },
+    win: function () { this.play('win'); }
 };
 
 // ============================================
@@ -1938,14 +2029,14 @@ const SistemaProblemas = {
     dificil: () => {
         const nome = cryptoNomes[Math.floor(Math.random() * cryptoNomes.length)];
         const tipo = ['cesar', 'ascii', 'base64'][Math.floor(Math.random() * 3)];
-        
+
         if (tipo === 'cesar') {
-            const chave = Math.random() > 0.5 ? 
+            const chave = Math.random() > 0.5 ?
                 Math.floor(Math.random() * 8) + 3 :
                 -(Math.floor(Math.random() * 8) + 3);
-            
+
             const nomeCifrado = Criptografia.cifraDeCesar(nome, chave);
-            
+
             return {
                 pergunta: `🔐 Descriptografe (Cifra de César, chave: ${Math.abs(chave)}${chave > 0 ? ' →' : ' ←'}):`,
                 textoCifrado: nomeCifrado,
@@ -1954,7 +2045,7 @@ const SistemaProblemas = {
                 chave: chave,
                 dica: `Chave: ${chave > 0 ? '+' : ''}${chave} (desloque ${Math.abs(chave)} posições ${chave > 0 ? 'para frente' : 'para trás'})`
             };
-        } 
+        }
         else if (tipo === 'ascii') {
             return {
                 pergunta: `🔢 Decodifique ASCII:`,
@@ -1963,7 +2054,7 @@ const SistemaProblemas = {
                 tipo: 'ascii',
                 dica: `Use tabela ASCII (cada 3 números = 1 caractere)`
             };
-        } 
+        }
         else {
             return {
                 pergunta: `🔄 Decodifique Base64:`,
@@ -1993,17 +2084,17 @@ function startGame(difficulty) {
     }
     jogoConcluido = false;
     dificuldadeAtual = difficulty;
-    switch(difficulty) {
+    switch (difficulty) {
         case 'facil': timeLimit = 60; break;
         case 'medio': timeLimit = 45; break;
         case 'dificil': timeLimit = 30; break;
         default: timeLimit = 60; dificuldadeAtual = 'facil';
     }
     remainingTime = timeLimit;
-    
+
     resetTimerGlobal();
     iniciarTimerGlobal();
-    
+
     document.getElementById('info-container').style.display = 'none';
     document.getElementById('difficulty-selection').style.display = 'none';
     document.getElementById('problem-container').style.display = 'flex';
@@ -2013,20 +2104,23 @@ function startGame(difficulty) {
     const cir = document.getElementById('decoded-info-circulo');
     if (decod) decod.style.display = 'flex';
     if (cir) cir.style.display = 'block';
-    const walletBtn = document.getElementById('wallet-toggle');
-    if (walletBtn) walletBtn.style.display = 'block';
+    const toggleIds = ['skins-toggle', 'achievements-toggle', 'wallet-toggle', 'chat-toggle'];
+    toggleIds.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.style.display = 'block';
+    });
     document.body.classList.remove('show-crypto');
     stopHomeBubbles();
     enciclopediaVisitados = new Set();
     enciclopediaPausada = false;
     pausaInicioTimestamp = null;
     showSoundToast();
-    
+
     ['img-Bitcoin.esquerda', 'img-esquerda', 'img-logo.esquerda', 'img-Bitcoin.direita', 'img-direita', 'img-logo.direita'].forEach(id => {
         const el = document.getElementById(id);
         if (el) el.style.display = 'none';
     });
-    
+
     document.getElementById('answer').disabled = false;
     initializeBlocks();
     updateBitcoinValue(false);
@@ -2034,22 +2128,22 @@ function startGame(difficulty) {
     updateVidasDisplay();
     gameStartTime = Date.now();
     SoundSystem.click();
-    
+
     const tipo = document.getElementById('tipo-indicador');
     if (tipo) {
         tipo.textContent = `Dificuldade: ${dificuldadeAtual.toUpperCase()}`;
         tipo.className = `tipo-${dificuldadeAtual}`;
         tipo.style.display = 'inline-block';
     }
-    
+
     // Mostrar botão de encerrar
     const btnEncerrar = document.getElementById('btn-encerrar');
     if (btnEncerrar) {
         btnEncerrar.style.display = 'block';
     }
-    
+
     // Se havia save anterior e o usuário optou por novo jogo, sobrescreveremos assim que salvar
-    
+
     displayNextProblem();
 }
 
@@ -2065,7 +2159,7 @@ function resetGame() {
     document.getElementById('mensagem-container').style.display = 'none';
     document.body.classList.add('show-crypto');
     startHomeBubbles();
-    
+
     const tempoDisplay = document.getElementById('tempo-global');
     if (tempoDisplay) {
         tempoDisplay.style.display = 'none';
@@ -2077,37 +2171,43 @@ function resetGame() {
         btnEncerrar.style.display = 'none';
     }
 
-    bitcoinQuantity = 0; 
-    score = 0; 
-    currentProblem = 1; 
-    vidas = 3; 
-    jogoConcluido = false; 
+    const toggleIds = ['skins-toggle', 'achievements-toggle', 'wallet-toggle', 'chat-toggle'];
+    toggleIds.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.style.display = 'none';
+    });
+
+    bitcoinQuantity = 0;
+    score = 0;
+    currentProblem = 1;
+    vidas = 3;
+    jogoConcluido = false;
     brokenBlocks = 0;
-    problemaAtual = null; 
+    problemaAtual = null;
     errosConsecutivos = 0;
-    
+
     clearInterval(timerInterval);
     resetTimerGlobal();
-    
+
     pararTimerGlobal();
-    metasAlcancadas = []; 
+    metasAlcancadas = [];
     selosConquistados = [];
-    
+
     updateScoreDisplay(score);
     updateBitcoinValue(false);
     updateVidasDisplay();
     document.getElementById('timer').textContent = '';
     document.getElementById('result').textContent = '';
     document.getElementById('hash-display').innerHTML = 'Nenhum bloco quebrado ainda.';
-    
+
     ['img-Bitcoin.esquerda', 'img-esquerda', 'img-logo.esquerda', 'img-Bitcoin.direita', 'img-direita', 'img-logo.direita'].forEach(id => {
         const el = document.getElementById(id);
         if (el) el.style.display = 'block';
     });
-    
+
     SoundSystem.click();
     initializeBlocks();
-    
+
     // Limpar save
     localStorage.removeItem(getSaveKey());
 }
@@ -2116,7 +2216,7 @@ function initializeBlocks() {
     const container = document.getElementById('blocks-container');
     container.innerHTML = '';
     ensureChapterCountdown(container);
-    
+
     const grid = document.createElement('div');
     grid.id = 'blocks-grid';
     grid.style.display = 'grid';
@@ -2124,7 +2224,7 @@ function initializeBlocks() {
     grid.style.gap = '1px';
     grid.style.justifyContent = 'center';
     grid.style.width = '100%';
-    
+
     blocks = [];
     for (let i = 0; i < TamMax; i++) {
         const block = document.createElement('div');
@@ -2138,12 +2238,12 @@ function initializeBlocks() {
         blocks.push(block);
         grid.appendChild(block);
     }
-    
+
     container.appendChild(grid);
     container.style.display = 'flex';
     container.style.flexDirection = 'column';
     container.style.alignItems = 'center';
-    
+
     updateChapterCountdown();
 }
 
@@ -2165,7 +2265,7 @@ function displayNextProblem() {
         if (vidas <= 0) gameOver();
         return;
     }
-    
+
     const p = generateCryptoProblem();
     document.getElementById('problem-number').textContent = `Bloco Nº: ${currentProblem}`;
     document.getElementById('problem-question').innerHTML = p.texto;
@@ -2173,14 +2273,14 @@ function displayNextProblem() {
     clearDecodedInfo();
     clearDecodedInfo('decoded-info-decod');
     clearDecodedInfo('decoded-info-circulo');
-    
+
     fecharCirculo();
-    
+
     const botoesDivAntigo = document.getElementById('botoes-ajuda-container');
     if (botoesDivAntigo) botoesDivAntigo.remove();
-    
+
     const container = document.getElementById('problem-container');
-    
+
     const botoesDiv = document.createElement('div');
     botoesDiv.id = 'botoes-ajuda-container';
     botoesDiv.style.cssText = `
@@ -2190,7 +2290,7 @@ function displayNextProblem() {
         justify-content: center;
         flex-wrap: wrap;
     `;
-    
+
     const btnDecode = document.createElement('button');
     btnDecode.id = 'btn-decode-rapido';
     btnDecode.innerHTML = '🔧 Decodificador';
@@ -2217,9 +2317,9 @@ function displayNextProblem() {
         btnDecode.style.boxShadow = '0 4px 15px rgba(33, 150, 243, 0.4)';
     };
     btnDecode.onclick = abrirDecodificador;
-    
+
     botoesDiv.appendChild(btnDecode);
-    
+
     if (problemaAtual && problemaAtual.tipo === 'cesar') {
         const btnCirculo = document.createElement('button');
         btnCirculo.id = 'btn-circulo-cesar';
@@ -2247,31 +2347,29 @@ function displayNextProblem() {
             btnCirculo.style.boxShadow = '0 4px 15px rgba(156, 39, 176, 0.4)';
         };
         btnCirculo.onclick = ativarCirculoCesar;
-        
+
         botoesDiv.appendChild(btnCirculo);
     }
-    
+
     container.appendChild(botoesDiv);
-    
+
     const tipo = document.getElementById('tipo-indicador');
     if (tipo) {
         tipo.textContent = `Dificuldade: ${dificuldadeAtual.toUpperCase()}`;
         tipo.className = `tipo-${dificuldadeAtual}`;
     }
-    
+
     const input = document.getElementById('answer');
-    input.value = ''; 
-    input.disabled = false; 
+    input.value = '';
+    input.disabled = false;
     input.focus();
-    
+
     document.getElementById('result').textContent = '';
     startTimer();
 
-    setTimeout(() => {
-        if (typeof atualizarDecodificadorComProblema === 'function') {
-            atualizarDecodificadorComProblema();
-        }
-    }, 500);
+    if (typeof atualizarDecodificadorComProblema === 'function') {
+        atualizarDecodificadorComProblema();
+    }
 }
 
 function startTimer(reset = true) {
@@ -2334,14 +2432,14 @@ function updateTimerDisplay() {
 
 function submitAnswer() {
     if (jogoConcluido || vidas <= 0) return;
-    
+
     const answerInput = document.getElementById('answer');
     const answer = answerInput.value.trim().toLowerCase();
-    
+
     if (!answer) {
         document.getElementById('result').textContent = '❌ Digite uma resposta!';
         document.getElementById('result').style.color = '#ff9800';
-        
+
         answerInput.style.borderColor = '#ff9800';
         answerInput.style.boxShadow = '0 0 10px rgba(255,152,0,0.5)';
         setTimeout(() => {
@@ -2350,64 +2448,64 @@ function submitAnswer() {
         }, 1000);
         return;
     }
-    
+
     if (!problemaAtual) {
         document.getElementById('result').textContent = '❌ Erro: problema não carregado';
         document.getElementById('result').style.color = '#f44336';
         return;
     }
-    
+
     if (answer === problemaAtual.respostaCorreta) {
         clearInterval(timerInterval);
-        
+
         document.getElementById('result').textContent = '✅ CORRETO! Bloco minerado!';
         document.getElementById('result').style.color = '#4CAF50';
         answerInput.style.borderColor = '#4CAF50';
         answerInput.style.boxShadow = '0 0 15px rgba(76,175,80,0.5)';
-        
+
         const questionElement = document.getElementById('problem-question');
         questionElement.classList.add('mining-success');
         setTimeout(() => {
             questionElement.classList.remove('mining-success');
         }, 1000);
-        
+
         setTimeout(() => {
             answerInput.style.borderColor = '';
             answerInput.style.boxShadow = '';
         }, 1000);
-        
+
         updateBitcoinValue();
         updateBlocks();
         showDecodedInfo(problemaAtual.respostaCorreta);
-        
+
         if (SoundSystem) SoundSystem.correct();
-        
+
     } else {
         errosConsecutivos++;
-        
+
         document.getElementById('result').textContent = '❌ RESPOSTA ERRADA! Tente novamente.';
         document.getElementById('result').style.color = '#f44336';
         answerInput.style.borderColor = '#f44336';
         answerInput.style.boxShadow = '0 0 15px rgba(244,67,54,0.5)';
-        
+
         setTimeout(() => {
             answerInput.style.borderColor = '';
             answerInput.style.boxShadow = '';
         }, 1000);
-        
+
         if (errosConsecutivos >= 2 && problemaAtual.dica) {
             const dicaElement = document.createElement('div');
             dicaElement.className = 'dica-box';
             dicaElement.innerHTML = `<small>💡 DICA: ${problemaAtual.dica}</small>`;
             document.getElementById('result').appendChild(dicaElement);
-            
+
             setTimeout(() => {
                 if (dicaElement.parentElement) dicaElement.remove();
             }, 5000);
         }
-        
+
         perderVida();
-        
+
         if (SoundSystem) SoundSystem.wrong();
     }
 }
@@ -2416,7 +2514,7 @@ function updateBitcoinValue(shouldAdd = true) {
     if (jogoConcluido) return;
     if (shouldAdd) {
         let add = 0;
-        switch(dificuldadeAtual) {
+        switch (dificuldadeAtual) {
             case 'facil': add = 0.01000000; break;
             case 'medio': add = 0.01200000; break;
             case 'dificil': add = 0.01500000; break;
@@ -2426,7 +2524,29 @@ function updateBitcoinValue(shouldAdd = true) {
     }
     syncActiveBalance();
     const disp = document.getElementById('bitcoin-value');
-    if (disp) disp.textContent = `${bitcoinQuantity.toFixed(8)} ${activeCoinSymbol}`;
+    if (disp) disp.innerHTML = `${bitcoinQuantity.toFixed(8)} ${activeCoinSymbol}`;
+    
+    // Atualizar logo da moeda
+    const logoDisp = document.getElementById('bitcoin-logo');
+    if (logoDisp) {
+        logoDisp.src = getCryptoLogoUrl(activeCoinSymbol);
+        logoDisp.alt = activeCoinSymbol;
+    }
+    
+    // Atualizar label dinâmico
+    const labelDisp = document.getElementById('minerados-label');
+    if (labelDisp) {
+        const cinfo = CoinStore.coins.find(c => c.symbol === activeCoinSymbol);
+        const cnome = cinfo ? cinfo.nome : (activeCoinId === 'satoshi' ? 'Satoshi' : activeCoinSymbol);
+        labelDisp.innerHTML = `💰 ${cnome} Minerados:`;
+    }
+
+    const badge = document.getElementById('coin-badge');
+    if (badge) {
+        badge.textContent = coinIcon(activeCoinSymbol);
+        const cls = `coin-badge coin-${activeCoinId || 'generic'}`;
+        badge.className = cls;
+    }
     checkCoinsMasterAchievement();
 }
 
@@ -2436,11 +2556,11 @@ function updateBlocks() {
     const block = blocks[idx];
     const stage = parseInt(block.getAttribute('data-stage'), 10);
     if (stage >= 3) return;
-    
+
     const next = stage + 1;
     block.setAttribute('data-stage', next);
-    
-    switch(next) {
+
+    switch (next) {
         case 1:
             block.style.backgroundColor = '#f1c40f';
             updateBlockProgress(idx, 33);
@@ -2462,49 +2582,49 @@ function updateBlocks() {
                 saveSpecialProgress();
                 checkSatoshiUnlock();
             }
-            
+
             if (brokenBlocks === 100) bitcoinQuantity += 0.00050000;
-            
+
             verificarBonusDeBlocos();
             updateHashLog(currentProblem);
 
             // Fechar o decodificador para o jogador ver o centro (hash/log) após concluir um bloco
             if (typeof fecharDecodificador === 'function') fecharDecodificador();
-            
+
             if (brokenBlocks % 5 === 0) {
                 const idxMsg = (brokenBlocks / 5 - 1) % mensagensDeIncentivo.length;
-        setTimeout(() => mostrarMensagemIncentivo(idxMsg), 500);
-    }
-    
-    if (brokenBlocks % 6 === 0) {
-        const cap = Math.floor(brokenBlocks / 6);
-        setTimeout(() => showHistory(cap), 2000);
-    }
-    
-    updateChapterCountdown();
-    
-    currentProblem++;
-    if (currentProblem > TamMax) {
-        setTimeout(() => endGame(true), 1000);
-        return;
+                setTimeout(() => mostrarMensagemIncentivo(idxMsg), 500);
+            }
+
+            if (brokenBlocks % 6 === 0) {
+                const cap = Math.floor(brokenBlocks / 6);
+                setTimeout(() => showHistory(cap), 2000);
+            }
+
+            updateChapterCountdown();
+
+            currentProblem++;
+            if (currentProblem > TamMax) {
+                setTimeout(() => endGame(true), 1000);
+                return;
             }
             break;
     }
-    
+
     if (next < 3) {
         setTimeout(() => displayNextProblem(), 1000);
     } else {
         setTimeout(() => displayNextProblem(), 1500);
         SoundSystem.block();
     }
-    
+
     // Salvar após quebrar bloco
     setTimeout(() => {
         if (!jogoConcluido && vidas > 0) {
             salvarJogo();
         }
     }, 500);
-    
+
     // Verificar metas após quebrar bloco
     setTimeout(() => {
         verificarMetasTempo();
@@ -2514,24 +2634,24 @@ function updateBlocks() {
 // Cria uma pequena animação de explosão e depois deixa o espaço negro
 function triggerBlockExplosion(block) {
     if (!block || block.classList.contains('broken')) return;
-    
+
     block.classList.add('exploding');
-    
+
     // Partículas simples saindo do bloco
     for (let i = 0; i < 16; i++) {
         const particle = document.createElement('span');
         particle.className = 'particle';
-        
+
         const ang = Math.random() * Math.PI * 2;
         const dist = 26 + Math.random() * 40; // ampliar alcance
         particle.style.setProperty('--dx', `${Math.cos(ang) * dist}px`);
         particle.style.setProperty('--dy', `${Math.sin(ang) * dist}px`);
         particle.style.background = `hsl(${20 + Math.random() * 30}, 85%, ${50 + Math.random() * 15}%)`;
-        
+
         block.appendChild(particle);
         setTimeout(() => particle.remove(), 700);
     }
-    
+
     // Fumaça rápida
     for (let i = 0; i < 8; i++) {
         const smoke = document.createElement('span');
@@ -2544,7 +2664,7 @@ function triggerBlockExplosion(block) {
         block.appendChild(smoke);
         setTimeout(() => smoke.remove(), 900);
     }
-    
+
     // Após o flash, deixar o espaço vazio/negro
     setTimeout(() => {
         block.classList.remove('exploding');
@@ -2560,7 +2680,7 @@ function triggerBlockExplosion(block) {
 function ensureChapterCountdown(container) {
     const existing = document.getElementById('chapter-countdown');
     if (existing) return;
-    
+
     const banner = document.createElement('div');
     banner.id = 'chapter-countdown';
     banner.textContent = '';
@@ -2570,16 +2690,16 @@ function ensureChapterCountdown(container) {
 function updateChapterCountdown() {
     const banner = document.getElementById('chapter-countdown');
     if (!banner) return;
-    
+
     const capSize = 6;
     const nextChapter = Math.floor(brokenBlocks / capSize) + 1;
     const blocksToNext = nextChapter * capSize - brokenBlocks;
-    
+
     if (brokenBlocks >= TamMax) {
         banner.textContent = 'Todos os capítulos do bitcoin foram concluídos!';
         return;
     }
-    
+
     banner.textContent = `Faltam ${blocksToNext} blocos para o ${nextChapter}º Capítulo do bitcoin`;
 }
 
@@ -2713,12 +2833,12 @@ function clearDecodedInfo(targetId = 'decoded-info') {
 function showDecodedInfo(termRaw, targetId = 'decoded-info', isPreview = false) {
     const slot = document.getElementById(targetId);
     if (!slot || !termRaw) return;
-    
+
     const term = termRaw.trim();
     const info = getQuickInfo(term);
     const icon = info?.icon || '🪙';
     const badge = isPreview ? '<span class="decoded-badge">prévia</span>' : '';
-    
+
     slot.innerHTML = `
         <div class="decoded-chip">
             <span class="decoded-icon">${icon}</span>
@@ -2735,7 +2855,7 @@ function updateScore(points) {
     if (jogoConcluido) return;
     let bonus = 0;
     if (problemaAtual) {
-        switch(problemaAtual.tipo) {
+        switch (problemaAtual.tipo) {
             case 'cesar': bonus = 50; break;
             case 'ascii': bonus = 75; break;
             case 'base64': bonus = 100; break;
@@ -2782,7 +2902,7 @@ function updateVidasDisplay() {
         const vida = document.createElement('img');
         vida.className = 'vida';
         vida.src = ['a.png', 'b.png', 'c.png'][i];
-        vida.alt = `Vida ${i+1}`;
+        vida.alt = `Vida ${i + 1}`;
         vida.style.cssText = 'width:35px; height:35px; margin:0 8px; transition:all 0.3s ease;';
         if (i >= vidas) {
             vida.style.opacity = '0.3';
@@ -2813,7 +2933,7 @@ function gameOver() {
     jogoConcluido = true;
     clearInterval(timerInterval);
     pararTimerGlobal();
-    
+
     document.getElementById('answer').disabled = true;
     const msg = document.getElementById('mensagem-final');
     const txt = document.getElementById('mensagem-texto');
@@ -2825,11 +2945,11 @@ function gameOver() {
     SoundSystem.gameover();
     setTimeout(() => { RankingSystem.saveGameScore(false); clearCurrentUserSession(false); }, 1500);
     if (btn) btn.style.display = 'inline-block';
-    
+
     // Esconder botão de encerrar
     const btnEncerrar = document.getElementById('btn-encerrar');
     if (btnEncerrar) btnEncerrar.style.display = 'none';
-    
+
     // Manter save para permitir retomada
     clearCurrentUserSession(false);
 }
@@ -2839,7 +2959,7 @@ function endGame(isVictory = true) {
     jogoConcluido = true;
     clearInterval(timerInterval);
     pararTimerGlobal();
-    
+
     document.getElementById('answer').disabled = true;
     const msg = document.getElementById('mensagem-final');
     const txt = document.getElementById('mensagem-texto');
@@ -2856,11 +2976,11 @@ function endGame(isVictory = true) {
     }
     setTimeout(() => { RankingSystem.saveGameScore(isVictory); clearCurrentUserSession(false); }, 1500);
     if (btn) btn.style.display = 'inline-block';
-    
+
     // Esconder botão de encerrar
     const btnEncerrar = document.getElementById('btn-encerrar');
     if (btnEncerrar) btnEncerrar.style.display = 'none';
-    
+
     // Manter save para retomar progresso
 }
 
@@ -2881,21 +3001,21 @@ function mostrarMensagemIncentivo(idx) {
 function mostrarMensagemLateral(texto, tipo = 'incentivo', duracao = 3000) {
     const container = document.getElementById('mensagens-laterais');
     if (!container) return;
-    
+
     const cores = {
         incentivo: 'linear-gradient(135deg, #f7931a, #ffaa33)',
         conquista: 'linear-gradient(135deg, gold, #ffcc00)',
         bonus: 'linear-gradient(135deg, #4CAF50, #2E7D32)',
         info: 'linear-gradient(135deg, #2196f3, #1976d2)'
     };
-    
+
     const icones = {
         incentivo: '💪',
         conquista: '🏆',
         bonus: '🎁',
         info: 'ℹ️'
     };
-    
+
     const mensagem = document.createElement('div');
     mensagem.style.cssText = `
         background: ${cores[tipo] || cores.incentivo};
@@ -2913,20 +3033,20 @@ function mostrarMensagemLateral(texto, tipo = 'incentivo', duracao = 3000) {
         width: 100%;
         font-size: 1em;
     `;
-    
+
     mensagem.innerHTML = `
         <span style="font-size: 1.5em;">${icones[tipo]}</span>
         <span style="flex: 1;">${texto}</span>
         <span style="font-size: 0.8em; opacity: 0.7;">agora</span>
     `;
-    
+
     container.prepend(mensagem);
-    
+
     setTimeout(() => {
         mensagem.style.animation = 'slideOutLeft 0.3s ease';
         setTimeout(() => mensagem.remove(), 300);
     }, duracao);
-    
+
     while (container.children.length > 5) {
         container.removeChild(container.lastChild);
     }
@@ -2941,62 +3061,62 @@ function showHistory(chapter) {
         SoundSystem.play('chapter');
         setTimeout(() => SoundSystem.playChapterVoice(chapter), 250);
     }
-    
+
     const textos = [
-    "2009: Criação do Bitcoin por Satoshi Nakamoto. O bloco gênese é minerado em 3 de janeiro, marcando o início da era das criptomoedas.",
-    
-    "2010: Primeira transação comercial - Laszlo Hanyecz compra 2 pizzas por 10.000 BTC (valor hoje: bilhões de dólares!).",
-    
-    "2012: Primeiro halving - recompensa cai de 50 para 25 BTC. Bitcoin Foundation é estabelecida para padronizar e proteger o protocolo.",
-    
-    "2013: Bitcoin atinge $1.000 pela primeira vez. O FBI fecha o Silk Road e apreende 144.000 BTC.",
-    
-    "2014: Falência da Mt. Gox - maior exchange da época perde 850.000 BTC. Preço cai para $300.",
-    
-    "2015: Ethereum é lançado, trazendo smart contracts. Coinbase se torna a primeira exchange unicórnio.",
-    
-    "2016: Segundo halving - recompensa cai para 12.5 BTC. Bitcoin é reconhecido como moeda no Japão.",
-    
-    "2017: Bitcoin atinge $20.000. ICOs explodem. CME lança futuros de Bitcoin.",
-    
-    "2018: Grande correção - Bitcoin cai para $3.200. Início do 'Crypto Winter'.",
-    
-    "2019: Facebook anuncia Libra (Diem). China anuncia blockchain como prioridade nacional.",
-    
-    "2020: Terceiro halving - recompensa reduzida para 6.25 BTC. PayPal permite compra de Bitcoin. MicroStrategy começa a comprar BTC para tesouraria.",
-    
-    "2021: Bitcoin atinge ATH de $69.000. El Salvador adota Bitcoin como moeda legal. Taproot é ativado.",
-    
-    "2022: 'Crypto Winter' com colapso de LUNA/UST e FTX. Mercado perde US$ 2 trilhões em valor.",
-    
-    "2023: Bitcoin sobe mais de 150% no ano. Aprovação do primeiro ETF de Bitcoin futuro nos EUA.",
-    
-    "2024: Quarto halving - recompensa cai para 3.125 BTC. ETFs de Bitcoin à vista são aprovados nos EUA, com fluxo bilionário.",
-    
-    "2025: Bitcoin atinge novo recorde de US$ 126.000 em outubro, impulsionado por ETFs e adoção institucional. Presidente Trump cria Reserva Estratégica de Bitcoin dos EUA. Maior liquidação da história: US$ 19 bilhões em posições são zeradas em outubro. Congresso aprova GENIUS Act, marco regulatório para stablecoins. Paquistão e outros países anunciam reservas nacionais de Bitcoin.",
-    
-    "2026: Bitcoin enfrenta correção após euforia, oscilando entre US$ 60.000 e US$ 70.000. Saídas de ETFs ultrapassam US$ 9 bilhões. Mercado amadurece com maior institucionalização e correlação com ativos tradicionais. Debate sobre o fim do ciclo de 4 anos do Bitcoin ganha força."
-];
-    
+        "2009: Criação do Bitcoin por Satoshi Nakamoto. O bloco gênese é minerado em 3 de janeiro, marcando o início da era das criptomoedas.",
+
+        "2010: Primeira transação comercial - Laszlo Hanyecz compra 2 pizzas por 10.000 BTC (valor hoje: bilhões de dólares!).",
+
+        "2012: Primeiro halving - recompensa cai de 50 para 25 BTC. Bitcoin Foundation é estabelecida para padronizar e proteger o protocolo.",
+
+        "2013: Bitcoin atinge $1.000 pela primeira vez. O FBI fecha o Silk Road e apreende 144.000 BTC.",
+
+        "2014: Falência da Mt. Gox - maior exchange da época perde 850.000 BTC. Preço cai para $300.",
+
+        "2015: Ethereum é lançado, trazendo smart contracts. Coinbase se torna a primeira exchange unicórnio.",
+
+        "2016: Segundo halving - recompensa cai para 12.5 BTC. Bitcoin é reconhecido como moeda no Japão.",
+
+        "2017: Bitcoin atinge $20.000. ICOs explodem. CME lança futuros de Bitcoin.",
+
+        "2018: Grande correção - Bitcoin cai para $3.200. Início do 'Crypto Winter'.",
+
+        "2019: Facebook anuncia Libra (Diem). China anuncia blockchain como prioridade nacional.",
+
+        "2020: Terceiro halving - recompensa reduzida para 6.25 BTC. PayPal permite compra de Bitcoin. MicroStrategy começa a comprar BTC para tesouraria.",
+
+        "2021: Bitcoin atinge ATH de $69.000. El Salvador adota Bitcoin como moeda legal. Taproot é ativado.",
+
+        "2022: 'Crypto Winter' com colapso de LUNA/UST e FTX. Mercado perde US$ 2 trilhões em valor.",
+
+        "2023: Bitcoin sobe mais de 150% no ano. Aprovação do primeiro ETF de Bitcoin futuro nos EUA.",
+
+        "2024: Quarto halving - recompensa cai para 3.125 BTC. ETFs de Bitcoin à vista são aprovados nos EUA, com fluxo bilionário.",
+
+        "2025: Bitcoin atinge novo recorde de US$ 126.000 em outubro, impulsionado por ETFs e adoção institucional. Presidente Trump cria Reserva Estratégica de Bitcoin dos EUA. Maior liquidação da história: US$ 19 bilhões em posições são zeradas em outubro. Congresso aprova GENIUS Act, marco regulatório para stablecoins. Paquistão e outros países anunciam reservas nacionais de Bitcoin.",
+
+        "2026: Bitcoin enfrenta correção após euforia, oscilando entre US$ 60.000 e US$ 70.000. Saídas de ETFs ultrapassam US$ 9 bilhões. Mercado amadurece com maior institucionalização e correlação com ativos tradicionais. Debate sobre o fim do ciclo de 4 anos do Bitcoin ganha força."
+    ];
+
     const idx = Math.min(Math.max(1, chapter), textos.length);
     const hist = document.getElementById('history-container');
     if (!hist) return;
-    
+
     hist.innerHTML = `
         <div style="background:linear-gradient(135deg,#1a1a2e,#16213e); color:white; padding:25px; border-radius:15px; border:2px solid #f7931a; max-width:600px; text-align:center;">
             <h3 style="color:#f7931a;">📖 Capítulo ${idx}</h3>
-            <div style="background:rgba(255,255,255,0.05); padding:20px; border-left:4px solid #f7931a; text-align:left;">${textos[idx-1]}</div>
+            <div style="background:rgba(255,255,255,0.05); padding:20px; border-left:4px solid #f7931a; text-align:left;">${textos[idx - 1]}</div>
             <button onclick="fecharHistoriaEVoltar()" style="margin-top:20px; padding:10px 25px; background:#f7931a; color:white; border:none; border-radius:25px; cursor:pointer;">Fechar</button>
         </div>
     `;
-    
+
     hist.style.display = 'block';
     hist.style.position = 'fixed';
     hist.style.top = '50%';
     hist.style.left = '50%';
     hist.style.transform = 'translate(-50%, -50%)';
     hist.style.zIndex = '10001';
-    
+
     let overlay = document.getElementById('history-overlay');
     if (!overlay) {
         overlay = document.createElement('div');
@@ -3017,7 +3137,7 @@ function fecharHistoriaEVoltar() {
     }
     const overlay = document.getElementById('history-overlay');
     if (overlay) overlay.style.display = 'none';
-    
+
     if (!jogoConcluido && vidas > 0) {
         if (remainingTime <= 0) {
             remainingTime = timeLimit;
@@ -3026,14 +3146,14 @@ function fecharHistoriaEVoltar() {
         if (timerInterval) clearInterval(timerInterval);
         startTimer();
     }
-    
+
     SoundSystem.click();
 }
 
 function verificarBonusDeBlocos() {
     if (brokenBlocks > 0 && brokenBlocks % 20 === 0) {
         let pts = 1000, btc = 0.00000100, vidasBonus = 0;
-        switch(dificuldadeAtual) {
+        switch (dificuldadeAtual) {
             case 'medio': pts = 2000; btc = 0.00000200; break;
             case 'dificil': pts = 3000; btc = 0.00000500; vidasBonus = 1; break;
         }
@@ -3063,21 +3183,21 @@ function mostrarBonusMessage(p, b, v) {
     if (!c) return;
     const div = document.createElement('div');
     div.style.cssText = 'position:fixed; top:50%; left:50%; transform:translate(-50%,-50%); background:linear-gradient(135deg,#FFD700,#FFA500); color:#000; padding:30px; border-radius:20px; border:5px solid gold; text-align:center; z-index:10000;';
-    div.innerHTML = `<div style="font-size:4em;">🏆</div><h2>BÔNUS!</h2><p>+${p} pontos</p><p>+${b.toFixed(8)} BTC</p>${v>0?'<p>+1 vida</p>':''}<button onclick="this.parentElement.remove()">OK</button>`;
+    div.innerHTML = `<div style="font-size:4em;">🏆</div><h2>BÔNUS!</h2><p>+${p} pontos</p><p>+${b.toFixed(8)} BTC</p>${v > 0 ? '<p>+1 vida</p>' : ''}<button onclick="this.parentElement.remove()">OK</button>`;
     document.body.appendChild(div);
     setTimeout(() => div.remove(), 5000);
 }
 
 function generateHash(n) {
     const d = new Date();
-    return `Bloco #${n} | Hash: 000000${Math.random().toString(36).substring(2,15)}${n} | ${d.toLocaleString('pt-BR')}`;
+    return `Bloco #${n} | Hash: 000000${Math.random().toString(36).substring(2, 15)}${n} | ${d.toLocaleString('pt-BR')}`;
 }
 
 function updateHashLog(blockNumber) {
     const bloco = gerarBlocoRealista(blockNumber, problemaAtual?.textoCifrado || '');
-    
+
     adicionarBlocoRealista(bloco);
-    
+
     const hashDisplay = document.getElementById('hash-display');
     if (hashDisplay) {
         if (hashDisplay.textContent.trim() === "Nenhum bloco quebrado ainda.") {
@@ -3096,13 +3216,13 @@ function updateHashLog(blockNumber) {
             color: #00ff00;
         `;
         el.textContent = `Bloco #${blockNumber} | ${bloco.timestamp} | Hash: ${bloco.hash}`;
-        
+
         if (hashDisplay.firstChild) {
             hashDisplay.insertBefore(el, hashDisplay.firstChild);
         } else {
             hashDisplay.appendChild(el);
         }
-        
+
         while (hashDisplay.children.length > 5) {
             hashDisplay.removeChild(hashDisplay.lastChild);
         }
@@ -3144,7 +3264,7 @@ function criarMenu() {
     btn.style.cssText = 'position:fixed; top:12px; right:140px; width:50px; height:50px; border-radius:50%; background:linear-gradient(135deg,#9c27b0,#673ab7); color:white; border:2px solid #ba68c8; font-size:1.5em; cursor:pointer; z-index:10001;';
     btn.onclick = toggleMenu;
     document.body.appendChild(btn);
-    
+
     const html = `
         <div id="main-menu" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; z-index:20000;">
             <div id="menu-overlay" style="position:absolute; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5);"></div>
@@ -3162,6 +3282,9 @@ function criarMenu() {
                     <div onclick="mostrarConquistas()" style="padding:15px; cursor:pointer; border-bottom:1px solid rgba(255,255,255,0.1);">🏆 Conquistas</div>
                     <div onclick="verMinhasConquistas()" style="padding:15px; cursor:pointer; border-bottom:1px solid rgba(255,255,255,0.1);">👤 Minhas Conquistas</div>
                     <div onclick="verConquistasDeJogador()" style="padding:15px; cursor:pointer; border-bottom:1px solid rgba(255,255,255,0.1);">🔍 Buscar Conquistas</div>
+                    <div onclick="ativarCirculoCesar(); fecharMenu();" style="padding:15px; cursor:pointer; border-bottom:1px solid rgba(255,255,255,0.1);">
+                        🔄 Círculo de César
+                    </div>
                     <div onclick="abrirDecodificador()" style="padding:15px; cursor:pointer; border-bottom:1px solid rgba(255,255,255,0.1);">
                         🔧 Ferramentas de Decodificação
                     </div>
@@ -3254,13 +3377,13 @@ function abrirCadastro() {
 
 function abrirAvaliacao(onDone = null) {
     fecharMenu();
-    
+
     const overlay = document.createElement('div');
     overlay.style.cssText = `
         position:fixed; inset:0; background:rgba(0,0,0,0.8); z-index:40000;
         display:flex; align-items:center; justify-content:center; padding:20px;
     `;
-    
+
     const box = document.createElement('div');
     box.style.cssText = `
         background: linear-gradient(135deg, #1a1a2e, #16213e);
@@ -3270,14 +3393,14 @@ function abrirAvaliacao(onDone = null) {
         max-width: 420px; width: 90%;
         color: white; text-align: center; box-shadow: 0 12px 40px rgba(0,0,0,0.6);
     `;
-    
+
     box.innerHTML = `
         <h3 style="margin-top:0; color:#00ffff;">Avalie o jogo</h3>
         <p style="margin:8px 0 16px 0; color:#ccc;">Clique nas estrelas para dar sua nota.</p>
         <div id="star-row" style="display:flex; gap:10px; justify-content:center; margin:14px 0 18px 0;"></div>
         <button id="aval-cancel" style="padding:10px 16px; border:none; border-radius:10px; background:rgba(255,255,255,0.1); color:white; cursor:pointer;">Fechar</button>
     `;
-    
+
     const starRow = box.querySelector('#star-row');
     let current = 0;
     for (let i = 1; i <= 5; i++) {
@@ -3298,7 +3421,7 @@ function abrirAvaliacao(onDone = null) {
         };
         starRow.appendChild(s);
     }
-    
+
     function highlight(n) {
         starRow.querySelectorAll('span').forEach(st => {
             const val = parseInt(st.dataset.val, 10);
@@ -3311,7 +3434,7 @@ function abrirAvaliacao(onDone = null) {
             }
         });
     }
-    
+
     box.querySelector('#aval-cancel').onclick = () => {
         overlay.remove();
         if (current > 0) {
@@ -3336,7 +3459,7 @@ function abrirCompartilharFinal(nomeJogador = 'Jogador') {
     const mensagem = `Joguei JogoBitcoin, quebrei ${brokenBlocks} blocos e somei ${score} pontos! Aprenda criptografia e Bitcoin brincando.`;
     const url = window.location.href.split('#')[0];
     const text = encodeURIComponent(`${mensagem} Venha jogar: ${url}`);
-    
+
     const redes = {
         x: { label: 'X', icon: '🐦', url: `https://twitter.com/intent/tweet?text=${text}` },
         linkedin: { label: 'LinkedIn', icon: 'in', url: `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(url)}&mini=true&summary=${text}` },
@@ -3344,7 +3467,7 @@ function abrirCompartilharFinal(nomeJogador = 'Jogador') {
         whatsapp: { label: 'WhatsApp', icon: '🟢', url: `https://wa.me/?text=${text}` },
         telegram: { label: 'Telegram', icon: '✈️', url: `https://t.me/share/url?url=${encodeURIComponent(url)}&text=${text}` }
     };
-    
+
     const modal = document.createElement('div');
     modal.style.cssText = `
         position: fixed; inset: 0; z-index: 40000; background: rgba(0,0,0,0.8);
@@ -3367,7 +3490,7 @@ function abrirCompartilharFinal(nomeJogador = 'Jogador') {
     `;
     modal.appendChild(box);
     document.body.appendChild(modal);
-    
+
     const btns = box.querySelector('#share-buttons');
     Object.entries(redes).forEach(([key, data]) => {
         const b = document.createElement('button');
@@ -3386,7 +3509,7 @@ function abrirCompartilharFinal(nomeJogador = 'Jogador') {
         b.onclick = () => window.open(data.url, '_blank', 'noopener,noreferrer');
         btns.appendChild(b);
     });
-    
+
     box.querySelector('#share-close').onclick = () => modal.remove();
 }
 
@@ -3395,11 +3518,11 @@ function abrirDashboard() {
     const visitas = localStorage.getItem('jogobitcoin_visitas') || 0;
     const cadastros = JSON.parse(localStorage.getItem('jogobitcoin_cadastros') || '[]');
     const avaliacoes = JSON.parse(localStorage.getItem('jogobitcoin_avaliacoes') || '[]');
-    
+
     let soma = 0;
     avaliacoes.forEach(a => soma += a.nota);
     const media = avaliacoes.length > 0 ? (soma / avaliacoes.length).toFixed(1) : 0;
-    
+
     alert(`📊 DASHBOARD\n\n👁️ Visitas: ${visitas}\n📰 Cadastros: ${cadastros.length}\n⭐ Avaliações: ${avaliacoes.length}\n📈 Média: ${media}/5`);
 }
 
@@ -3424,20 +3547,20 @@ function mostrarConquistas() {
 function verMinhasConquistas() {
     fecharMenu();
     const ultimoJogador = RankingSystem.getCurrentPlayerName() || localStorage.getItem(nsKey('jogobitcoin_lastname'));
-    
+
     if (!ultimoJogador) {
         alert('👤 Você ainda não tem um nome registrado. Jogue uma partida primeiro!');
         return;
     }
-    
+
     const conquistas = RankingSystem.getConquistasDoJogador(ultimoJogador);
-    
+
     if (conquistas.length === 0) {
         alert(`🏆 ${ultimoJogador} ainda não tem conquistas. Continue minerando!`);
     } else {
         let texto = `🏆 CONQUISTAS DE ${ultimoJogador.toUpperCase()} 🏆\n\n`;
         conquistas.forEach((c, index) => {
-            texto += `${index+1}. ${c.icone} ${c.titulo}\n   📅 ${c.data}\n\n`;
+            texto += `${index + 1}. ${c.icone} ${c.titulo}\n   📅 ${c.data}\n\n`;
         });
         alert(texto);
     }
@@ -3446,20 +3569,20 @@ function verMinhasConquistas() {
 function verConquistasDeJogador() {
     fecharMenu();
     const nome = prompt('🔍 Digite o nome do jogador:');
-    
+
     if (!nome) return;
-    
+
     const nomeLimpo = nome.trim();
     if (nomeLimpo === '') return;
-    
+
     const conquistas = RankingSystem.getConquistasDoJogador(nomeLimpo);
-    
+
     if (conquistas.length === 0) {
         alert(`🏆 ${nomeLimpo} ainda não tem conquistas registradas.`);
     } else {
         let texto = `🏆 CONQUISTAS DE ${nomeLimpo.toUpperCase()} 🏆\n\n`;
         conquistas.forEach((c, index) => {
-            texto += `${index+1}. ${c.icone} ${c.titulo}\n   📅 ${c.data}\n\n`;
+            texto += `${index + 1}. ${c.icone} ${c.titulo}\n   📅 ${c.data}\n\n`;
         });
         alert(texto);
     }
@@ -3474,24 +3597,31 @@ let rotacoesPorLetra = [];
 function ativarCirculoCesar() {
     if (problemaAtual && problemaAtual.tipo === 'cesar') {
         circuloAtivo = true;
-        
+
         const textoOriginal = problemaAtual.textoCifrado;
         const textoDecifrado = problemaAtual.respostaCorreta;
-        
+
         letrasCifradas = textoOriginal.split('').filter(c => c.match(/[a-zA-Z]/));
         letrasDecifradas = textoDecifrado.split('').filter(c => c.match(/[a-zA-Z]/));
-        
+
         rotacoesPorLetra = new Array(letrasCifradas.length).fill(0);
         letraSelecionada = 0;
-        
+
         const circulo = document.getElementById('circulo-cesar');
         if (circulo) {
             circulo.style.display = 'flex';
+
+            const chaveElement = document.getElementById('circulo-cesar-chave');
+            const chaveValorElement = document.getElementById('circulo-cesar-chave-valor');
+            if (chaveElement && chaveValorElement && problemaAtual && problemaAtual.chave !== undefined) {
+                chaveValorElement.textContent = `${Math.abs(problemaAtual.chave)}${problemaAtual.chave > 0 ? ' →' : ' ←'}`;
+                chaveElement.style.display = 'block';
+            }
             criarAlfabetoFixo();
             criarLetrasCifradas();
             atualizarLetraSelecionada();
             atualizarRespostaConstruida();
-            
+
             if (SoundSystem) SoundSystem.click();
         }
     }
@@ -3500,18 +3630,18 @@ function ativarCirculoCesar() {
 function criarAlfabetoFixo() {
     const container = document.getElementById('circulo-externo-letras');
     if (!container) return;
-    
+
     container.innerHTML = '';
     const alfabeto = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
     const raio = 160;
     const centroX = 175;
     const centroY = 175;
-    
+
     alfabeto.forEach((letra, index) => {
         const angulo = (index * 360 / 26) * Math.PI / 180;
         const x = centroX + raio * Math.sin(angulo) - 15;
         const y = centroY - raio * Math.cos(angulo) - 15;
-        
+
         const div = document.createElement('div');
         div.className = 'letra-alfabeto';
         div.style.cssText = `
@@ -3536,9 +3666,9 @@ function criarAlfabetoFixo() {
 function criarLetrasCifradas() {
     const container = document.getElementById('texto-cifrado-destaque');
     if (!container) return;
-    
+
     container.innerHTML = '';
-    
+
     letrasCifradas.forEach((letra, index) => {
         const btn = document.createElement('button');
         btn.className = 'letra-cifrada-btn';
@@ -3579,7 +3709,7 @@ function criarLetrasCifradas() {
 function selecionarLetra(index) {
     letraSelecionada = index;
     atualizarLetraSelecionada();
-    
+
     const botoes = document.querySelectorAll('.letra-cifrada-btn');
     botoes.forEach((btn, i) => {
         if (i === index) {
@@ -3594,7 +3724,7 @@ function selecionarLetra(index) {
             btn.style.boxShadow = 'none';
         }
     });
-    
+
     if (SoundSystem) SoundSystem.click();
 }
 
@@ -3602,7 +3732,7 @@ function girarLetraAtual(direcao) {
     rotacoesPorLetra[letraSelecionada] += direcao;
     atualizarLetraSelecionada();
     atualizarRespostaConstruida();
-    
+
     const circuloInterno = document.getElementById('circulo-interno');
     if (circuloInterno) {
         circuloInterno.style.transform = `rotate(${rotacoesPorLetra[letraSelecionada] * 5}deg)`;
@@ -3610,7 +3740,7 @@ function girarLetraAtual(direcao) {
             circuloInterno.style.transform = 'rotate(0deg)';
         }, 200);
     }
-    
+
     if (SoundSystem) SoundSystem.click();
 }
 
@@ -3626,17 +3756,17 @@ document.addEventListener('keydown', (event) => {
 function atualizarLetraSelecionada() {
     const letraAtual = document.getElementById('letra-atual');
     if (!letraAtual) return;
-    
+
     const letraOriginal = letrasCifradas[letraSelecionada];
     const rotacao = rotacoesPorLetra[letraSelecionada];
-    
+
     if (letraOriginal && letraOriginal.match(/[a-zA-Z]/)) {
         const code = letraOriginal.charCodeAt(0);
         const base = code >= 97 ? 97 : 65;
         const pos = (code - base - rotacao + 26) % 26;
         const letraDecifrada = String.fromCharCode(base + pos);
         letraAtual.textContent = letraDecifrada.toUpperCase();
-        
+
         const letraEsperada = letrasDecifradas[letraSelecionada];
         if (letraDecifrada.toLowerCase() === letraEsperada.toLowerCase()) {
             letraAtual.style.color = '#4CAF50';
@@ -3651,7 +3781,7 @@ function atualizarLetraSelecionada() {
 function atualizarRespostaConstruida() {
     const container = document.getElementById('resposta-construida');
     if (!container) return;
-    
+
     let resposta = '';
     for (let i = 0; i < letrasCifradas.length; i++) {
         const letra = letrasCifradas[i];
@@ -3664,14 +3794,14 @@ function atualizarRespostaConstruida() {
             resposta += letra;
         }
     }
-    
+
     container.textContent = resposta.toLowerCase();
-    
+
     if (resposta.toLowerCase() === letrasDecifradas.join('').toLowerCase()) {
         container.style.color = '#4CAF50';
         container.style.textShadow = '0 0 20px rgba(76,175,80,0.7)';
         showDecodedInfoIfCorrect(resposta, 'decoded-info-circulo');
-        
+
         if (SoundSystem && SoundSystem.win) SoundSystem.win();
     } else {
         container.style.color = '#ffaa00';
@@ -3723,7 +3853,7 @@ const getSaveKey = () => nsKey(SAVE_KEY_BASE);
 function salvarJogo(force = false) {
     // Só salvar se o jogo estiver ativo, a menos que seja forçado
     if (!force && (jogoConcluido || vidas <= 0)) return;
-    
+
     const estado = {
         // Progresso básico
         currentProblem: currentProblem,
@@ -3735,13 +3865,13 @@ function salvarJogo(force = false) {
         dificuldadeAtual: dificuldadeAtual,
         timeLimit: timeLimit,
         remainingTime: remainingTime,
-        
+
         // Timestamp para saber quando foi salvo
         timestamp: Date.now(),
-        
+
         // Blocos quebrados (estado dos blocos)
         blocksStage: blocks.map(block => parseInt(block.getAttribute('data-stage') || '0')),
-        
+
         // Problema atual
         problemaAtual: problemaAtual ? {
             pergunta: problemaAtual.pergunta,
@@ -3751,11 +3881,11 @@ function salvarJogo(force = false) {
             chave: problemaAtual.chave,
             dica: problemaAtual.dica
         } : null,
-        
+
         // Metas e conquistas da sessão atual
         metasAlcancadas: metasAlcancadas,
         selosConquistados: selosConquistados,
-        
+
         // Tempo
         tempoTotalPartida: tempoTotalPartida,
         tempoInicioPartida: tempoInicioPartida
@@ -3765,11 +3895,11 @@ function salvarJogo(force = false) {
         ultimosHashes: ultimosHashes,
         blockchainHistory: blockchainHistory
     };
-    
+
     try {
         localStorage.setItem(getSaveKey(), JSON.stringify(estado));
         console.log('💾 Jogo salvo automaticamente:', new Date().toLocaleTimeString());
-        
+
         // Mostrar indicador de salvamento
         mostrarIndicadorSalvamento();
     } catch (e) {
@@ -3782,7 +3912,7 @@ function salvarJogo(force = false) {
 // ============================================
 function mostrarIndicadorSalvamento() {
     let indicador = document.getElementById('save-indicator');
-    
+
     if (!indicador) {
         indicador = document.createElement('div');
         indicador.id = 'save-indicator';
@@ -3805,10 +3935,10 @@ function mostrarIndicadorSalvamento() {
         `;
         document.body.appendChild(indicador);
     }
-    
+
     indicador.innerHTML = '💾 Jogo salvo ✓';
     indicador.style.opacity = '1';
-    
+
     // Esconder após 2 segundos
     setTimeout(() => {
         indicador.style.opacity = '0';
@@ -3822,21 +3952,21 @@ function carregarJogoSalvo() {
     try {
         const saved = localStorage.getItem(getSaveKey());
         if (!saved) return false;
-        
+
         const estado = JSON.parse(saved);
-        
+
         // Verificar se o save é recente (menos de 24 horas)
         const idade = Date.now() - estado.timestamp;
         const UM_DIA = 24 * 60 * 60 * 1000;
-        
+
         if (idade > UM_DIA) {
             console.log('⌛ Save expirado (mais de 24 horas)');
             localStorage.removeItem(getSaveKey());
             return false;
         }
-        
+
         console.log('📂 Carregando jogo salvo de', new Date(estado.timestamp).toLocaleString());
-        
+
         // Restaurar variáveis básicas
         currentProblem = estado.currentProblem;
         score = estado.score;
@@ -3854,25 +3984,25 @@ function carregarJogoSalvo() {
         tempoInicioPartida = Date.now() - (tempoTotalPartida * 1000);
         if (estado.ultimosHashes) ultimosHashes = estado.ultimosHashes;
         blockchainHistory = estado.blockchainHistory || [];
-        
+
         // Restaurar problema atual
         if (estado.problemaAtual) {
             problemaAtual = estado.problemaAtual;
         }
-        
+
         // Inicializar jogo com a dificuldade salva
         document.getElementById('info-container').style.display = 'none';
         document.getElementById('difficulty-selection').style.display = 'none';
         document.getElementById('problem-container').style.display = 'flex';
         document.getElementById('game-container').style.display = 'flex';
         document.getElementById('hash-log').style.display = 'flex';
-        
+
         // Esconder imagens
         ['img-Bitcoin.esquerda', 'img-esquerda', 'img-logo.esquerda', 'img-Bitcoin.direita', 'img-direita', 'img-logo.direita'].forEach(id => {
             const el = document.getElementById(id);
             if (el) el.style.display = 'none';
         });
-        
+
         // Recriar blocos com estágios salvos
         initializeBlocks();
         if (estado.blocksStage) {
@@ -3880,7 +4010,7 @@ function carregarJogoSalvo() {
                 if (index < blocks.length && stage > 0) {
                     const block = blocks[index];
                     block.setAttribute('data-stage', stage);
-                    
+
                     // Aplicar cor baseada no estágio
                     if (stage === 1) {
                         block.style.backgroundColor = '#f1c40f';
@@ -3889,7 +4019,7 @@ function carregarJogoSalvo() {
                     } else if (stage === 3) {
                         block.style.backgroundColor = '#2ecc71';
                     }
-                    
+
                     const progress = block.querySelector('.block-progress');
                     if (progress) {
                         progress.textContent = stage === 1 ? '33%' : stage === 2 ? '66%' : '100%';
@@ -3897,12 +4027,12 @@ function carregarJogoSalvo() {
                 }
             });
         }
-        
+
         // Atualizar displays
         updateBitcoinValue(false);
         updateScoreDisplay(score);
         updateVidasDisplay();
-        
+
         // Mostrar problema atual
         if (problemaAtual) {
             document.getElementById('problem-number').textContent = `Bloco Nº: ${currentProblem}`;
@@ -3910,14 +4040,14 @@ function carregarJogoSalvo() {
         } else {
             displayNextProblem();
         }
-        
+
         // Reiniciar timer
         startTimer();
         iniciarTimerGlobal(false); // retoma do tempo salvo
         const tempoDisplay = document.getElementById('tempo-global');
         if (tempoDisplay) tempoDisplay.style.display = 'flex';
         syncActiveBalance();
-        
+
         // Restaurar blockchain visual
         const cadeia = document.getElementById('blockchain-cadeia');
         if (cadeia) {
@@ -3930,10 +4060,10 @@ function carregarJogoSalvo() {
             }
             cadeia.style.display = 'flex';
         }
-        
+
         // Mostrar mensagem de boas-vindas
         mostrarMensagemLateral('🔄 Jogo carregado! Continue de onde parou.', 'info', 3000);
-        
+
         return true;
     } catch (e) {
         console.error('Erro ao carregar jogo:', e);
@@ -3966,19 +4096,19 @@ function criarBotaoEncerrar() {
         border: 2px solid #ff9800;
         display: none; /* Só aparece durante o jogo */
     `;
-    
+
     btn.onmouseover = () => {
         btn.style.transform = 'scale(1.05)';
         btn.style.boxShadow = '0 8px 25px rgba(244, 67, 54, 0.6)';
     };
-    
+
     btn.onmouseout = () => {
         btn.style.transform = 'scale(1)';
         btn.style.boxShadow = '0 4px 15px rgba(244, 67, 54, 0.4)';
     };
-    
+
     btn.onclick = encerrarPartida;
-    
+
     document.body.appendChild(btn);
 }
 
@@ -3990,21 +4120,21 @@ function encerrarPartida() {
     if (!confirm('⚠️ Deseja realmente encerrar esta partida?\n\nSeu progresso será registrado no ranking e você poderá começar uma nova partida.')) {
         return;
     }
-    
+
     console.log('⏹️ Encerrando partida voluntariamente...');
-    
+
     // Parar timers
     clearInterval(timerInterval);
     pararTimerGlobal();
-    
+
     // Marcar como concluído para não continuar
     jogoConcluido = true;
-    
+
     // Mostrar mensagem de encerramento
     const msg = document.getElementById('mensagem-final');
     const txt = document.getElementById('mensagem-texto');
     const btn = document.getElementById('restart-button');
-    
+
     if (msg && txt) {
         // Mostrar resumo da partida
         let conquistasTexto = '';
@@ -4016,7 +4146,7 @@ function encerrarPartida() {
             });
             conquistasTexto += '</div>';
         }
-        
+
         txt.innerHTML = `
             <h2 style="color: #ff9800;">⏹️ Partida Encerrada</h2>
             <p><strong>BTC:</strong> ${bitcoinQuantity.toFixed(8)}</p>
@@ -4026,23 +4156,23 @@ function encerrarPartida() {
             <p><strong>Dificuldade:</strong> ${dificuldadeAtual.toUpperCase()}</p>
             ${conquistasTexto}
         `;
-        
+
         msg.style.display = 'block';
     }
-    
+
     // Salvar no ranking (com todas as conquistas)
     setTimeout(() => {
         RankingSystem.saveGameScore(false); // false = não é vitória, mas encerrou
-        
+
         clearCurrentUserSession(false);
     }, 500);
-    
+
     if (btn) btn.style.display = 'inline-block';
-    
+
     // Esconder botão de encerrar
     const btnEncerrar = document.getElementById('btn-encerrar');
     if (btnEncerrar) btnEncerrar.style.display = 'none';
-    
+
     // Tocar som
     if (SoundSystem) SoundSystem.click();
 }
@@ -4065,7 +4195,7 @@ window.addEventListener('beforeunload', (e) => {
     if (!jogoConcluido && vidas > 0 && currentProblem > 1) {
         // Salvar automaticamente antes de sair
         salvarJogo();
-        
+
         // Mostrar aviso (opcional)
         e.preventDefault();
         e.returnValue = 'Tem certeza que deseja sair? Seu progresso foi salvo.';
@@ -4078,19 +4208,19 @@ window.addEventListener('beforeunload', (e) => {
 
 function abrirDecodificador() {
     console.log('🔧 Abrindo decodificador - Dificuldade atual:', dificuldadeAtual);
-    
+
     fecharMenu();
     const modal = document.getElementById('decodificador-modal');
     if (modal) {
         modal.style.display = 'flex';
-        
+
         atualizarEstadosDecodificador();
-        
+
         setTimeout(() => {
             abrirDecodNivel(dificuldadeAtual);
             forcarPreenchimentoDecodificador();
         }, 200);
-        
+
         if (SoundSystem) SoundSystem.click();
     }
 }
@@ -4109,18 +4239,18 @@ function fecharDecodificador() {
 
 function atualizarEstadosDecodificador() {
     console.log('🎮 Atualizando estados do decodificador - Dificuldade atual:', dificuldadeAtual);
-    
+
     const botoesNivel = document.querySelectorAll('.decod-nivel');
-    
+
     botoesNivel.forEach(btn => {
         const nivel = btn.getAttribute('data-nivel');
-        
+
         if (nivel === dificuldadeAtual) {
             btn.disabled = false;
             btn.style.opacity = '1';
             btn.style.cursor = 'pointer';
             btn.style.pointerEvents = 'auto';
-            
+
             if (nivel === 'facil') btn.style.background = 'linear-gradient(135deg,#00aa00,#006600)';
             if (nivel === 'medio') btn.style.background = 'linear-gradient(135deg,#ffaa00,#cc8800)';
             if (nivel === 'dificil') btn.style.background = 'linear-gradient(135deg,#ff4400,#aa2200)';
@@ -4132,7 +4262,7 @@ function atualizarEstadosDecodificador() {
             btn.style.background = 'rgba(255,255,255,0.1)';
         }
     });
-    
+
     const nivelAtualDiv = document.getElementById(`decod-${dificuldadeAtual}`);
     if (nivelAtualDiv && nivelAtualDiv.style.display !== 'block') {
         abrirDecodNivel(dificuldadeAtual);
@@ -4141,22 +4271,22 @@ function atualizarEstadosDecodificador() {
 
 function abrirDecodNivel(nivel) {
     console.log('📂 Tentando abrir nível:', nivel, 'Dificuldade atual:', dificuldadeAtual);
-    
+
     if (nivel !== dificuldadeAtual) {
         console.log('🚫 Nível', nivel, 'não permitido - dificuldade atual é', dificuldadeAtual);
-        
+
         mostrarMensagemLateral(`🚫 Nível ${nivel.toUpperCase()} bloqueado! Complete o nível ${dificuldadeAtual.toUpperCase()} primeiro.`, 'info', 3000);
-        
+
         setTimeout(() => {
             abrirDecodNivel(dificuldadeAtual);
         }, 100);
         return;
     }
-    
+
     document.querySelectorAll('.decod-conteudo').forEach(el => {
         el.style.display = 'none';
     });
-    
+
     const nivelDiv = document.getElementById(`decod-${nivel}`);
     if (nivelDiv) {
         nivelDiv.style.display = 'block';
@@ -4164,10 +4294,10 @@ function abrirDecodNivel(nivel) {
         console.error(`❌ Nível ${nivel} não encontrado`);
         return;
     }
-    
+
     document.querySelectorAll('.decod-nivel').forEach(btn => {
         const btnNivel = btn.getAttribute('data-nivel');
-        
+
         if (btnNivel === dificuldadeAtual) {
             btn.style.background = 'rgba(255,255,255,0.1)';
             btn.style.color = 'white';
@@ -4183,7 +4313,7 @@ function abrirDecodNivel(nivel) {
             btn.style.background = 'rgba(255,255,255,0.1)';
         }
     });
-    
+
     const btnAtivo = document.querySelector(`.decod-nivel[data-nivel="${nivel}"]`);
     if (btnAtivo && nivel === dificuldadeAtual) {
         if (nivel === 'facil') btnAtivo.style.background = 'linear-gradient(135deg,#00aa00,#006600)';
@@ -4191,10 +4321,10 @@ function abrirDecodNivel(nivel) {
         if (nivel === 'dificil') btnAtivo.style.background = 'linear-gradient(135deg,#ff4400,#aa2200)';
         btnAtivo.style.color = 'white';
     }
-    
+
     const resultado = document.getElementById('decod-resultado');
     if (resultado) resultado.innerHTML = 'Aguardando decodificação...';
-    
+
     setTimeout(() => {
         forcarPreenchimentoDecodificador();
     }, 100);
@@ -4202,26 +4332,26 @@ function abrirDecodNivel(nivel) {
 
 function selecionarDecodMetodo(nivel, metodo) {
     console.log(`📂 Selecionando método ${metodo} no nível ${nivel}`);
-    
+
     document.querySelectorAll(`#decod-${nivel} .decod-metodo`).forEach(el => {
         el.style.display = 'none';
     });
-    
+
     const metodoDiv = document.getElementById(`decod-${nivel}-${metodo}`);
     if (metodoDiv) {
         metodoDiv.style.display = 'block';
     }
-    
+
     document.querySelectorAll(`#decod-${nivel} .btn-metodo`).forEach(btn => {
         btn.style.background = 'rgba(255,255,255,0.1)';
     });
-    
+
     const btnAtivo = document.getElementById(`decod-${nivel}-${metodo}-btn`);
     if (btnAtivo) {
         if (nivel === 'medio') btnAtivo.style.background = 'linear-gradient(135deg, #ffaa00, #cc8800)';
         if (nivel === 'dificil') btnAtivo.style.background = 'linear-gradient(135deg, #ff4400, #aa2200)';
     }
-    
+
     setTimeout(() => {
         forcarPreenchimentoDecodificador();
     }, 100);
@@ -4230,7 +4360,7 @@ function selecionarDecodMetodo(nivel, metodo) {
 function selecionarDecodFacil(tipo) {
     const btnSimples = document.getElementById('decod-facil-simples-btn');
     const btnCirculo = document.getElementById('decod-facil-circulo-btn');
-    
+
     if (tipo === 'simples') {
         document.getElementById('decod-facil-simples').style.display = 'block';
         document.getElementById('decod-facil-circulo').style.display = 'none';
@@ -4242,7 +4372,7 @@ function selecionarDecodFacil(tipo) {
         btnCirculo.style.background = 'linear-gradient(135deg, #4CAF50, #2E7D32)';
         btnSimples.style.background = 'rgba(255,255,255,0.1)';
     }
-    
+
     atualizarDecodificadorComProblema();
 }
 
@@ -4250,12 +4380,12 @@ function decodificarFacil() {
     const input = document.getElementById('decod-facil-input')?.value;
     const shift = parseInt(document.getElementById('decod-facil-shift')?.value || 0);
     const resultado = document.getElementById('decod-resultado');
-    
+
     if (!input) {
         resultado.innerHTML = '⚠️ Digite uma mensagem para decodificar!';
         return;
     }
-    
+
     const decoded = decodificarCesar(input, shift);
     resultado.innerHTML = decoded;
     showDecodedInfoIfCorrect(decoded, 'decoded-info-decod');
@@ -4266,11 +4396,11 @@ function decodificarMedio() {
     const metodoCesar = document.getElementById('decod-medio-cesar')?.style.display !== 'none';
     const metodoAscii = document.getElementById('decod-medio-ascii')?.style.display !== 'none';
     const resultado = document.getElementById('decod-resultado');
-    
+
     if (metodoCesar) {
         const input = document.getElementById('decod-medio-cesar-input')?.value;
         const shift = parseInt(document.getElementById('decod-medio-shift')?.value || 0);
-        
+
         if (!input) {
             resultado.innerHTML = '⚠️ Digite uma mensagem!';
             return;
@@ -4278,7 +4408,7 @@ function decodificarMedio() {
         const decoded = decodificarCesar(input, shift);
         resultado.innerHTML = decoded;
         showDecodedInfoIfCorrect(decoded, 'decoded-info-decod');
-    } 
+    }
     else if (metodoAscii) {
         const input = document.getElementById('decod-medio-ascii-input')?.value;
         if (!input) {
@@ -4292,7 +4422,7 @@ function decodificarMedio() {
     else {
         resultado.innerHTML = '❌ Selecione um método primeiro!';
     }
-    
+
     if (SoundSystem) SoundSystem.click();
 }
 
@@ -4301,7 +4431,7 @@ function decodificarDificil() {
     const metodoAscii = document.getElementById('decod-dificil-ascii')?.style.display !== 'none';
     const metodoBase64 = document.getElementById('decod-dificil-base64')?.style.display !== 'none';
     const resultado = document.getElementById('decod-resultado');
-    
+
     if (metodoCesar) {
         const input = document.getElementById('decod-dificil-cesar-input')?.value;
         const shift = parseInt(document.getElementById('decod-dificil-shift')?.value || 0);
@@ -4312,7 +4442,7 @@ function decodificarDificil() {
         const decoded = decodificarCesar(input, shift);
         resultado.innerHTML = decoded;
         showDecodedInfoIfCorrect(decoded, 'decoded-info-decod');
-    } 
+    }
     else if (metodoAscii) {
         const input = document.getElementById('decod-dificil-ascii-input')?.value;
         if (!input) {
@@ -4322,7 +4452,7 @@ function decodificarDificil() {
         const decoded = decodificarASCII(input);
         resultado.innerHTML = decoded;
         showDecodedInfoIfCorrect(decoded, 'decoded-info-decod');
-    } 
+    }
     else if (metodoBase64) {
         const input = document.getElementById('decod-dificil-base64-input')?.value;
         if (!input) {
@@ -4336,7 +4466,7 @@ function decodificarDificil() {
     else {
         resultado.innerHTML = '❌ Selecione um método primeiro!';
     }
-    
+
     if (SoundSystem) SoundSystem.click();
 }
 
@@ -4430,7 +4560,7 @@ function showSoundToast() {
     if (soundTipShown || localStorage.getItem(KEY)) return;
     soundTipShown = true;
     localStorage.setItem(KEY, '1');
-    
+
     const toast = document.createElement('div');
     toast.id = 'sound-toast';
     toast.style.cssText = `
@@ -4456,7 +4586,7 @@ function showSoundToast() {
         ">Entendi</button>
     `;
     document.body.appendChild(toast);
-    
+
     const close = () => {
         toast.style.opacity = '0';
         setTimeout(() => toast.remove(), 300);
@@ -4479,9 +4609,14 @@ const SkinStore = {
         { id: 'aurora', nome: 'Aurora Rose', precoBtc: 0.02050000, desc: 'Lilas com rosa neon e brilho boreal.' },
         { id: 'cyberpink', nome: 'Cyber Pink', precoBtc: 0.02150000, desc: 'Rosa choque com linhas ciano.' },
         { id: 'galaxy', nome: 'Galaxy Glow', precoBtc: 0.02250000, desc: 'Roxo profundo com estrelas cintilantes.' },
-        { id: 'goldpulse', nome: 'Gold Pulse', precoBtc: 0.02300000, desc: 'Ouro vibrante com pulso luminoso.' }
+        { id: 'goldpulse', nome: 'Gold Pulse', precoBtc: 0.02300000, desc: 'Ouro vibrante com pulso luminoso.' },
+        { id: 'grafite', nome: 'Grafite', precoBtc: 0.02400000, desc: 'Design minimalista, metálico e grafite escuro.' },
+        // Skins lendárias: só liberam em cadeia bronze -> prata -> ouro após comprar todas as anteriores
+        { id: 'bronze', nome: 'Bronze Prime', precoBtc: 0.03000000, desc: 'Tom metálico âmbar, brilho quente em todo o jogo.' },
+        { id: 'silver', nome: 'Silver Nova', precoBtc: 0.03300000, desc: 'Prata cintilante com reflexos frios cobrindo toda a interface.' },
+        { id: 'goldultimate', nome: 'Aurum Supreme', precoBtc: 0.03800000, desc: 'Ouro profundo e luminoso que tinge todos os elementos.' }
     ],
-    
+
     load() {
         try {
             const o = JSON.parse(localStorage.getItem(nsKey('skins_owned')) || '[]');
@@ -4492,12 +4627,12 @@ const SkinStore = {
         CoinStore.load();
         this.initTabs();
     },
-    
+
     save() {
         localStorage.setItem(nsKey('skins_owned'), JSON.stringify(Array.from(skinsOwned)));
         if (skinAtiva) localStorage.setItem(nsKey('skin_active'), skinAtiva);
     },
-    
+
     open() {
         const modal = document.getElementById('skins-modal');
         if (!modal) return;
@@ -4505,12 +4640,12 @@ const SkinStore = {
         CoinStore.render();
         modal.style.display = 'flex';
     },
-    
+
     close() {
         const modal = document.getElementById('skins-modal');
         if (modal) modal.style.display = 'none';
     },
-    
+
     render() {
         const list = document.getElementById('skins-list');
         if (!list) return;
@@ -4518,6 +4653,7 @@ const SkinStore = {
         this.skins.forEach(s => {
             const owned = skinsOwned.has(s.id);
             const active = skinAtiva === s.id;
+            const unlocked = this.isUnlocked(s.id);
             const card = document.createElement('div');
             card.className = 'skin-card';
             card.innerHTML = `
@@ -4526,15 +4662,17 @@ const SkinStore = {
                     <h4>${s.nome} ${active ? '✅' : ''}</h4>
                     <div style="font-size:0.9em; opacity:0.9;">${s.desc}</div>
                     <div style="margin-top:6px; color:#ffd180;">Preço: ${s.precoBtc.toFixed(8)} BTC</div>
+                    ${!unlocked ? `<div style="color:#ffcccb;font-size:0.9em;margin-top:4px;">Bloqueada: compre todas as skins anteriores.</div>` : ''}
                 </div>
                 <div class="skin-actions">
                     ${owned ? `<button class="skin-apply" data-apply="${s.id}">Usar</button>` :
-                        `<button class="skin-buy" data-buy="${s.id}">Comprar</button>`}
+                    unlocked ? `<button class="skin-buy" data-buy="${s.id}">Comprar</button>` :
+                        `<button class="skin-locked" disabled>Bloqueada</button>`}
                 </div>
             `;
             list.appendChild(card);
         });
-        
+
         list.querySelectorAll('[data-buy]').forEach(btn => {
             btn.onclick = () => this.buy(btn.getAttribute('data-buy'));
         });
@@ -4542,7 +4680,7 @@ const SkinStore = {
             btn.onclick = () => this.apply(btn.getAttribute('data-apply'));
         });
     },
-    
+
     previewColor(id) {
         if (id === 'neon') return 'linear-gradient(135deg, #00ffff, #ff00ff)';
         if (id === 'midnight') return 'linear-gradient(135deg, #071423, #0d2337 60%, #040b13)';
@@ -4554,7 +4692,22 @@ const SkinStore = {
         if (id === 'cyberpink') return 'linear-gradient(135deg, #ff3cac 0%, #784ba0 50%, #2b86c5 100%)';
         if (id === 'galaxy') return 'radial-gradient(circle at 30% 30%, #ffe1ff, #7a1fa2 40%, #0b1021)';
         if (id === 'goldpulse') return 'linear-gradient(135deg, #ffdd55, #ff8800)';
+        if (id === 'grafite') return 'linear-gradient(135deg, #3a3f47, #1b1d22)';
+        if (id === 'bronze') return 'linear-gradient(135deg, #8c6239, #d6a36a)';
+        if (id === 'silver') return 'linear-gradient(135deg, #b9c4d9, #e8ecf5)';
+        if (id === 'goldultimate') return 'linear-gradient(135deg, #c4952f, #f8d775)';
         return '#888';
+    },
+
+    isUnlocked(id) {
+        // Ordem: comprar todas as skins comuns -> libera Bronze -> libera Silver -> libera Gold Ultimate
+        if (id === 'bronze') {
+            const comuns = this.skins.filter(s => !['bronze', 'silver', 'goldultimate'].includes(s.id));
+            return comuns.every(s => skinsOwned.has(s.id));
+        }
+        if (id === 'silver') return skinsOwned.has('bronze');
+        if (id === 'goldultimate') return skinsOwned.has('silver');
+        return true;
     },
 
     initTabs() {
@@ -4580,7 +4733,7 @@ const SkinStore = {
             };
         });
     },
-    
+
     checkSkinsAchievement() {
         if (!RankingSystem || !RankingSystem.getCurrentPlayerName) return;
         if (skinsOwned.size !== this.skins.length) return;
@@ -4596,10 +4749,14 @@ const SkinStore = {
             mostrarMensagemLateral('🎖️ Colecionador de Skins: comprou todas!', 'bonus', 3500);
         }
     },
-    
+
     buy(id) {
         const skin = this.skins.find(s => s.id === id);
         if (!skin) return;
+        if (!this.isUnlocked(id)) {
+            alert('Esta skin só libera após comprar todas as anteriores na ordem bronze → prata → ouro.');
+            return;
+        }
         if (skinsOwned.has(id)) { this.apply(id); return; }
         if (bitcoinQuantity < skin.precoBtc) {
             alert('BTC insuficiente para comprar esta skin.');
@@ -4615,7 +4772,7 @@ const SkinStore = {
         mostrarMensagemLateral(`🎨 Skin comprada: ${skin.nome}`, 'bonus', 2500);
         this.checkSkinsAchievement();
     },
-    
+
     apply(id, persist = true) {
         document.body.setAttribute('data-skin', id);
         skinAtiva = id;
@@ -4667,7 +4824,7 @@ function initGameChat() {
     const hint = document.getElementById('chat-hint');
     const header = document.getElementById('chat-header');
     if (!toggle || !box || !closeBtn || !input || !sendBtn || !list) return;
-    
+
     const name = ensureChatUsername();
     if (header) header.querySelector('span').textContent = `Chat do Jogo (Você: ${name})`;
     if (hint) hint.textContent = 'Digite ? para dicas automáticas; mensagens comuns são vistas por quem estiver em outras abas/janela.';
@@ -4679,7 +4836,7 @@ function initGameChat() {
         list.appendChild(div);
         list.scrollTop = list.scrollHeight;
     };
-    
+
     const dicasRapidas = [
         'Use “Usar e Enviar” no decodificador para copiar direto para a resposta.',
         'Se errar duas vezes, o jogo mostra uma dica automática no campo de resultado.',
@@ -4689,7 +4846,7 @@ function initGameChat() {
         'Lives baixas? Priorize problemas tipo ASCII ou Base64, costumam ser mais curtos.',
         'Complete todos os verbetes da enciclopédia para ganhar a conquista 📚 Mente Enciclopédica.'
     ];
-    
+
     const quickReply = (text) => {
         const lower = text.toLowerCase();
         const difLabel = dificuldadeAtual?.toUpperCase?.() || 'FÁCIL';
@@ -4699,7 +4856,7 @@ function initGameChat() {
         const tipo = problemaAtual?.tipo || 'cesar/ascii/base64';
         const erros = errosConsecutivos || 0;
         const contexto = `Dificuldade: ${difLabel} | Vidas: ${vidasInfo} | Bloco: ${blocoInfo} | Tempo: ${tempo} | Tipo atual: ${tipo}`;
-        
+
         if (lower.includes('regra') || lower.includes('como joga') || lower.includes('objetivo')) {
             return `Objetivo: quebrar ${TamMax} blocos resolvendo o enigma criptográfico. Use o decodificador (César, ASCII ou Base64) para achar a resposta, clique “Usar e Enviar” e valide. Cada acerto minera um bloco e registra hash. ${contexto}`;
         }
@@ -4779,19 +4936,19 @@ function initGameChat() {
             addMsg(`<strong>${label}:</strong> ${m.text}`, cls);
         });
     };
-    
+
     const sendPlayerMessage = (text) => {
         const msgs = loadChatMessages();
         msgs.push({ from: name, text, ts: Date.now() });
         saveChatMessages(msgs);
         renderMessages();
     };
-    
+
     const handleSend = () => {
         const text = input.value.trim();
         if (!text) return;
         input.value = '';
-        
+
         // Se começar com ?, trata como pedido ao bot
         if (text.startsWith('?')) {
             addMsg(`<strong>${name}:</strong> ${text.slice(1)}`, 'user');
@@ -4800,29 +4957,29 @@ function initGameChat() {
             }, 200);
             return;
         }
-        
+
         sendPlayerMessage(text);
         // Mesmo sem '?', o BOT responde com orientação contextual
         setTimeout(() => {
             addMsg(`<strong>BOT:</strong> ${quickReply(text)}`, 'bot');
         }, 180);
     };
-    
+
     toggle.onclick = () => {
         const open = box.style.display === 'flex';
         box.style.display = open ? 'none' : 'flex';
         if (!open) input.focus();
     };
-    
+
     closeBtn.onclick = () => box.style.display = 'none';
     sendBtn.onclick = handleSend;
     input.addEventListener('keydown', (e) => {
         if (e.key === 'Enter') handleSend();
     });
-    
+
     addMsg('Bem-vindo ao chat! Digite normalmente para falar com outros jogadores (outras abas). Use ?texto para falar com o BOT.', 'bot');
     renderMessages();
-    
+
     window.addEventListener('storage', (e) => {
         if (e.key && e.key.endsWith(CHAT_STORAGE_KEY)) renderMessages();
     });
@@ -4839,59 +4996,59 @@ function copiarResultadoDecod() {
     }
 }
 
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
     Auth.load();
     updateProfileUI();
     migrateLegacyData();
-    
+
     // Configurações iniciais
     document.getElementById('problem-container').style.display = 'none';
     document.getElementById('hash-log').style.display = 'none';
     document.getElementById('game-container').style.display = 'none';
     document.getElementById('tipo-indicador').style.display = 'none';
-    
+
     // Event listener para Enter
     const answerInput = document.getElementById('answer');
     if (answerInput) {
-        answerInput.addEventListener('keydown', function(e) {
+        answerInput.addEventListener('keydown', function (e) {
             if (e.key === 'Enter' && typeof submitAnswer === 'function') submitAnswer();
         });
     }
-    
+
     // Inicializar sistemas
     updateVidasDisplay();
     CryptoEncyclopedia.init();
     BitcoinPriceWidget.init();
     RankingSystem.init();
     SoundSystem.init();
-    
+
     // Sliders do decodificador
     buildAlignedRulers();
-    
+
     const sliderFacil = document.getElementById('decod-facil-shift');
     if (sliderFacil) {
-        sliderFacil.addEventListener('input', function(e) {
+        sliderFacil.addEventListener('input', function (e) {
             document.getElementById('decod-facil-shift-value').textContent = e.target.value;
         });
     }
-    
+
     const sliderMedio = document.getElementById('decod-medio-shift');
     if (sliderMedio) {
-        sliderMedio.addEventListener('input', function(e) {
+        sliderMedio.addEventListener('input', function (e) {
             document.getElementById('decod-medio-shift-value').textContent = e.target.value;
         });
     }
-    
+
     const sliderDificil = document.getElementById('decod-dificil-shift');
     if (sliderDificil) {
-        sliderDificil.addEventListener('input', function(e) {
+        sliderDificil.addEventListener('input', function (e) {
             document.getElementById('decod-dificil-shift-value').textContent = e.target.value;
         });
     }
-    
+
     // Chat interativo local
     initGameChat();
-    
+
     // Loja de skins
     SkinStore.load();
     const skinsBtn = document.getElementById('skins-toggle');
@@ -4910,8 +5067,8 @@ document.addEventListener('DOMContentLoaded', function() {
     const walletAccrue = document.getElementById('wallet-accrue');
     const walletInput = document.getElementById('wallet-amount');
     if (walletDeposit && walletInput) walletDeposit.onclick = () => Wallet.deposit(walletInput.value);
-        if (walletWithdraw && walletInput) walletWithdraw.onclick = () => Wallet.withdraw(walletInput.value);
-        if (walletAccrue) walletAccrue.onclick = () => { Wallet.accrue(); Wallet.render(); mostrarMensagemLateral('Rendimento atualizado!', 'bonus', 1800); };
+    if (walletWithdraw && walletInput) walletWithdraw.onclick = () => Wallet.withdraw(walletInput.value);
+    if (walletAccrue) walletAccrue.onclick = () => { Wallet.accrue(); Wallet.render(); mostrarMensagemLateral('Rendimento atualizado!', 'bonus', 1800); };
 
     // Conquistas (visual)
     const achBtn = document.getElementById('achievements-toggle');
@@ -4944,38 +5101,38 @@ document.addEventListener('DOMContentLoaded', function() {
     if (!currentUser && profileModal) {
         setTimeout(() => { profileModal.style.display = 'flex'; }, 600);
     }
-    
+
     // Aviso rápido de som (exibe uma vez)
     setTimeout(showSoundToast, 400);
-    
+
     // Esconder enciclopédia após 500ms
     setTimeout(() => {
         const enc = document.getElementById('crypto-encyclopedia');
         if (enc) enc.style.display = 'none';
     }, 500);
-    
+
     startHomeBubbles();
 
     // Criar menu se não existir
     if (!document.getElementById('main-menu')) criarMenu();
-    
+
     // Inicializar contador de visitas
     inicializarContadorVisitas();
-    
+
     // NOVO: Criar botão de encerrar
     criarBotaoEncerrar();
-    
+
     // NOVO: Verificar se há jogo salvo
     setTimeout(() => {
         const temSave = localStorage.getItem(getSaveKey());
-        
+
         if (temSave) {
             // Perguntar se quer continuar
             const continuar = confirm('🔄 Há um jogo em andamento salvo!\n\nDeseja continuar de onde parou?');
-            
+
             if (continuar) {
                 carregarJogoSalvo();
-                
+
                 // Mostrar botão de encerrar
                 const btnEncerrar = document.getElementById('btn-encerrar');
                 if (btnEncerrar) btnEncerrar.style.display = 'block';
@@ -4992,31 +5149,31 @@ function preencherTextoAtual() {
         alert('⚠️ Nenhum problema ativo no momento. Inicie uma partida primeiro!');
         return false;
     }
-    
+
     const textoCifrado = problemaAtual.textoCifrado;
-    
+
     const nivelAtivo = document.querySelector('.decod-conteudo[style*="display: block"]')?.id;
-    
+
     if (!nivelAtivo) return false;
-    
+
     if (nivelAtivo === 'decod-facil') {
         document.getElementById('decod-facil-input').value = textoCifrado;
-        
+
     } else if (nivelAtivo === 'decod-medio') {
         const metodoCesar = document.getElementById('decod-medio-cesar').style.display !== 'none';
         const metodoAscii = document.getElementById('decod-medio-ascii').style.display !== 'none';
-        
+
         if (metodoCesar) {
             document.getElementById('decod-medio-cesar-input').value = textoCifrado;
         } else if (metodoAscii && problemaAtual.tipo === 'ascii') {
             document.getElementById('decod-medio-ascii-input').value = textoCifrado;
         }
-        
+
     } else if (nivelAtivo === 'decod-dificil') {
         const metodoCesar = document.getElementById('decod-dificil-cesar').style.display !== 'none';
         const metodoAscii = document.getElementById('decod-dificil-ascii').style.display !== 'none';
         const metodoBase64 = document.getElementById('decod-dificil-base64').style.display !== 'none';
-        
+
         if (metodoCesar) {
             document.getElementById('decod-dificil-cesar-input').value = textoCifrado;
         } else if (metodoAscii && problemaAtual.tipo === 'ascii') {
@@ -5025,38 +5182,38 @@ function preencherTextoAtual() {
             document.getElementById('decod-dificil-base64-input').value = textoCifrado;
         }
     }
-    
+
     return true;
 }
 
 function usarResultadoNoJogo() {
     const resultado = document.getElementById('decod-resultado').innerText;
-    
+
     if (!resultado || resultado.includes('Aguardando') || resultado.includes('⚠️') || resultado.includes('❌')) {
         alert('❌ Nenhum resultado válido para usar!');
         return;
     }
-    
+
     if (jogoConcluido || vidas <= 0) {
         alert('❌ O jogo não está ativo no momento!');
         return;
     }
-    
+
     const answerInput = document.getElementById('answer');
     if (answerInput) {
         answerInput.value = resultado;
-        
+
         answerInput.style.borderColor = '#4CAF50';
         answerInput.style.boxShadow = '0 0 20px rgba(76,175,80,0.5)';
         setTimeout(() => {
             answerInput.style.borderColor = '';
             answerInput.style.boxShadow = '';
         }, 1500);
-        
+
         answerInput.focus();
-        
+
         if (SoundSystem) SoundSystem.correct();
-        
+
         const resultadoDiv = document.getElementById('decod-resultado');
         const msgSucesso = document.createElement('div');
         msgSucesso.style.cssText = `
@@ -5070,7 +5227,7 @@ function usarResultadoNoJogo() {
         `;
         msgSucesso.textContent = '✅ Resposta copiada para o jogo!';
         resultadoDiv.parentElement.appendChild(msgSucesso);
-        
+
         setTimeout(() => {
             if (msgSucesso.parentElement) msgSucesso.remove();
         }, 2000);
@@ -5080,40 +5237,51 @@ function usarResultadoNoJogo() {
 function atualizarDecodificadorComProblema() {
     const modal = document.getElementById('decodificador-modal');
     if (!modal || modal.style.display !== 'flex') return;
-    
+
     if (!problemaAtual) {
         document.getElementById('decod-resultado').innerHTML = '⚠️ Nenhum problema ativo. Inicie uma partida!';
         return;
     }
-    
+
     document.getElementById('decod-resultado').innerHTML = 'Aguardando decodificação...';
-    
+
+    const chaveElement = document.getElementById('decodificador-chave');
+    const chaveValorElement = document.getElementById('decodificador-chave-valor');
+    if (chaveElement && chaveValorElement) {
+        if (problemaAtual.tipo === 'cesar' && problemaAtual.chave !== undefined) {
+            chaveValorElement.textContent = `${Math.abs(problemaAtual.chave)}${problemaAtual.chave > 0 ? ' →' : ' ←'}`;
+            chaveElement.style.display = 'block';
+        } else {
+            chaveElement.style.display = 'none';
+        }
+    }
+
     const textoCifrado = problemaAtual.textoCifrado;
-    
+
     const nivelAtivo = document.querySelector('.decod-conteudo[style*="display: block"]')?.id;
-    
+
     if (!nivelAtivo) return;
-    
+
     console.log(`🔄 Atualizando decodificador com: ${textoCifrado}`);
-    
+
     if (nivelAtivo === 'decod-facil') {
         document.getElementById('decod-facil-input').value = textoCifrado;
-        
+
     } else if (nivelAtivo === 'decod-medio') {
         const metodoCesar = document.getElementById('decod-medio-cesar').style.display !== 'none';
         const metodoAscii = document.getElementById('decod-medio-ascii').style.display !== 'none';
-        
+
         if (metodoCesar) {
             document.getElementById('decod-medio-cesar-input').value = textoCifrado;
         } else if (metodoAscii && problemaAtual.tipo === 'ascii') {
             document.getElementById('decod-medio-ascii-input').value = textoCifrado;
         }
-        
+
     } else if (nivelAtivo === 'decod-dificil') {
         const metodoCesar = document.getElementById('decod-dificil-cesar').style.display !== 'none';
         const metodoAscii = document.getElementById('decod-dificil-ascii').style.display !== 'none';
         const metodoBase64 = document.getElementById('decod-dificil-base64').style.display !== 'none';
-        
+
         if (metodoCesar) {
             document.getElementById('decod-dificil-cesar-input').value = textoCifrado;
         } else if (metodoAscii && problemaAtual.tipo === 'ascii') {
@@ -5132,10 +5300,10 @@ let modoTesteAtivo = false;
 
 function toggleModoTeste() {
     modoTesteAtivo = !modoTesteAtivo;
-    
+
     const status = modoTesteAtivo ? 'ATIVADO' : 'DESATIVADO';
     const cor = modoTesteAtivo ? '#4CAF50' : '#f44336';
-    
+
     let indicador = document.getElementById('modo-teste-indicador');
     if (!indicador) {
         indicador = document.createElement('div');
@@ -5157,12 +5325,12 @@ function toggleModoTeste() {
         indicador.onclick = toggleModoTeste;
         document.body.appendChild(indicador);
     }
-    
+
     indicador.style.background = cor;
     indicador.innerHTML = `🧪 MODO TESTE ${status}`;
-    
+
     console.log(`🧪 Modo teste ${status}`);
-    
+
     if (SoundSystem) SoundSystem.click();
 }
 
@@ -5174,24 +5342,24 @@ let ultimosHashes = [];
 
 function gerarBlocoRealista(numeroBloco, texto = '') {
     // Hash anterior (do último bloco, ou genesis se for o primeiro)
-    const hashAnterior = ultimosHashes.length > 0 
-        ? ultimosHashes[ultimosHashes.length - 1].hash 
+    const hashAnterior = ultimosHashes.length > 0
+        ? ultimosHashes[ultimosHashes.length - 1].hash
         : '0000000000000000000000000000000000000000'; // Genesis hash (64 chars)
-    
+
     // Gerar nonce aleatório (entre 0 e 4294967295 - 32 bits)
     const nonce = Math.floor(Math.random() * 4294967295);
-    
+
     // Timestamp atual em segundos (Unix timestamp)
     const timestamp = Math.floor(Date.now() / 1000);
-    
+
     // Dificuldade simulada (número de zeros à esquerda no hash)
     const dificuldade = 4; // 4 zeros = dificuldade baixa
-    
+
     // Simular mineração: encontrar um hash com zeros à esquerda
     let hash = '';
     let tentativas = 0;
     const maxTentativas = 5000; // Evitar loop infinito
-    
+
     const gerarHexAleatorio = (len) => {
         let s = '';
         for (let i = 0; i < len; i++) {
@@ -5199,7 +5367,7 @@ function gerarBlocoRealista(numeroBloco, texto = '') {
         }
         return s;
     };
-    
+
     do {
         tentativas++;
         // Gera um hash pseudo-aleatório de 64 chars hex
@@ -5207,15 +5375,15 @@ function gerarBlocoRealista(numeroBloco, texto = '') {
         // Garante zeros à esquerda conforme dificuldade
         hash = '0'.repeat(dificuldade) + base.slice(dificuldade, 64);
     } while (hash.substring(0, dificuldade) !== '0'.repeat(dificuldade) && tentativas < maxTentativas);
-    
+
     // Formatar hash em grupos de 2 caracteres para melhor visualização
     const hashFormatado = hash.match(/.{1,2}/g).join(' ');
-    
+
     // Calcular merkle root (simulado)
-    const merkleRoot = Array(8).fill(0).map(() => 
+    const merkleRoot = Array(8).fill(0).map(() =>
         Math.floor(Math.random() * 65536).toString(16).padStart(4, '0')
     ).join(' ');
-    
+
     const bloco = {
         numero: numeroBloco,
         hashAnterior: hashAnterior,
@@ -5228,21 +5396,21 @@ function gerarBlocoRealista(numeroBloco, texto = '') {
         transacoes: Math.floor(Math.random() * 1000) + 500, // 500 a 1500 transações
         minerador: ['AntPool', 'F2Pool', 'ViaBTC', 'Binance Pool', 'Foundry USA'][Math.floor(Math.random() * 5)]
     };
-    
+
     // Armazenar para próximo bloco (apenas o hash, sem formatação)
-    ultimosHashes.push({ 
-        numero: numeroBloco, 
+    ultimosHashes.push({
+        numero: numeroBloco,
         hash: hash // hash sem formatação
     });
-    
+
     // Manter apenas últimos 20 hashes na memória
     if (ultimosHashes.length > 20) {
         ultimosHashes.shift();
     }
-    
+
     // Registrar no histórico completo (para recriar a cadeia ao retomar)
     blockchainHistory.push(bloco);
-    
+
     return bloco;
 }
 
@@ -5252,7 +5420,7 @@ function gerarBlocoRealista(numeroBloco, texto = '') {
 function adicionarBlocoRealista(bloco) {
     const cadeia = document.getElementById('blockchain-cadeia');
     if (!cadeia) return;
-    
+
     const blocoDiv = document.createElement('div');
     blocoDiv.className = 'bloco-blockchain';
     blocoDiv.setAttribute('data-numero', bloco.numero);
@@ -5271,11 +5439,11 @@ function adicionarBlocoRealista(bloco) {
         animation: novoBloco 0.5s ease-out;
         border-left: 6px solid #f7931a;
     `;
-    
+
     // Determinar cor baseada na dificuldade
-    const corDestaque = dificuldadeAtual === 'facil' ? '#4CAF50' : 
-                       dificuldadeAtual === 'medio' ? '#FF9800' : '#f44336';
-    
+    const corDestaque = dificuldadeAtual === 'facil' ? '#4CAF50' :
+        dificuldadeAtual === 'medio' ? '#FF9800' : '#f44336';
+
     blocoDiv.innerHTML = `
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; padding-bottom: 10px; border-bottom: 2px solid rgba(255,255,255,0.1);">
             <div style="display: flex; align-items: center; gap: 10px;">
@@ -5329,19 +5497,19 @@ function adicionarBlocoRealista(bloco) {
             🔒 ${bloco.hash.substring(0, 10)}... ${bloco.hash.substring(bloco.hash.length - 10)}
         </div>
     `;
-    
+
     // Inserir no TOPO (bloco mais recente primeiro)
     if (cadeia.firstChild) {
         cadeia.insertBefore(blocoDiv, cadeia.firstChild);
     } else {
         cadeia.appendChild(blocoDiv);
     }
-    
+
     // Manter apenas os 15 blocos mais recentes
     while (cadeia.children.length > 15) {
         cadeia.removeChild(cadeia.lastChild);
     }
-    
+
     // Debug
     console.log(`✅ Bloco #${bloco.numero} minerado:`, {
         hash: bloco.hash,
@@ -5376,17 +5544,17 @@ async function gerarHashSHA256(dados) {
 function updateHashLog(blockNumber) {
     // Gerar bloco realista com hash hexadecimal
     const bloco = gerarBlocoRealista(blockNumber, problemaAtual?.textoCifrado || '');
-    
+
     // Adicionar à blockchain visual
     adicionarBlocoRealista(bloco);
-    
+
     // Também manter o log simples (opcional)
     const hashDisplay = document.getElementById('hash-display');
     if (hashDisplay) {
         if (hashDisplay.textContent.trim() === "Nenhum bloco quebrado ainda.") {
             hashDisplay.innerHTML = '';
         }
-        
+
         const el = document.createElement('div');
         el.className = 'hash-box';
         el.style.cssText = `
@@ -5400,7 +5568,7 @@ function updateHashLog(blockNumber) {
             color: #00ff00;
             box-shadow: 0 2px 10px rgba(247,147,26,0.2);
         `;
-        
+
         // Mostrar informações resumidas
         el.innerHTML = `
             <div style="display: flex; justify-content: space-between;">
@@ -5409,14 +5577,14 @@ function updateHashLog(blockNumber) {
             </div>
             <div style="font-size: 0.8em; color: #4CAF50;">${bloco.hash}</div>
         `;
-        
+
         // Inserir no topo
         if (hashDisplay.firstChild) {
             hashDisplay.insertBefore(el, hashDisplay.firstChild);
         } else {
             hashDisplay.appendChild(el);
         }
-        
+
         // Manter apenas últimos 8
         while (hashDisplay.children.length > 8) {
             hashDisplay.removeChild(hashDisplay.lastChild);
@@ -5425,18 +5593,18 @@ function updateHashLog(blockNumber) {
 }
 
 const startGameOriginal = startGame;
-startGame = function(difficulty) {
+startGame = function (difficulty) {
     const wasLogged = !!currentUser;
     startGameOriginal(difficulty);
     if (!currentUser || !wasLogged) return; // não iniciar timers se não logou
-    
+
     setTimeout(() => {
         if (!currentUser) return;
         if (typeof iniciarTimerGlobal === 'function') {
             iniciarTimerGlobal(true); // reseta para novo jogo
             console.log('⏱️ Timer reiniciado após startGame');
         }
-        
+
         const tempoDisplay = document.getElementById('tempo-global');
         if (tempoDisplay) {
             tempoDisplay.style.display = 'flex';
@@ -5445,15 +5613,15 @@ startGame = function(difficulty) {
 };
 
 if (typeof iniciarTimerGlobal !== 'function') {
-    iniciarTimerGlobal = function() {
+    iniciarTimerGlobal = function () {
         if (timerGlobalInterval) clearInterval(timerGlobalInterval);
-        
+
         tempoInicioPartida = Date.now();
-        
+
         timerGlobalInterval = setInterval(() => {
             if (!jogoConcluido) {
                 tempoTotalPartida = Math.floor((Date.now() - tempoInicioPartida) / 1000);
-                
+
                 const tempoDisplay = document.getElementById('tempo-global');
                 if (tempoDisplay) {
                     const mins = Math.floor(tempoTotalPartida / 60);
@@ -5486,31 +5654,42 @@ setInterval(() => {
 
 function forcarPreenchimentoDecodificador() {
     if (!problemaAtual) return;
-    
+
     const textoCifrado = problemaAtual.textoCifrado;
     if (!textoCifrado) return;
-    
+
     console.log('🔄 Forçando preenchimento do decodificador com:', textoCifrado);
-    
+
+    const chaveElement = document.getElementById('decodificador-chave');
+    const chaveValorElement = document.getElementById('decodificador-chave-valor');
+    if (chaveElement && chaveValorElement) {
+        if (problemaAtual.tipo === 'cesar' && problemaAtual.chave !== undefined) {
+            chaveValorElement.textContent = `${Math.abs(problemaAtual.chave)}${problemaAtual.chave > 0 ? ' →' : ' ←'}`;
+            chaveElement.style.display = 'block';
+        } else {
+            chaveElement.style.display = 'none';
+        }
+    }
+
     const facilInput = document.getElementById('decod-facil-input');
     if (facilInput) facilInput.value = textoCifrado;
-    
+
     const medioCesarInput = document.getElementById('decod-medio-cesar-input');
     if (medioCesarInput) medioCesarInput.value = textoCifrado;
-    
+
     const medioAsciiInput = document.getElementById('decod-medio-ascii-input');
     if (medioAsciiInput && problemaAtual.tipo === 'ascii') {
         medioAsciiInput.value = textoCifrado;
     }
-    
+
     const dificilCesarInput = document.getElementById('decod-dificil-cesar-input');
     if (dificilCesarInput) dificilCesarInput.value = textoCifrado;
-    
+
     const dificilAsciiInput = document.getElementById('decod-dificil-ascii-input');
     if (dificilAsciiInput && problemaAtual.tipo === 'ascii') {
         dificilAsciiInput.value = textoCifrado;
     }
-    
+
     const dificilBase64Input = document.getElementById('decod-dificil-base64-input');
     if (dificilBase64Input && problemaAtual.tipo === 'base64') {
         dificilBase64Input.value = textoCifrado;
@@ -5518,9 +5697,9 @@ function forcarPreenchimentoDecodificador() {
 }
 
 const displayNextProblemOriginal = displayNextProblem;
-displayNextProblem = function() {
+displayNextProblem = function () {
     if (displayNextProblemOriginal) displayNextProblemOriginal();
-    
+
     const modal = document.getElementById('decodificador-modal');
     if (modal && modal.style.display === 'flex') {
         setTimeout(() => {
@@ -5531,24 +5710,24 @@ displayNextProblem = function() {
 
 function usarResultadoEEnviar() {
     const resultado = document.getElementById('decod-resultado').innerText;
-    
+
     if (!resultado || resultado.includes('Aguardando') || resultado.includes('⚠️') || resultado.includes('❌')) {
         alert('❌ Nenhum resultado válido para usar!');
         return;
     }
-    
+
     if (jogoConcluido || vidas <= 0) {
         alert('❌ O jogo não está ativo no momento!');
         return;
     }
-    
+
     const answerInput = document.getElementById('answer');
     if (answerInput) {
         answerInput.value = resultado;
-        
+
         answerInput.style.borderColor = '#4CAF50';
         answerInput.style.boxShadow = '0 0 20px rgba(76,175,80,0.5)';
-        
+
         const msgSucesso = document.createElement('div');
         msgSucesso.style.cssText = `
             position: fixed;
@@ -5567,13 +5746,13 @@ function usarResultadoEEnviar() {
         `;
         msgSucesso.textContent = '✅ RESPOSTA ENVIADA!';
         document.body.appendChild(msgSucesso);
-        
+
         setTimeout(() => msgSucesso.remove(), 1500);
-        
+
         setTimeout(() => {
             submitAnswer();
         }, 300);
-        
+
         if (SoundSystem) SoundSystem.correct();
     }
 }
@@ -5585,7 +5764,7 @@ console.log(`💰 Bitcoin atual: ${bitcoinQuantity.toFixed(8)} BTC`);
 
 function testarConquista() {
     console.log('🧪 Testando conquista...');
-    
+
     const metaTeste = {
         id: 'velocidade_5',
         nome: '⚡ Minerador Relâmpago (Teste)',
@@ -5593,13 +5772,13 @@ function testarConquista() {
         descricao: 'Teste de conquista',
         recompensa: { pontos: 500, bitcoin: 0.00000200, titulo: 'Minerador Relâmpago' }
     };
-    
+
     alcançarMeta(metaTeste);
 }
 // Intercepte o evento de teclado
 document.addEventListener("keydown", (e) => {
-  if (e.key === "F5") {
-    e.preventDefault(); // Impede o recarregamento
-    //alert("Use o botão de salvar do jogo!");
-  }
+    if (e.key === "F5") {
+        e.preventDefault(); // Impede o recarregamento
+        //alert("Use o botão de salvar do jogo!");
+    }
 });
