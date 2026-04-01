@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>JogoBitcoin Mobile - Mineração Otimizada</title>
+    <script>
+        // Detecção automática de PC
+        (function() {
+            const urlParams = new URLSearchParams(window.location.search);
+            if (urlParams.get('v') !== 'mobile' && window.innerWidth >= 1024) {
+                window.location.replace('index.html');
+            }
+        })();
+    </script>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Inter:wght@400;700;800&display=swap" rel="stylesheet">
+    <!-- Estilos Originais de Desktop (apenas base) -->
+    <link rel="stylesheet" href="styles.css">
+    <!-- Estilos Exclusivos Mobile -->
+    <link rel="stylesheet" href="mobile.css">
+</head>
+<body class="tab-game">
+    <!-- Overlay de Carregamento -->
+    <div id="loading-overlay" style="position:fixed; inset:0; background:#000; z-index:99999; display:flex; justify-content:center; align-items:center; color:#00ffff; font-family:'Share Tech Mono';">
+        CARREGANDO AMBIENTE MOBILE...
+    </div>
+
+    <!-- Header Mobile Compacto -->
+    <header id="top-header">
+        <div style="font-weight: 800; color: #00ffff; font-size: 1.1em;">JOGOBITCOIN</div>
+        <div id="bitcoin-value">Carregando...</div>
+    </header>
+
+    <!-- Navegação por Abas (Mudar de Contexto) -->
+    <nav id="mobile-nav">
+        <button onclick="switchMobileTab('game')" class="mobile-tab-btn active" data-tab="game">🎮 Jogo</button>
+        <button onclick="switchMobileTab('history')" class="mobile-tab-btn" data-tab="history">📜 Histórico</button>
+        <button onclick="switchMobileTab('blockchain')" class="mobile-tab-btn" data-tab="blockchain">⛓️ Chain</button>
+        <button onclick="switchMobileTab('config')" class="mobile-tab-btn" data-tab="config">⚙️ Ajustes</button>
+    </nav>
+
+    <main id="mobile-main-content">
+        <!-- TELA DE JOGO (TAB: game) -->
+        <div class="mobile-section" id="section-game">
+            <div id="game-container">
+                <div class="score-container" style="display:flex; justify-content:center; gap:20px; width:100%; margin-bottom:10px;">
+                    <div>Score: <span id="score-display">0</span></div>
+                    <div id="vidas-container"></div>
+                </div>
+                <div id="blocks-container"></div>
+            </div>
+
+            <div id="problem-container">
+                <div id="mining-status-mobile">
+                    <div class="mining-coin-info">
+                        <img id="mobile-current-coin-logo" src="" alt="" style="width:20px;">
+                        <span id="mobile-current-coin-name">---</span>
+                    </div>
+                    <div class="mining-block-info">Bloco: <span id="mobile-current-block-num">#0</span></div>
+                </div>
+                <div id="problema-texto" style="font-size: 1.2em; text-align:center; margin:10px 0;">Aguardando...</div>
+                
+                <div id="mobile-quick-tool">
+                    <div style="display:flex; align-items:center; gap:10px; margin-bottom:5px;">
+                        <span style="font-size:0.8em; color:#888;">Girar:</span>
+                        <input type="range" id="quick-shift-slider" min="-25" max="25" value="3" oninput="updateQuickDecrypt()" style="flex:1;">
+                        <span id="quick-shift-val" style="background:#00ffff; color:#000; padding:2px 8px; border-radius:10px;">3</span>
+                    </div>
+                    <div id="quick-decrypt-result" style="font-family:monospace; color:#00ff00; background:rgba(0,0,0,0.4); padding:5px; border-radius:5px; text-align:center; min-height:24px;"></div>
+                    <button onclick="applyQuickDecrypt()" style="width:100%; background:linear-gradient(135deg, #00ffff, #0088aa); color:black; font-weight:bold; height:40px; border:none; border-radius:8px; margin-top:5px;">✅ USAR RESPOSTA</button>
+                </div>
+
+                <input type="text" id="answer" placeholder="Resposta Manual..." style="width:100%; height:45px; margin-top:10px;">
+                <div style="display:flex; gap:10px; margin-top:10px;">
+                    <button id="submit-button" onclick="submeterResposta()" style="flex:1; background:#4CAF50; height:45px; border:none; border-radius:8px; color:white; font-weight:bold;">ENVIAR</button>
+                    <button onclick="pularProblema()" style="background:#ff4444; width:50px; border-radius:8px; border:none; color:white;">⏭️</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- OUTRAS SEÇÕES (Placeholder para o Script gerenciar) -->
+        <div class="mobile-section" id="section-history" style="display:none; padding:20px;">
+            <h2 style="color:#ffaa00;">📜 Histórico</h2>
+            <div id="history-container"></div>
+        </div>
+
+        <div class="mobile-section" id="section-blockchain" style="display:none; padding:20px;">
+            <h2 style="color:#00ffff;">⛓️ Blockchain</h2>
+            <div id="hash-log"></div>
+        </div>
+
+        <div class="mobile-section" id="section-config" style="display:none; padding:20px;">
+             <h2 style="color:#ffaa00;">⚙️ Configurações</h2>
+             <button onclick="resetGame()" style="width:100%; padding:15px; background:#f44336; border:none; border-radius:8px; color:white; font-weight:bold; margin-bottom:10px;">REINICIAR JOGO</button>
+             <button onclick="window.location.href='index.html?v=desktop'" style="width:100%; padding:15px; background:#2196F3; border:none; border-radius:8px; color:white; font-weight:bold;">VERSÃO DESKTOP</button>
+        </div>
+    </main>
+
+    <!-- Barra de Ferramentas Inferior -->
+    <div id="mobile-action-bar">
+        <div class="action-group">
+            <button onclick="toggleChat()">💬</button>
+            <button onclick="toggleSkins()">🎨</button>
+        </div>
+        <div class="action-group center">
+            <button onclick="ativarCirculoCesar()" class="tool-btn-mobile">🔄</button>
+            <button onclick="abrirDecodificador()" class="tool-btn-mobile">🔧</button>
+        </div>
+        <div class="action-group">
+            <button onclick="toggleWallet()">💰</button>
+            <button onclick="toggleProfile()">👤</button>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="script.js"></script>
+    <script>
+        // Inicialização Mobile
+        window.addEventListener('load', () => {
+            document.getElementById('loading-overlay').fadeOut();
+            // Garante que o jogo comece na dificuldade salva ou padrão
+            if (!jogoAtivo) startGame('medio');
+        });
+
+        Element.prototype.fadeOut = function() {
+            this.style.opacity = '1';
+            this.style.transition = 'opacity 0.5s ease';
+            this.style.opacity = '0';
+            setTimeout(() => this.style.display = 'none', 500);
+        }
+
+        function switchMobileTab(tab) {
+            document.querySelectorAll('.mobile-section').forEach(s => s.style.display = 'none');
+            document.querySelectorAll('.mobile-tab-btn').forEach(b => b.classList.remove('active'));
+            
+            document.getElementById('section-' + tab).style.display = 'block';
+            document.querySelector(`[data-tab="${tab}"]`).classList.add('active');
+        }
+    </script>
+</body>
+</html>

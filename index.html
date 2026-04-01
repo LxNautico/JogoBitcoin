@@ -4,6 +4,15 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>₿ JogoBitcoin - Blockchain Educacional</title>
+    <script>
+        // Detecção automática de Mobile
+        (function() {
+            const urlParams = new URLSearchParams(window.location.search);
+            if (urlParams.get('v') !== 'desktop' && window.innerWidth < 1024) {
+                window.location.replace('index_mobile.html');
+            }
+        })();
+    </script>
     <link rel="stylesheet" href="styles.css">
     <style>
         /* APENAS CORES MODERNAS - MESMA ESTRUTURA */
@@ -782,6 +791,9 @@
                         <button id="profile-register">Criar conta</button>
                         <button id="profile-guest" style="background:#607d8b;color:white;">Convidado</button>
                         <button id="profile-logout" style="background:#f44336;color:white;">Sair</button>
+                    </div>
+                    <div style="margin-top:15px; border-top:1px solid rgba(255,255,255,0.1); padding-top:15px;">
+                        <button onclick="window.location.href='index_mobile.html?v=mobile'" style="width:100%; padding:10px; background:linear-gradient(135deg, #00ffff, #0088aa); border:none; border-radius:8px; color:black; font-weight:bold; cursor:pointer;">📱 VERSÃO MOBILE</button>
                     </div>
                     <small style="opacity:0.7;">Dados ficam salvos por usuário neste dispositivo.</small>
                 </div>
