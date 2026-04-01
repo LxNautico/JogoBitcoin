@@ -21,14 +21,18 @@
         display: flex !important;
         flex-direction: column;
         width: 100% !important;
+        min-height: calc(100vh - 160px) !important;
         padding: 15px !important;
         animation: fadeIn 0.3s ease;
+        overflow-y: auto;
     }
 
     .mobile-section.active #game-container,
     .mobile-section.active #problem-container {
         display: flex !important;
+        flex-direction: column;
         width: 100% !important;
+        align-items: center;
     }
 
     .container {

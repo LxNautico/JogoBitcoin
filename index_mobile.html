@@ -260,16 +260,24 @@
     <script>
         // Inicialização Mobile
         window.addEventListener('load', () => {
-             console.log('Mobile environment loading...');
+             console.log('📱 AMBIENTE MOBILE: Iniciando configuração...');
+             
+             // Aguarda um pouco mais para garantir que script.js rodou as suas inicializações internas
              setTimeout(() => {
                 document.getElementById('loading-overlay').fadeOut();
-                // Tenta iniciar o jogo se não estiver ativo
-                if (typeof jogoConcluido !== 'undefined') {
-                    if (!jogoConcluido) startGame('medio');
-                } else if (typeof startGame === 'function') {
+                
+                // Força o display flex nas áreas de conteúdo
+                const gameSec = document.getElementById('section-game');
+                if (gameSec) gameSec.classList.add('active');
+                
+                // Tenta iniciar o jogo via startGame
+                if (typeof startGame === 'function') {
+                    console.log('🎮 Iniciando jogo no mobile...');
                     startGame('medio');
+                } else {
+                    console.warn('⚠️ Erro: startGame não encontrado. O script.js foi carregado?');
                 }
-             }, 200);
+             }, 500); 
         });
 
         Element.prototype.fadeOut = function() {
