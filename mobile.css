@@ -202,12 +202,13 @@
         font-size: 0.9em;
     }
 
-    #mobile-quick-tool {
-        display: block !important;
-        background: rgba(0,0,0,0.3);
-        padding: 10px;
-        border-radius: 12px;
-        margin: 10px 0;
-        border: 1px dashed rgba(0, 255, 255, 0.3);
+    #btn-encerrar {
+        top: 10px !important;
+        right: 10px !important;
+        padding: 8px 12px !important;
+        font-size: 0.8em !important;
+        z-index: 17000 !important;
+        background: #f44336 !important;
+        border-radius: 5px !important;
     }
 }

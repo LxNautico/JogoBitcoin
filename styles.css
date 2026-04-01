@@ -1446,7 +1446,8 @@ body {
 /* Chat interativo */
 #chat-toggle {
     position: fixed;
-    bottom: 850px;
+    /*bottom: 25px;*/
+    top: 150px;
     right: 25px;
     width: 46px;
     height: 46px;
@@ -1571,8 +1572,8 @@ body {
 /* Loja de skins */
 #skins-toggle {
     position: fixed;
-    top: 12px;
-    left: 150px;
+    top: 10px;
+    left: 140px;
     width: 40px;
     height: 40px;
     border-radius: 50%;
@@ -1583,6 +1584,7 @@ body {
     cursor: pointer;
     z-index: 10000;
     box-shadow: 0 8px 20px rgba(0, 0, 0, 0.35);
+    display: none;
 }
 
 #skins-modal {
@@ -1603,7 +1605,7 @@ body {
 
 #profile-toggle {
     position: fixed;
-    top: 75px;
+    top: 85px;
     right: 25px;
     width: 50px;
     height: 50px;
@@ -1615,11 +1617,12 @@ body {
     cursor: pointer;
     z-index: 12005;
     box-shadow: 0 8px 20px rgba(0, 0, 0, 0.35);
+    display: none;
 }
 
 #achievements-toggle {
     position: fixed;
-    top: 12px;
+    top: 10px;
     left: 200px;
     width: 40px;
     height: 40px;
@@ -1631,22 +1634,27 @@ body {
     cursor: pointer;
     z-index: 12005;
     box-shadow: 0 8px 20px rgba(0, 0, 0, 0.35);
+    display: none;
 }
 
 #wallet-toggle {
     position: fixed;
-    bottom: 160px;
-    right: 18px;
-    width: 60px;
-    height: 60px;
+    bottom: 90px;
+    right: 21px;
+    width: 56px;
+    height: 56px;
     border-radius: 50%;
     background: linear-gradient(135deg, #00c9ff, #92fe9d);
     color: #0b1b2b;
     border: none;
-    font-size: 2.8em;
+    font-size: 2.2em;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     cursor: pointer;
     z-index: 10000;
     box-shadow: 0 10px 24px rgba(0, 0, 0, 0.35);
+    display: none;
 }
 
 #wallet-modal {

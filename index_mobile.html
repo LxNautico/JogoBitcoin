@@ -262,21 +262,56 @@
                 <button class="decod-nivel" data-nivel="dificil" onclick="abrirDecodNivel('dificil')" style="flex:1; padding:8px; background:#444; border:none; color:white;">DIFÍCIL</button>
             </div>
             <div id="decod-facil" class="decod-conteudo">
-                <textarea id="decod-facil-input" rows="2" style="width:100%; background:#222; color:white; padding:10px; border:1px solid #00ffff;"></textarea>
-                <input type="range" id="decod-facil-shift" min="-25" max="25" value="3" style="width:100%; margin:10px 0;">
-                <button onclick="decodificarFacil()" style="width:100%; padding:10px; background:#00ffff; color:#000;">DECODIFICAR</button>
+                <textarea id="decod-facil-input" rows="2" style="width:100%; background:#222; color:white; padding:10px; border:1px solid #00ffff; border-radius:8px;"></textarea>
+                <div style="margin: 10px 0;">
+                    <label style="color:#00ffff; display:block; margin-bottom:5px;">Shift:</label>
+                    <input type="range" id="decod-facil-shift" min="-25" max="25" value="3" style="width:100%;">
+                    <div style="text-align:center; color:#00ffff; font-weight:bold;"><span id="decod-facil-shift-value">3</span></div>
+                </div>
+                <button onclick="decodificarFacil()" style="width:100%; padding:12px; background:#00ffff; color:#000; font-weight:bold; border:none; border-radius:8px;">🔓 DECODIFICAR</button>
             </div>
+
             <div id="decod-medio" class="decod-conteudo" style="display:none;">
-                 <textarea id="decod-medio-cesar-input" rows="2" style="width:100%; background:#222; color:white; padding:10px; border:1px solid #ffaa00;"></textarea>
-                 <button onclick="decodificarMedio()" style="width:100%; padding:10px; background:#ffaa00; color:#000; margin-top:5px;">DECODIFICAR</button>
+                <div style="display:flex; gap:10px; margin-bottom:10px;">
+                    <button id="decod-medio-cesar-btn" onclick="selecionarDecodMetodo('medio', 'cesar')" style="flex:1; padding:8px; background:#ffaa00; color:white; border:none; border-radius:5px;">🔤 César</button>
+                    <button id="decod-medio-ascii-btn" onclick="selecionarDecodMetodo('medio', 'ascii')" style="flex:1; padding:8px; background:#444; color:white; border:none; border-radius:5px;">💻 ASCII</button>
+                </div>
+                <div id="decod-medio-cesar" class="decod-metodo">
+                    <textarea id="decod-medio-cesar-input" rows="2" style="width:100%; background:#222; color:white; padding:10px; border:1px solid #ffaa00; border-radius:8px;"></textarea>
+                    <input type="range" id="decod-medio-shift" min="-25" max="25" value="3" style="width:100%; margin:10px 0;">
+                    <button onclick="decodificarMedio()" style="width:100%; padding:10px; background:#ffaa00; color:#000; font-weight:bold; border:none; border-radius:8px;">🔓 DECODIFICAR</button>
+                </div>
+                <div id="decod-medio-ascii" class="decod-metodo" style="display:none;">
+                    <textarea id="decod-medio-ascii-input" rows="2" style="width:100%; background:#222; color:white; padding:10px; border:1px solid #ffaa00; border-radius:8px;"></textarea>
+                    <button onclick="decodificarMedio()" style="width:100%; padding:10px; background:#ffaa00; color:#000; font-weight:bold; border:none; border-radius:8px;">🔓 DECODIFICAR</button>
+                </div>
             </div>
+
             <div id="decod-dificil" class="decod-conteudo" style="display:none;">
-                 <textarea id="decod-dificil-input" rows="2" style="width:100%; background:#222; color:white; padding:10px; border:1px solid #ff4400;"></textarea>
-                 <button onclick="decodificarDificil()" style="width:100%; padding:10px; background:#ff4400; color:white; margin-top:5px;">DECODIFICAR</button>
+                <div style="display:flex; gap:5px; margin-bottom:10px; flex-wrap:wrap;">
+                    <button id="decod-dificil-cesar-btn" onclick="selecionarDecodMetodo('dificil', 'cesar')" style="flex:1; padding:8px; background:#ff4400; color:white; border:none; border-radius:5px;">🔤 César</button>
+                    <button id="decod-dificil-ascii-btn" onclick="selecionarDecodMetodo('dificil', 'ascii')" style="flex:1; padding:8px; background:#444; color:white; border:none; border-radius:5px;">💻 ASCII</button>
+                    <button id="decod-dificil-base64-btn" onclick="selecionarDecodMetodo('dificil', 'base64')" style="flex:1; padding:8px; background:#444; color:white; border:none; border-radius:5px;">🔄 B64</button>
+                </div>
+                <div id="decod-dificil-cesar" class="decod-metodo">
+                    <textarea id="decod-dificil-cesar-input" rows="2" style="width:100%; background:#222; color:white; padding:10px; border:1px solid #ff4400; border-radius:8px;"></textarea>
+                    <input type="range" id="decod-dificil-shift" min="-25" max="25" value="3" style="width:100%; margin:10px 0;">
+                    <button onclick="decodificarDificil()" style="width:100%; padding:10px; background:#ff4400; color:white; font-weight:bold; border:none; border-radius:8px;">🔓 DECODIFICAR</button>
+                </div>
+                <div id="decod-dificil-ascii" class="decod-metodo" style="display:none;">
+                    <textarea id="decod-dificil-ascii-input" rows="2" style="width:100%; background:#222; color:white; padding:10px; border:1px solid #ff4400; border-radius:8px;"></textarea>
+                    <button onclick="decodificarDificil()" style="width:100%; padding:10px; background:#ff4400; color:white; font-weight:bold; border:none; border-radius:8px;">🔓 DECODIFICAR</button>
+                </div>
+                <div id="decod-dificil-base64" class="decod-metodo" style="display:none;">
+                    <textarea id="decod-dificil-base64-input" rows="2" style="width:100%; background:#222; color:white; padding:10px; border:1px solid #ff4400; border-radius:8px;"></textarea>
+                    <button onclick="decodificarDificil()" style="width:100%; padding:10px; background:#ff4400; color:white; font-weight:bold; border:none; border-radius:8px;">🔓 DECODIFICAR</button>
+                </div>
             </div>
-            <div style="margin-top:15px; padding:10px; background:rgba(0,0,0,0.5); border:1px solid gold;">
-                <div id="decod-resultado" style="color:#00ff00; font-family:monospace; min-height:20px;"></div>
-                <button onclick="usarResultadoEEnviar()" style="width:100%; margin-top:10px; background:gold; color:black; font-weight:bold; padding:8px;">USAR E ENVIAR</button>
+
+            <div style="margin-top:15px; padding:10px; background:rgba(0,0,0,0.5); border:1px solid gold; border-radius:10px;">
+                <div id="decod-resultado" style="color:#00ff00; font-family:monospace; min-height:20px; word-break:break-all;">Aguardando decodificação...</div>
+                <div id="decoded-info-decod" class="decoded-info" style="margin-top:10px; display:none;"></div>
+                <button onclick="usarResultadoEEnviar()" style="width:100%; margin-top:10px; background:gold; color:black; font-weight:bold; padding:12px; border:none; border-radius:8px; box-shadow:0 0 15px rgba(255,215,0,0.3);">🚀 USAR E ENVIAR</button>
             </div>
         </div>
     </div>
@@ -353,6 +388,30 @@
         function toggleChat() { 
             const cb = document.getElementById('chat-box');
             if (cb) cb.style.display = cb.style.display === 'none' ? 'flex' : 'none';
+        }
+
+        function usarResultadoEEnviar() {
+            console.log('🚀 usarResultadoEEnviar called');
+            if (typeof window.usarResultadoNoJogo === 'function') {
+                window.usarResultadoNoJogo();
+                console.log('✅ Resultado copiado para o campo de resposta');
+                setTimeout(() => {
+                    if (typeof window.submitAnswer === 'function') {
+                        console.log('🔔 Submetendo resposta via submitAnswer');
+                        window.submitAnswer();
+                    } else {
+                        console.error('submitAnswer function not found');
+                    }
+                    if (typeof window.fecharDecodificador === 'function') {
+                        console.log('🔒 Fechando decodificador');
+                        window.fecharDecodificador();
+                    } else {
+                        console.error('fecharDecodificador function not found');
+                    }
+                }, 300);
+            } else {
+                console.error('usarResultadoNoJogo function not found');
+            }
         }
     </script>
 </body>
