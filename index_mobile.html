@@ -135,25 +135,26 @@
         <button id="restart-button" onclick="resetGame()">Reiniciar Jogo</button>
     </div>
 
-    <!-- MODAL PERFIL/LOGIN -->
-    <div id="profile-modal" class="modal-mobile" style="display:none;">
-        <div id="profile-panel">
-            <div id="profile-header">
-                <span>Perfil</span>
-                <button id="profile-close" onclick="fecharTodosModais()">×</button>
+    <div id="profile-modal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.95); z-index:10000; justify-content:center; align-items:center;">
+        <div id="profile-panel" style="background:#1a1a2e; padding:20px; border-radius:20px; border:3px solid #00ffff; width:90%; max-width:400px;">
+            <div id="profile-header" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; border-bottom:1px solid #333; padding-bottom:10px;">
+                <span style="color:#00ffff; font-weight:bold;">👤 PERFIL</span>
+                <button onclick="fecharPerfil()" style="background:none; border:none; color:white; font-size:2em;">×</button>
             </div>
             <div id="profile-body">
-                <div id="profile-current"></div>
-                <div class="profile-actions">
-                    <input id="profile-username" placeholder="Usuário">
-                    <input id="profile-password" type="password" placeholder="Senha">
-                    <div style="display:flex; gap:8px; flex-wrap:wrap;">
-                        <button id="profile-login">Entrar</button>
-                        <button id="profile-register">Criar</button>
-                        <button id="profile-guest" style="background:#607d8b;">Convidado</button>
-                        <button id="profile-logout" style="background:#f44336;">Sair</button>
+                <div id="profile-current" style="margin-bottom:15px; color:#fff; text-align:center; font-weight:bold;"></div>
+                <div class="profile-actions" style="display:flex; flex-direction:column; gap:10px;">
+                    <input id="profile-username" placeholder="Usuário" style="width:100%; padding:12px; background:#222; color:white; border:1px solid #00ffff; border-radius:8px;">
+                    <input id="profile-password" type="password" placeholder="Senha" style="width:100%; padding:12px; background:#222; color:white; border:1px solid #00ffff; border-radius:8px;">
+                    <div style="display:flex; gap:8px; flex-wrap:wrap; margin-top:10px;">
+                        <button id="profile-login" onclick="Auth.login(document.getElementById('profile-username').value.trim(), document.getElementById('profile-password').value.trim())" style="flex:1; padding:12px; background:#00ffff; color:black; border:none; border-radius:8px; font-weight:bold;">Entrar</button>
+                        <button id="profile-register" onclick="Auth.register(document.getElementById('profile-username').value.trim(), document.getElementById('profile-password').value.trim())" style="flex:1; min-width:100px; padding:12px; background:#4CAF50; color:white; border:none; border-radius:8px; font-weight:bold;">Criar</button>
+                        <button id="profile-guest" onclick="Auth.useGuest()" style="flex:1; padding:12px; background:#607d8b; color:white; border:none; border-radius:8px; font-weight:bold;">Convidado</button>
+                        <button id="profile-logout" onclick="Auth.logout()" style="flex:1; padding:12px; background:#f44336; color:white; border:none; border-radius:8px; font-weight:bold;">Sair</button>
                     </div>
-                    <button onclick="window.location.href='index.html?v=desktop'" style="width:100%; margin-top:15px; background:#2196F3; color:white; border:none; padding:10px; border-radius:8px;">🖥️ VERSÃO DESKTOP</button>
+                </div>
+                <div style="margin-top:20px; border-top:1px solid rgba(255,255,255,0.1); padding-top:15px; text-align:center;">
+                    <button onclick="window.location.href='index.html?v=pc'" style="width:100%; padding:12px; background:linear-gradient(135deg, #ff9800, #f44336); border:none; border-radius:10px; color:white; font-weight:bold;">🖥️ VERSÃO DESKTOP (PC)</button>
                 </div>
             </div>
         </div>
@@ -302,6 +303,25 @@
             }
             const btn = document.querySelector(`[data-tab="${tab}"]`);
             if (btn) btn.classList.add('active');
+        }
+
+        // Funções de Toggle para Mobile
+        function toggleProfile() {
+            const m = document.getElementById('profile-modal');
+            if (m.style.display === 'none' || m.style.display === '') {
+                m.style.display = 'flex';
+                if (typeof updateProfileUI === 'function') updateProfileUI();
+            } else {
+                fecharPerfil();
+            }
+        }
+        function fecharPerfil() { document.getElementById('profile-modal').style.display = 'none'; }
+        
+        function toggleWallet() { if (typeof Wallet !== 'undefined') Wallet.open(); }
+        function toggleSkins() { if (typeof SkinStore !== 'undefined') SkinStore.open(); }
+        function toggleChat() { 
+            const cb = document.getElementById('chat-box');
+            if (cb) cb.style.display = cb.style.display === 'none' ? 'flex' : 'none';
         }
     </script>
 </body>
