@@ -40,13 +40,33 @@
         <button onclick="switchMobileTab('config')" class="mobile-tab-btn" data-tab="config">⚙️ Ajustes</button>
     </nav>
 
+    <!-- ElementOS Ocultos para compatibilidade com script.js (desktop logic) -->
+    <div style="display:none;">
+        <div id="info-container"></div>
+        <div id="difficulty-selection"></div>
+        <div id="mensagem-final">
+            <div id="mensagem-texto"></div>
+            <button id="restart-button"></button>
+        </div>
+        <div id="mensagem-container"></div>
+        <div id="mensagens-laterais"></div>
+        <div id="tempo-global"></div>
+        <div id="decodificador-modal"></div>
+        <div id="circulo-cesar"></div>
+    </div>
+
     <main id="mobile-main-content">
         <!-- TELA DE JOGO (TAB: game) -->
-        <div class="mobile-section" id="section-game">
+        <div class="mobile-section container center active" id="section-game">
             <div id="game-container">
                 <div class="score-container" style="display:flex; justify-content:center; gap:20px; width:100%; margin-bottom:10px;">
-                    <div>Score: <span id="score-display">0</span></div>
-                    <div id="vidas-container"></div>
+                    <div style="display:flex; align-items:baseline; gap:5px;">
+                        <span>Score:</span>
+                        <div id="score-display" style="display:flex; gap:2px;">
+                           <div class="score-box">0</div><div class="score-box">0</div><div class="score-box">0</div><div class="score-box">0</div>
+                        </div>
+                    </div>
+                    <div id="vidas-container" class="vidas-container"></div>
                 </div>
                 <div id="blocks-container"></div>
             </div>
@@ -85,9 +105,11 @@
             <div id="history-container"></div>
         </div>
 
-        <div class="mobile-section" id="section-blockchain" style="display:none; padding:20px;">
+        <div class="mobile-section container right" id="section-blockchain" style="display:none; padding:20px;">
             <h2 style="color:#00ffff;">⛓️ Blockchain</h2>
-            <div id="hash-log"></div>
+            <div id="hash-log">
+                <div id="blockchain-cadeia"></div>
+            </div>
         </div>
 
         <div class="mobile-section" id="section-config" style="display:none; padding:20px;">
@@ -118,9 +140,16 @@
     <script>
         // Inicialização Mobile
         window.addEventListener('load', () => {
-            document.getElementById('loading-overlay').fadeOut();
-            // Garante que o jogo comece na dificuldade salva ou padrão
-            if (!jogoAtivo) startGame('medio');
+             console.log('Mobile environment loading...');
+             setTimeout(() => {
+                document.getElementById('loading-overlay').fadeOut();
+                // Tenta iniciar o jogo se não estiver ativo
+                if (typeof jogoConcluido !== 'undefined') {
+                    if (!jogoConcluido) startGame('medio');
+                } else if (typeof startGame === 'function') {
+                    startGame('medio');
+                }
+             }, 200);
         });
 
         Element.prototype.fadeOut = function() {
@@ -131,11 +160,20 @@
         }
 
         function switchMobileTab(tab) {
-            document.querySelectorAll('.mobile-section').forEach(s => s.style.display = 'none');
+            console.log('Switching to tab:', tab);
+            document.querySelectorAll('.mobile-section').forEach(s => {
+                s.style.display = 'none';
+                s.classList.remove('active');
+            });
             document.querySelectorAll('.mobile-tab-btn').forEach(b => b.classList.remove('active'));
             
-            document.getElementById('section-' + tab).style.display = 'block';
-            document.querySelector(`[data-tab="${tab}"]`).classList.add('active');
+            const target = document.getElementById('section-' + tab);
+            if (target) {
+                target.style.display = 'flex';
+                target.classList.add('active');
+            }
+            const btn = document.querySelector(`[data-tab="${tab}"]`);
+            if (btn) btn.classList.add('active');
         }
     </script>
 </body>
