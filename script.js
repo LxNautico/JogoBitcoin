@@ -618,7 +618,7 @@ const CryptoEncyclopedia = {
         button.id = 'encyclopedia-toggle';
         button.innerHTML = '📚';
         button.title = 'Enciclopédia Cripto';
-        button.style.cssText = `position:fixed; left:25px; bottom:25px; width:60px; height:60px; border-radius:50%; background:linear-gradient(135deg,#2196f3,#1976d2); color:white; border:2px solid #64b5f6; font-size:1.8em; cursor:pointer; z-index:9999; box-shadow:0 6px 20px rgba(33,150,243,0.5); transition:all 0.3s ease; display:none; align-items:center; justify-content:center;`;
+        button.style.cssText = `position:fixed; left:20px; bottom:20px; width:60px; height:60px; border-radius:50%; background:linear-gradient(135deg,#2196f3,#1976d2); color:white; border:2px solid #64b5f6; font-size:1.8em; cursor:pointer; z-index:9999; box-shadow:0 6px 20px rgba(33,150,243,0.5); transition:all 0.3s ease; display:flex; align-items:center; justify-content:center;`;
 
         button.onclick = () => {
             const enc = document.getElementById('crypto-encyclopedia');
@@ -698,11 +698,7 @@ const CryptoEncyclopedia = {
         // Recompensa por entrada inédita
         if (!enciclopediaVisitados.has(key) && enciclopediaVisitados.size < Object.keys(this.entries || {}).length) {
             enciclopediaVisitados.add(key);
-            
-            // Atualizar o saldo da moeda ativa diretamente
-            coinBalances[activeCoinId] = (coinBalances[activeCoinId] || 0) + ENC_BTC_REWARD;
-            bitcoinQuantity = coinBalances[activeCoinId];
-            
+            bitcoinQuantity += ENC_BTC_REWARD;
             score += ENC_SCORE_REWARD;
             updateBitcoinValue(false);
             updateScoreDisplay(score);
@@ -2108,7 +2104,7 @@ function startGame(difficulty) {
     const cir = document.getElementById('decoded-info-circulo');
     if (decod) decod.style.display = 'flex';
     if (cir) cir.style.display = 'block';
-    const toggleIds = ['skins-toggle', 'achievements-toggle', 'wallet-toggle', 'chat-toggle', 'profile-toggle', 'encyclopedia-toggle'];
+    const toggleIds = ['skins-toggle', 'achievements-toggle', 'wallet-toggle', 'chat-toggle'];
     toggleIds.forEach(id => {
         const el = document.getElementById(id);
         if (el) el.style.display = 'block';
@@ -2175,7 +2171,7 @@ function resetGame() {
         btnEncerrar.style.display = 'none';
     }
 
-    const toggleIds = ['skins-toggle', 'achievements-toggle', 'wallet-toggle', 'chat-toggle', 'profile-toggle', 'encyclopedia-toggle'];
+    const toggleIds = ['skins-toggle', 'achievements-toggle', 'wallet-toggle', 'chat-toggle'];
     toggleIds.forEach(id => {
         const el = document.getElementById(id);
         if (el) el.style.display = 'none';
@@ -4222,7 +4218,7 @@ function abrirDecodificador() {
 
         setTimeout(() => {
             abrirDecodNivel(dificuldadeAtual);
-            atualizarDecodificadorComProblema();
+            forcarPreenchimentoDecodificador();
         }, 200);
 
         if (SoundSystem) SoundSystem.click();
@@ -4330,7 +4326,7 @@ function abrirDecodNivel(nivel) {
     if (resultado) resultado.innerHTML = 'Aguardando decodificação...';
 
     setTimeout(() => {
-        atualizarDecodificadorComProblema();
+        forcarPreenchimentoDecodificador();
     }, 100);
 }
 
@@ -4357,7 +4353,7 @@ function selecionarDecodMetodo(nivel, metodo) {
     }
 
     setTimeout(() => {
-        atualizarDecodificadorComProblema();
+        forcarPreenchimentoDecodificador();
     }, 100);
 }
 
@@ -5237,19 +5233,6 @@ function usarResultadoNoJogo() {
         }, 2000);
     }
 }
-
-function usarResultadoEEnviar() {
-    console.log('🚀 Usando resultado e enviando - Mobile');
-    usarResultadoNoJogo();
-    setTimeout(() => {
-        submitAnswer();
-        fecharDecodificador();
-    }, 300);
-}
-
-// Alias para compatibilidade
-const forcarPreenchimentoDecodificador = atualizarDecodificadorComProblema;
-
 
 function atualizarDecodificadorComProblema() {
     const modal = document.getElementById('decodificador-modal');
