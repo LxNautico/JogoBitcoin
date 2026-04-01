@@ -25,6 +25,12 @@
         animation: fadeIn 0.3s ease;
     }
 
+    .mobile-section.active #game-container,
+    .mobile-section.active #problem-container {
+        display: flex !important;
+        width: 100% !important;
+    }
+
     .container {
         display: block !important; 
         width: 100% !important;
