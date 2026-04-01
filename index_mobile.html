@@ -160,28 +160,45 @@
         </div>
     </div>
 
-    <div id="skins-modal" style="display:none;">
-        <div id="skins-header"><span>Loja</span><button id="skins-close">×</button></div>
-        <div id="skins-tabs"><button data-tab="skins" class="active">Skins</button><button data-tab="coins">Moedas</button></div>
-        <div id="skins-list" data-section="skins"></div>
-        <div id="coins-list" data-section="coins" style="display:none;"></div>
+    <div id="skins-modal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.95); z-index:20000; justify-content:center; align-items:center;">
+        <div style="background:#1a1a2e; padding:20px; border-radius:20px; border:3px solid #f7931a; width:95%; max-height:85vh; overflow-y:auto;">
+            <div id="skins-header" style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #333; padding-bottom:10px; margin-bottom:15px;">
+                <span style="color:#f7931a; font-weight:bold;">🎨 LOJA DE SKINS</span>
+                <button id="skins-close" onclick="fecharSkins()" style="background:none; border:none; color:white; font-size:2em;">×</button>
+            </div>
+            <div id="skins-tabs" style="display:flex; gap:10px; margin-bottom:15px;">
+                <button data-tab="skins" class="active" style="flex:1; padding:10px; background:#f7931a; border:none; border-radius:8px; color:black; font-weight:bold;">Skins</button>
+                <button data-tab="coins" style="flex:1; padding:10px; background:#444; border:none; border-radius:8px; color:white; font-weight:bold;">Moedas</button>
+            </div>
+            <div id="skins-list" data-section="skins"></div>
+            <div id="coins-list" data-section="coins" style="display:none;"></div>
+        </div>
     </div>
 
-    <div id="achievements-modal" style="display:none;">
-        <div id="achievements-panel">
-            <div id="achievements-header"><span>Conquistas</span><button id="achievements-close">×</button></div>
+    <div id="achievements-modal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.95); z-index:20000; justify-content:center; align-items:center;">
+        <div id="achievements-panel" style="background:#1a1a2e; padding:20px; border-radius:20px; border:3px solid gold; width:95%; max-height:85vh; overflow-y:auto;">
+            <div id="achievements-header" style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #333; padding-bottom:10px; margin-bottom:15px;">
+                <span style="color:gold; font-weight:bold;">🏆 CONQUISTAS</span>
+                <button id="achievements-close" onclick="fecharConquistas()" style="background:none; border:none; color:white; font-size:2em;">×</button>
+            </div>
             <div id="achievements-body"><div id="achievements-list"></div></div>
         </div>
     </div>
 
-    <div id="wallet-modal" style="display:none;">
-        <div id="wallet-panel">
-            <div id="wallet-header"><span>Carteira</span><button id="wallet-close">×</button></div>
+    <div id="wallet-modal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.95); z-index:20000; justify-content:center; align-items:center;">
+        <div id="wallet-panel" style="background:#1a1a2e; padding:20px; border-radius:20px; border:3px solid #4CAF50; width:90%; max-width:400px;">
+            <div id="wallet-header" style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #333; padding-bottom:10px; margin-bottom:15px;">
+                <span style="color:#4CAF50; font-weight:bold;">💼 CARTEIRA BTC</span>
+                <button id="wallet-close" onclick="fecharWallet()" style="background:none; border:none; color:white; font-size:2em;">×</button>
+            </div>
             <div id="wallet-body">
-                <p>Saldo: <strong id="wallet-balance">0 BTC</strong></p>
-                <input id="wallet-amount" type="number" placeholder="Valor">
-                <button id="wallet-deposit">Depositar</button>
-                <button id="wallet-withdraw">Sacar</button>
+                <p style="color:white;">Saldo: <strong id="wallet-balance" style="color:#4CAF50;">0.00000000 BTC</strong></p>
+                <input id="wallet-amount" type="number" step="0.00000001" placeholder="Valor (BTC)" style="width:100%; padding:10px; background:#222; border:1px solid #4CAF50; color:white; border-radius:8px; margin-bottom:10px;">
+                <div style="display:flex; gap:10px;">
+                    <button id="wallet-deposit" style="flex:1; padding:12px; background:#4CAF50; border:none; border-radius:8px; color:white; font-weight:bold;">Depositar</button>
+                    <button id="wallet-withdraw" style="flex:1; padding:12px; background:#f44336; border:none; border-radius:8px; color:white; font-weight:bold;">Sacar</button>
+                </div>
+                <button id="wallet-accrue" style="width:100%; margin-top:10px; padding:10px; background:rgba(255,255,255,0.1); border:1px solid #4CAF50; color:white; border-radius:8px;">Atualizar Rendimento</button>
             </div>
         </div>
     </div>
@@ -205,6 +222,10 @@
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
                 <h3 style="color: #00ffff; margin: 0;">🔄 César</h3>
                 <button onclick="fecharCirculo()" style="background:none; border:none; color:white; font-size:2em;">×</button>
+            </div>
+            <div id="circulo-cesar-chave" style="display:none; text-align:center; padding:5px; background:rgba(0,255,255,0.1); border-radius:5px; margin-bottom:10px;">
+                <small style="color:#aaa;">Chave identificada:</small>
+                <div id="circulo-cesar-chave-valor" style="color:#00ffff; font-weight:bold; font-size:1.1em;"></div>
             </div>
             <div id="texto-cifrado-destaque" style="display: flex; justify-content: center; gap: 5px; margin: 10px 0; flex-wrap: wrap;"></div>
             <div style="position: relative; width: 250px; height: 250px; margin: 10px auto;">
@@ -230,6 +251,10 @@
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
                 <h3 style="color: #00ffff; margin: 0;">🔧 DECODIFICADOR</h3>
                 <button onclick="fecharDecodificador()" style="background:none; border:none; color:white; font-size:2em;">×</button>
+            </div>
+            <div id="decodificador-chave" style="display:none; text-align:center; padding:8px; background:rgba(0,255,255,0.15); border:1px solid #00ffff; border-radius:10px; margin-bottom:15px;">
+                <small style="color:#aaa; display:block; margin-bottom:3px;">Chave atual identificada:</small>
+                <div id="decodificador-chave-valor" style="color:#00ffff; font-weight:bold; font-size:1.3em; text-shadow:0 0 10px rgba(0,255,255,0.5);"></div>
             </div>
             <div style="display: flex; gap: 5px; margin-bottom: 15px;">
                 <button class="decod-nivel active" data-nivel="facil" onclick="abrirDecodNivel('facil')" style="flex:1; padding:8px; background:#00aa00; border:none; color:white;">FÁCIL</button>
@@ -318,7 +343,13 @@
         function fecharPerfil() { document.getElementById('profile-modal').style.display = 'none'; }
         
         function toggleWallet() { if (typeof Wallet !== 'undefined') Wallet.open(); }
+        function fecharWallet() { if (typeof Wallet !== 'undefined') Wallet.close(); }
+        
         function toggleSkins() { if (typeof SkinStore !== 'undefined') SkinStore.open(); }
+        function fecharSkins() { if (typeof SkinStore !== 'undefined') SkinStore.close(); }
+
+        function fecharConquistas() { if (typeof AchievementsUI !== 'undefined') AchievementsUI.close(); }
+        
         function toggleChat() { 
             const cb = document.getElementById('chat-box');
             if (cb) cb.style.display = cb.style.display === 'none' ? 'flex' : 'none';
