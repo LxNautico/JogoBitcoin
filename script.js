@@ -698,9 +698,15 @@ const CryptoEncyclopedia = {
         // Recompensa por entrada inédita
         if (!enciclopediaVisitados.has(key) && enciclopediaVisitados.size < Object.keys(this.entries || {}).length) {
             enciclopediaVisitados.add(key);
-            bitcoinQuantity += ENC_BTC_REWARD;
+            
+            // ✅ CORREÇÃO: Atualizar o saldo real na moeda ativa e a variável global
+            if (typeof coinBalances !== 'undefined') {
+                coinBalances[activeCoinId] = (coinBalances[activeCoinId] || 0) + ENC_BTC_REWARD;
+            }
+            bitcoinQuantity = getActiveBalance(); // Garante que bitcoinQuantity reflita o novo saldo
+            
             score += ENC_SCORE_REWARD;
-            updateBitcoinValue(false);
+            updateBitcoinValue(false); // Atualiza os displays na tela
             updateScoreDisplay(score);
 
             // Conquista: todas as entradas visitadas
@@ -1948,7 +1954,7 @@ const cryptoNomes = [
     "PublicKey", "Wallet", "Node", "Miner", "MiningRig", "ASIC", "GPU", "FPGA", "Bitmain", "Antminer",
     "Whatsminer", "Hash", "Lightning", "Taproot", "SegWit", "Ordinals", "BRC20", "RGB", "Runes", "StateChannels",
     "Chainlink", "TheGraph", "Infura", "Alchemy", "QuickNode", "Ankr", "Moralis", "Pinata", "Fleek", "Ceramic",
-    "Livepeer", "IPFS", "Filecoin", "Arweave", "Helium", "Theta", "Render", "Akash", "Storj", "HeliumMobile",
+    "Livepeer", "IPFS", "Filecoin", "Arweave", "Helium", "Theta", "Render", "Akash", "Storj", "FrenPet",
     "Uniswap", "Sushi", "PancakeSwap", "Curve", "Balancer", "Aave", "Compound", "Maker", "Yearn", "Synthetix",
     "dYdX", "Lido", "RocketPool", "EigenLayer", "Pendle", "Jito", "Marinade", "Jupiter", "Raydium", "Orca",
     "OpenSea", "Rarible", "Blur", "MagicEden", "Tensor", "Zora", "BAYC", "CryptoPunks", "Azuki", "DeGods",
